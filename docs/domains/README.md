@@ -32,3 +32,23 @@ docked in narrow right rails and small chrome inside dense screens, and
 are known to under-read. Decisions in this repo rely on **product spread**
 (how many of the four products show a component), which is robust to
 under-counting, rather than on exact screen counts.
+
+## Corrected by the evaluations
+
+The comparative evaluations in `../evaluation/` re-derived the counts and
+supersede these specs where the evidence changed:
+
+- The composer is far more prevalent than labelled: **431 screens by OCR
+  geometry versus 98 labelled** (383 docked, 48 hero). Manus's "4/4" chips are
+  a step-progress rollup, not attachment progress; no product shows attachment
+  progress anywhere.
+- Devin's transcripts are labelled after all (46 screens, not 0).
+- `date_separator` is mostly over-detection (chart axes, billing dates);
+  verified separators exist only in Lovable and Manus.
+- `rating_prompt` is Manus-only; Lovable's labels caught the model's own
+  rating prose.
+- Lovable renders no tool-call cards; it shows outcome rollups
+  ("2 edits made / Show all") instead.
+- The `cost_tokens_meter` labels were withdrawn as uncorroborated.
+
+Where a domain spec and an evaluation disagree, the evaluation wins.
