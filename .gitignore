@@ -5,3 +5,10 @@ dist-test/
 .DS_Store
 .env
 .env.*
+
+# beads: track the portable JSONL + config, ignore local db/daemon state
+.beads/*
+!.beads/issues.jsonl
+!.beads/README.md
+!.beads/config.yaml
+
