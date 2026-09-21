@@ -1,0 +1,27 @@
+{
+  "name": "@aicl/react",
+  "version": "0.0.0",
+  "description": "React adapter for @aicl/core: hooks and unstyled, accessible chat primitives.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "peerDependencies": {
+    "react": ">=18"
+  },
+  "dependencies": {
+    "@aicl/core": "*"
+  }
+}
