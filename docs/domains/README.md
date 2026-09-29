@@ -50,5 +50,13 @@ supersede these specs where the evidence changed:
 - Lovable renders no tool-call cards; it shows outcome rollups
   ("2 edits made / Show all") instead.
 - The `cost_tokens_meter` labels were withdrawn as uncorroborated.
+- `session_list_item` is **3/4, not 4/4** — Cofounder's three labels are mislabels (a draft-post editor, a content-calendar modal, a billing history).
+- No frame shows a collapsed sidebar — collapse toggles are `[observed]`, the icon rail is `[inferred]`.
+- Lovable 258 is the user-card menu open, not the workspace switcher; the switcher-open frame is Lovable 245.
+- No "N found" counts or search filter pills exist anywhere — only empty states ("No public projects found", "No events found").
+- Lovable does not date-group search results — those hits are calendar widgets in generated app previews; the corpus's only date-grouped session list is Manus 165.
+- `session_search` is 3/4 observed, not 2/4 labelled — Manus 165's search overlay carries no `session_search` or `modal` label.
+- Devin session rows carry one secondary line (status or relative time), not stacked fields.
+- 30 of the 40 `tab_bar` frames are Devin automation editors — no product switches sessions with tabs.
 
 Where a domain spec and an evaluation disagree, the evaluation wins.
