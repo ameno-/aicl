@@ -297,7 +297,28 @@ This is not a sign-off of the full 28-primitive inventory in `BLUEPRINT.md`.
 Session list, platform primitives, Svelte/Vue, and the moi-style workspace stay
 gated on a further Go. AICL-3 remains the review gate for that remainder.
 
+**2026-10-04 — Go, React inventory (blueprint stages 3c, 3e, 3f).** Ameno asked for
+"actual react components" from the library (AICL-20). Built in `@aicl/react`:
+`TriggerMenu` + `SlashMenu`/`MentionMenu`, `SuggestionChips`, `AttachmentChip`,
+`AttachmentDropzone`; `SessionList`, `SessionListItem`, `SessionSearch`, `SidebarNav`;
+`Dialog`, `AlertDialog`, `Drawer`, `ToastRegion`/`Toast`, `Field`, `Switch`, `Select`,
+`SegmentedControl`. Core gained `createComboboxModel` (@internal), `createSessionStore` +
+`bucketByRecency`, `createToastQueue`, `Attachment`/`toFilePart`, `Mention`. Svelte/Vue stay
+paused (AICL-9). Deviations from `BLUEPRINT.md`, each forced by the implementation:
+
+- `SessionStore.meta(id)`, not `get(id)`: `get()` is already `ReadableStore.get`.
+- `TriggerMenu` takes `inputRef`, `value`, `onValueChange`: the menu must read the caret and
+  write the completion, and focus stays in the field, so it binds to the field it completes.
+  `Composer` gained controlled `value`/`onChange` and `inputRef` for this.
+- `ToastRegion` takes the `queue` it renders.
+- `DismissReason` adds `'swipe'` for `Drawer`.
+- `AlertDialog` takes a required `title`.
+- `@aicl/styles` `reset.css` selectors are wrapped in `:where()`: at attribute-plus-tag
+  specificity the reset beat every single-attribute component rule (it zeroed the borders and
+  padding of every styled `button`). A reset should never win.
+
 ## Open questions
 
-None open in the design. D12–D14 resolved the three Phase-1 questions. Implementation
-beyond slice 1 is not yet authorized.
+None open in the design. D12–D14 resolved the three Phase-1 questions. Still gated:
+`Composer` compound parts and the `Draft` submit shape (§4.11), `createScrollPin`,
+`createFormController`, `createApprovalsStore`, and the Svelte/Vue adapters.

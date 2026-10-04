@@ -12,3 +12,6 @@ dist-test/
 !.beads/README.md
 !.beads/config.yaml
 
+
+# Claude Code hook logs written into whatever directory the session is in
+logs/
