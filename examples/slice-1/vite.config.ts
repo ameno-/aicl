@@ -13,5 +13,16 @@ export default defineConfig({
       '@aicl/react': path.resolve(root, '../../packages/react/src/index.ts'),
     },
   },
-  server: { port: 5179, strictPort: true },
+  server: {
+    port: 5179,
+    strictPort: true,
+    proxy: {
+      '/api': {
+        target: 'http://127.0.0.1:5174',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+        ws: false,
+      },
+    },
+  },
 });

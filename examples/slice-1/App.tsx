@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState, type ComponentType } from 'react'
 import {
   createRendererRegistry,
   type ChatTransport,
+  type Message,
   type StreamEvent,
 } from '@aicl/core';
 import {
@@ -23,7 +24,8 @@ export type Scenario =
   | 'unknown'
   | 'stopped'
   | 'error'
-  | 'play';
+  | 'play'
+  | 'remote';
 
 const SCENARIOS: Array<{ id: Scenario; label: string }> = [
   { id: 'empty', label: 'Empty' },
@@ -36,6 +38,7 @@ const SCENARIOS: Array<{ id: Scenario; label: string }> = [
   { id: 'stopped', label: 'Stopped' },
   { id: 'error', label: 'Error + retry' },
   { id: 'play', label: 'Play turn' },
+  { id: 'remote', label: 'Remote SSE' },
 ];
 
 const wait = (ms: number, signal: AbortSignal) =>
@@ -139,7 +142,55 @@ function errorThenRetry(): ChatTransport {
   };
 }
 
+function remoteTransport(): ChatTransport {
+  return {
+    async *send(req, signal) {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', accept: 'text/event-stream' },
+        body: JSON.stringify({ messages: req.messages, ...req.body }),
+        signal,
+      });
+      if (!response.ok || !response.body) {
+        throw new Error(`Chat request failed: ${response.status} ${response.statusText}`);
+      }
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      try {
+        while (true) {
+          if (signal.aborted) break;
+          const { value, done } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          let boundary = buffer.indexOf('\n\n');
+          while (boundary !== -1) {
+            const frame = buffer.slice(0, boundary);
+            buffer = buffer.slice(boundary + 2);
+            boundary = buffer.indexOf('\n\n');
+            const data = frame
+              .split('\n')
+              .filter((line) => line.startsWith('data:'))
+              .map((line) => line.slice(5).trimStart())
+              .join('\n');
+            if (data === '[DONE]') return;
+            if (!data) continue;
+            try {
+              yield JSON.parse(data) as StreamEvent;
+            } catch {
+              // ignore malformed frames
+            }
+          }
+        }
+      } finally {
+        reader.releaseLock();
+      }
+    },
+  };
+}
+
 function transportFor(scenario: Scenario): ChatTransport {
+  if (scenario === 'remote') return remoteTransport();
   if (scenario === 'play') return playTransport();
   if (scenario === 'error') return errorThenRetry();
   if (scenario === 'submitted') {
@@ -309,7 +360,7 @@ function Stage({ scenario }: { scenario: Scenario }) {
 
   useEffect(() => {
     if (scenario === 'empty') return;
-    void chat.send('Show the work');
+    void chat.send(scenario === 'remote' ? 'Network round-trip' : 'Show the work');
     if (scenario !== 'stopped') return;
     const timer = setInterval(() => {
       if (statusRef.current === 'streaming') {

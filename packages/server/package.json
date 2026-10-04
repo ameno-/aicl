@@ -1,0 +1,29 @@
+{
+  "name": "@aicl/server",
+  "version": "0.0.0",
+  "description": "Framework-free server-side helpers for AICL: ChatHandler contract, SSE framing, error typing.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "tsc -p tsconfig.test.json && node --test dist-test/handler.test.js"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.4",
+    "typescript": "5.6"
+  },
+  "dependencies": {
+    "@aicl/core": "*"
+  }
+}
