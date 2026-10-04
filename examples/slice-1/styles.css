@@ -76,6 +76,11 @@ textarea {
   font-size: 13px;
 }
 
+.note {
+  color: #71717a;
+  font-size: 13px;
+}
+
 .gallery {
   max-width: 760px;
   margin: 0 auto;
@@ -101,6 +106,36 @@ textarea {
   display: flex;
   gap: 6px;
   margin-top: 8px;
+}
+
+/* Corpus rule: action bar is always in the DOM and keyboard-reachable.
+ * visibility 'auto' reveals on hover, focus-within, coarse pointers, and the
+ * last assistant message. Other surfaces paint persistently. */
+[data-aicl='message-actions'][data-visibility='auto'] {
+  opacity: 0;
+  transition: opacity 100ms;
+}
+
+[data-aicl='message-actions'][data-visibility='auto']:hover,
+[data-aicl='message-actions'][data-visibility='auto']:focus-within {
+  opacity: 1;
+}
+
+@media (pointer: coarse) {
+  [data-aicl='message-actions'][data-visibility='auto'] {
+    opacity: 1;
+  }
+}
+
+/* Last assistant message reveals its actions persistently. */
+[data-aicl='message'][data-role='assistant'][data-last-assistant]
+  [data-aicl='message-actions'][data-visibility='auto'] {
+  opacity: 1;
+}
+
+[data-aicl='code-block'] [data-aicl='code-copy'],
+[data-aicl='message-actions'] button {
+  visibility: inherit;
 }
 
 [data-aicl='code-block'],

@@ -63,6 +63,14 @@ export function Transcript({ messages, status, streamingId, registry }: Transcri
           const prev = index > 0 ? messages[index - 1] : undefined;
           const prevDay = prev?.createdAt ? new Date(prev.createdAt).toDateString() : null;
           const showDay = Boolean(day && prevDay && day !== prevDay);
+          // The last assistant message along the active branch reveals its
+          // actions persistently (corpus rule, transcript §3.3).
+          const lastAssistantIndex = (() => {
+            for (let i = messages.length - 1; i >= 0; i--) {
+              if (messages[i]!.role === 'assistant') return i;
+            }
+            return -1;
+          })();
           return (
             <div key={message.id}>
               {showDay ? <div data-aicl="day-separator"><time dateTime={new Date(message.createdAt!).toISOString()}>{day}</time></div> : null}
@@ -70,6 +78,7 @@ export function Transcript({ messages, status, streamingId, registry }: Transcri
                 message={message}
                 isStreaming={message.id === streamingId}
                 registry={registry}
+                lastAssistant={index === lastAssistantIndex && message.role === 'assistant'}
               />
             </div>
           );
@@ -90,12 +99,14 @@ export function MessageItem({
   registry,
   branch,
   onAction,
+  lastAssistant = false,
 }: {
   message: Message;
   isStreaming?: boolean;
   registry?: RendererRegistry<ComponentType<PartProps>>;
   branch?: { index: number; count: number; onSelect: (index: number) => void };
   onAction?: (action: MessageAction, message: Message) => void;
+  lastAssistant?: boolean;
 }) {
   const alignment = message.role === 'user' ? 'end' : 'full';
   const state = message.aborted ? 'aborted' : isStreaming ? 'streaming' : 'complete';
@@ -108,8 +119,9 @@ export function MessageItem({
       data-message-id={message.id}
       data-part-count={message.parts.length}
       data-identity="none"
-      data-branch-index={branch ? branch.index : undefined}
-      data-branch-count={branch ? branch.count : undefined}
+      data-branch-index={branch ?branch.index : undefined}
+      data-branch-count={branch ?branch.count : undefined}
+      data-last-assistant={lastAssistant || undefined}
     >
       {message.aborted ? <p data-aicl="status-line">Stopped working</p> : null}
       {branch && branch.count > 1 ? (

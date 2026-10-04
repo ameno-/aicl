@@ -117,6 +117,7 @@ export function Gallery() {
       </Section>
       <Section id="actions" title="Actions">
         <MessageItem message={assistant('act', [{ type: 'text', text: 'Checks passed.' }])} />
+        <p className="note">Hover or focus the row to reveal. Always visible on the last assistant message and on coarse pointers.</p>
       </Section>
       <Section id="branch" title="Branch">
         <MessageItem
@@ -161,6 +162,7 @@ export function Gallery() {
           status="idle"
           attachments={[{ id: 'file-1', name: 'notes.md' }]}
           onSubmit={() => {}}
+          onAttach={() => {}}
         />
       </Section>
     </main>

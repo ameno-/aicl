@@ -32,6 +32,7 @@ export interface ComposerProps {
   attachments?: Array<{ id: string; name: string }>;
   suggestions?: string[];
   onSelectSuggestion?: (label: string) => void;
+  onAttach?: () => void;
   maxRows?: number;
   /** Render-prop children receive live state so consumers own all markup. */
   children?: (api: ComposerRenderApi) => ReactNode;
@@ -70,6 +71,7 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(function Compo
     attachments = [],
     suggestions = [],
     onSelectSuggestion,
+    onAttach,
     maxRows = 10,
     children,
   },
@@ -152,6 +154,16 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(function Compo
             <span key={file.id} data-aicl="attachment-chip">{file.name}</span>
           ))}
         </div>
+      ) : null}
+      {onAttach ? (
+        <button
+          type="button"
+          data-aicl="composer-attach"
+          aria-label="Attach file"
+          onClick={onAttach}
+        >
+          Attach
+        </button>
       ) : null}
       <textarea
         ref={textareaRef}
