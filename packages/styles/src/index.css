@@ -1,0 +1,12 @@
+/**
+ * AICL styles entrypoint. Importing this file once applies the design
+ * tokens, the chat-shell reset, and the component surface to every
+ * `[data-aicl]` selector in the document.
+ *
+ * Theming is by `data-theme="light"` or `data-theme="dark"` on any
+ * container above the chat surface. Without an explicit theme, the
+ * media query follows the user's system preference.
+ */
+@import './tokens.css';
+@import './reset.css';
+@import './components.css';

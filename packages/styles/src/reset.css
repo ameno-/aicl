@@ -1,0 +1,84 @@
+/**
+ * Reset scoped to AICL surfaces. Applied to the library's container via
+ * `data-aicl-root`. Minimal and reversible: it strips UA chrome inside the
+ * chat shell so the headless primitives render predictably, and leaves
+ * the rest of the document alone.
+ */
+
+[data-aicl-root] *,
+[data-aicl-root] *::before,
+[data-aicl-root] *::after {
+  box-sizing: border-box;
+}
+
+[data-aicl-root] {
+  font-family: var(--aicl-font-sans);
+  font-size: var(--aicl-text-base);
+  line-height: var(--aicl-leading-normal);
+  color: var(--aicl-text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+[data-aicl-root] ::selection {
+  background: color-mix(in oklab, var(--aicl-accent) 28%, transparent);
+  color: var(--aicl-text);
+}
+
+[data-aicl-root] button,
+[data-aicl-root] input,
+[data-aicl-root] textarea,
+[data-aicl-root] select {
+  font: inherit;
+  color: inherit;
+}
+
+[data-aicl-root] button {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  border-radius: var(--aicl-radius-sm);
+  transition: background var(--aicl-anim-fast) var(--aicl-ease),
+              color var(--aicl-anim-fast) var(--aicl-ease),
+              transform var(--aicl-anim-fast) var(--aicl-ease);
+}
+
+[data-aicl-root] button:focus-visible,
+[data-aicl-root] textarea:focus-visible,
+[data-aicl-root] [contenteditable='true']:focus-visible {
+  outline: none;
+  box-shadow: var(--aicl-focus-ring);
+}
+
+[data-aicl-root] button:active:not(:disabled) {
+  transform: translateY(0.5px);
+}
+
+[data-aicl-root] button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+[data-aicl-root] textarea {
+  background: transparent;
+  border: 0;
+  outline: none;
+  resize: none;
+}
+
+[data-aicl-root] p { margin: 0; }
+[data-aicl-root] ul, [data-aicl-root] ol { margin: 0; padding-inline-start: 1.2em; }
+
+/* Respect reduced motion. */
+@media (prefers-reduced-motion: reduce) {
+  [data-aicl-root] *,
+  [data-aicl-root] *::before,
+  [data-aicl-root] *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

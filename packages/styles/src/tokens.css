@@ -1,0 +1,230 @@
+/**
+ * Design tokens for AICL primitives.
+ *
+ * Two themes are shipped: light and dark. Switch the active theme on a
+ * container element via `data-theme="light"` or `data-theme="dark"`. The
+ * library only writes `data-*` attributes; theming belongs to the consumer
+ * and the stylesheet, never to runtime JS.
+ *
+ * Tokens are CSS custom properties. Adapters may consume them; the library
+ * does not. Consumers that need their own palette override the relevant
+ * variables on a higher-specificity selector.
+ */
+
+:root,
+[data-theme='light'] {
+  color-scheme: light;
+
+  /* Surfaces */
+  --aicl-bg:               #fafaf7;
+  --aicl-surface:          #ffffff;
+  --aicl-surface-elevated: #ffffff;
+  --aicl-surface-inset:    #f4f4f0;
+  --aicl-surface-tint:     #f7f6f1;
+  --aicl-overlay:          rgba(15, 17, 21, 0.42);
+
+  /* Text */
+  --aicl-text:        #1c1d22;
+  --aicl-text-muted:  #5b6068;
+  --aicl-text-faint:  #8b8f97;
+  --aicl-text-link:   #2c52d4;
+  --aicl-text-inverse:#fbfbf9;
+
+  /* Borders */
+  --aicl-border:        #e4e3dd;
+  --aicl-border-strong: #d0cfca;
+  --aicl-border-focus:  #2c52d4;
+
+  /* Accent (a calm, professional indigo) */
+  --aicl-accent:        #2c52d4;
+  --aicl-accent-soft:   #eaeefb;
+  --aicl-accent-strong: #1f3eb3;
+  --aicl-accent-fg:     #ffffff;
+
+  /* Semantic */
+  --aicl-success: #156c3e;
+  --aicl-warning: #8a5a00;
+  --aicl-danger:  #b3261e;
+  --aicl-info:    #2c52d4;
+
+  /* Tool call states */
+  --aicl-tool-pending:   #8b8f97;
+  --aicl-tool-running:   #2c52d4;
+  --aicl-tool-success:   #156c3e;
+  --aicl-tool-error:     #b3261e;
+  --aicl-tool-cancelled: #8b8f97;
+
+  /* Code & terminal */
+  --aicl-code-bg:        #f7f6f1;
+  --aicl-code-fg:        #1c1d22;
+  --aicl-code-border:    #e4e3dd;
+  --aicl-code-comment:   #8b8f97;
+  --aicl-code-keyword:   #b3261e;
+  --aicl-code-string:    #156c3e;
+  --aicl-code-number:    #2c52d4;
+  --aicl-code-tag:       #8a5a00;
+  --aicl-terminal-bg:    #1c1d22;
+  --aicl-terminal-fg:    #fbfbf9;
+  --aicl-terminal-prompt:#7c83e8;
+
+  /* Shadows */
+  --aicl-shadow-1: 0 1px 2px rgba(15, 17, 21, 0.04), 0 1px 3px rgba(15, 17, 21, 0.06);
+  --aicl-shadow-2: 0 4px 12px rgba(15, 17, 21, 0.08), 0 2px 4px rgba(15, 17, 21, 0.04);
+  --aicl-shadow-3: 0 12px 32px rgba(15, 17, 21, 0.14), 0 4px 8px rgba(15, 17, 21, 0.06);
+
+  /* Focus ring (used via outline) */
+  --aicl-focus-ring: 0 0 0 3px color-mix(in oklab, var(--aicl-accent) 32%, transparent);
+
+  /* Type */
+  --aicl-font-sans:  ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
+                      'Helvetica Neue', Arial, sans-serif;
+  --aicl-font-mono:  ui-monospace, 'SF Mono', SFMono-Regular, 'JetBrains Mono',
+                      Menlo, Consolas, monospace;
+
+  --aicl-text-xs:   12px;
+  --aicl-text-sm:   13px;
+  --aicl-text-base: 14px;
+  --aicl-text-md:   15px;
+  --aicl-text-lg:   17px;
+
+  --aicl-leading-tight:  1.25;
+  --aicl-leading-snug:   1.4;
+  --aicl-leading-normal: 1.55;
+
+  --aicl-radius-sm: 6px;
+  --aicl-radius-md: 10px;
+  --aicl-radius-lg: 14px;
+  --aicl-radius-pill: 999px;
+
+  --aicl-space-1: 4px;
+  --aicl-space-2: 8px;
+  --aicl-space-3: 12px;
+  --aicl-space-4: 16px;
+  --aicl-space-5: 20px;
+  --aicl-space-6: 28px;
+  --aicl-space-7: 40px;
+
+  --aicl-shadow-ring-soft: 0 0 0 1px var(--aicl-border) inset;
+  --aicl-shadow-ring-strong: 0 0 0 1px var(--aicl-border-strong) inset;
+
+  --aicl-anim-fast: 80ms;
+  --aicl-anim:      160ms;
+  --aicl-anim-slow: 320ms;
+  --aicl-ease:      cubic-bezier(0.2, 0.7, 0.2, 1);
+  --aicl-ease-out:  cubic-bezier(0, 0.6, 0.2, 1);
+
+  /* Shimmer gradient stops for in-flight tool call */
+  --aicl-shimmer-a: color-mix(in oklab, var(--aicl-accent) 0%, transparent);
+  --aicl-shimmer-b: color-mix(in oklab, var(--aicl-accent) 14%, transparent);
+  --aicl-shimmer-c: color-mix(in oklab, var(--aicl-accent) 0%, transparent);
+}
+
+[data-theme='dark'] {
+  color-scheme: dark;
+
+  --aicl-bg:               #0e1014;
+  --aicl-surface:          #161922;
+  --aicl-surface-elevated: #1c2030;
+  --aicl-surface-inset:    #0a0c10;
+  --aicl-surface-tint:     #1f2230;
+  --aicl-overlay:          rgba(0, 0, 0, 0.62);
+
+  --aicl-text:        #ececf0;
+  --aicl-text-muted:  #9ba0ac;
+  --aicl-text-faint:  #6c7280;
+  --aicl-text-link:   #8b9afc;
+  --aicl-text-inverse:#0e1014;
+
+  --aicl-border:        #2a2e3c;
+  --aicl-border-strong: #3a3f4f;
+  --aicl-border-focus:  #8b9afc;
+
+  --aicl-accent:        #8b9afc;
+  --aicl-accent-soft:   #1f2547;
+  --aicl-accent-strong: #a7b3ff;
+  --aicl-accent-fg:     #0e1014;
+
+  --aicl-success: #4ec27a;
+  --aicl-warning: #e3b54f;
+  --aicl-danger:  #ff6e6e;
+  --aicl-info:    #8b9afc;
+
+  --aicl-tool-pending:   #6c7280;
+  --aicl-tool-running:   #8b9afc;
+  --aicl-tool-success:   #4ec27a;
+  --aicl-tool-error:     #ff6e6e;
+  --aicl-tool-cancelled: #6c7280;
+
+  --aicl-code-bg:        #11131a;
+  --aicl-code-fg:        #ececf0;
+  --aicl-code-border:    #2a2e3c;
+  --aicl-code-comment:   #6c7280;
+  --aicl-code-keyword:   #ff8a8a;
+  --aicl-code-string:    #95d2a6;
+  --aicl-code-number:    #8b9afc;
+  --aicl-code-tag:       #e3b54f;
+  --aicl-terminal-bg:    #08090c;
+  --aicl-terminal-fg:    #ececf0;
+  --aicl-terminal-prompt:#8b9afc;
+
+  --aicl-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.32);
+  --aicl-shadow-2: 0 4px 12px rgba(0, 0, 0, 0.5), 0 2px 4px rgba(0, 0, 0, 0.32);
+  --aicl-shadow-3: 0 12px 32px rgba(0, 0, 0, 0.62), 0 4px 8px rgba(0, 0, 0, 0.42);
+
+  --aicl-focus-ring: 0 0 0 3px color-mix(in oklab, var(--aicl-accent) 38%, transparent);
+
+  --aicl-shimmer-a: color-mix(in oklab, var(--aicl-accent) 0%, transparent);
+  --aicl-shimmer-b: color-mix(in oklab, var(--aicl-accent) 18%, transparent);
+  --aicl-shimmer-c: color-mix(in oklab, var(--aicl-accent) 0%, transparent);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    color-scheme: dark;
+    --aicl-bg:               #0e1014;
+    --aicl-surface:          #161922;
+    --aicl-surface-elevated: #1c2030;
+    --aicl-surface-inset:    #0a0c10;
+    --aicl-surface-tint:     #1f2230;
+    --aicl-overlay:          rgba(0, 0, 0, 0.62);
+    --aicl-text:        #ececf0;
+    --aicl-text-muted:  #9ba0ac;
+    --aicl-text-faint:  #6c7280;
+    --aicl-text-link:   #8b9afc;
+    --aicl-text-inverse:#0e1014;
+    --aicl-border:        #2a2e3c;
+    --aicl-border-strong: #3a3f4f;
+    --aicl-border-focus:  #8b9afc;
+    --aicl-accent:        #8b9afc;
+    --aicl-accent-soft:   #1f2547;
+    --aicl-accent-strong: #a7b3ff;
+    --aicl-accent-fg:     #0e1014;
+    --aicl-success: #4ec27a;
+    --aicl-warning: #e3b54f;
+    --aicl-danger:  #ff6e6e;
+    --aicl-info:    #8b9afc;
+    --aicl-tool-pending:   #6c7280;
+    --aicl-tool-running:   #8b9afc;
+    --aicl-tool-success:   #4ec27a;
+    --aicl-tool-error:     #ff6e6e;
+    --aicl-tool-cancelled: #6c7280;
+    --aicl-code-bg:        #11131a;
+    --aicl-code-fg:        #ececf0;
+    --aicl-code-border:    #2a2e3c;
+    --aicl-code-comment:   #6c7280;
+    --aicl-code-keyword:   #ff8a8a;
+    --aicl-code-string:    #95d2a6;
+    --aicl-code-number:    #8b9afc;
+    --aicl-code-tag:       #e3b54f;
+    --aicl-terminal-bg:    #08090c;
+    --aicl-terminal-fg:    #ececf0;
+    --aicl-terminal-prompt:#8b9afc;
+    --aicl-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.32);
+    --aicl-shadow-2: 0 4px 12px rgba(0, 0, 0, 0.5), 0 2px 4px rgba(0, 0, 0, 0.32);
+    --aicl-shadow-3: 0 12px 32px rgba(0, 0, 0, 0.62), 0 4px 8px rgba(0, 0, 0, 0.42);
+    --aicl-focus-ring: 0 0 0 3px color-mix(in oklab, var(--aicl-accent) 38%, transparent);
+    --aicl-shimmer-a: color-mix(in oklab, var(--aicl-accent) 0%, transparent);
+    --aicl-shimmer-b: color-mix(in oklab, var(--aicl-accent) 18%, transparent);
+    --aicl-shimmer-c: color-mix(in oklab, var(--aicl-accent) 0%, transparent);
+  }
+}

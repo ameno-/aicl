@@ -1,0 +1,12 @@
+{
+  "name": "@aicl/styles",
+  "version": "0.0.0",
+  "description": "Optional CSS-variable theme for AICL primitives. Two themes: light and dark.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.css"
+  },
+  "files": ["src"]
+}

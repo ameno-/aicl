@@ -1,0 +1,931 @@
+/**
+ * Component styles for every AICL primitive. The library carries
+ * `data-*` attributes; this file turns them into a coherent surface.
+ *
+ * Conventions:
+ *   - Every interactive element is always in the DOM; visibility is paint only.
+ *   - The streaming indicator is a single reasoning row, never a caret.
+ *   - Tool rows are disclosures, collapsed by default, force-open on error.
+ *   - Action bars are always in the DOM and keyboard-reachable.
+ */
+
+/* ─── Transcript ──────────────────────────────────────────────────── */
+
+[data-aicl='transcript-root'] {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+[data-aicl='transcript'] {
+  flex: 1;
+  overflow: auto;
+  padding: var(--aicl-space-5) var(--aicl-space-4) var(--aicl-space-3);
+  scroll-behavior: smooth;
+  scrollbar-gutter: stable;
+  display: flex;
+  flex-direction: column;
+  gap: var(--aicl-space-3);
+  font-size: var(--aicl-text-base);
+  line-height: var(--aicl-leading-normal);
+}
+
+[data-aicl='transcript'][data-empty] {
+  align-items: center;
+  justify-content: center;
+  color: var(--aicl-text-faint);
+  font-size: var(--aicl-text-sm);
+}
+
+[data-aicl='transcript'][data-at-bottom] {
+  /* sentinel */
+}
+
+[data-aicl='scroll-to-bottom'] {
+  position: sticky;
+  bottom: var(--aicl-space-3);
+  align-self: center;
+  padding: var(--aicl-space-2) var(--aicl-space-3);
+  background: var(--aicl-surface-elevated);
+  color: var(--aicl-text-muted);
+  border: 1px solid var(--aicl-border);
+  border-radius: var(--aicl-radius-pill);
+  box-shadow: var(--aicl-shadow-1);
+  font-size: var(--aicl-text-sm);
+}
+
+[data-aicl='scroll-to-bottom']:hover {
+  background: var(--aicl-surface-tint);
+  color: var(--aicl-text);
+}
+
+[data-aicl='day-separator'] {
+  display: flex;
+  align-items: center;
+  gap: var(--aicl-space-2);
+  margin: var(--aicl-space-3) 0 var(--aicl-space-1);
+  color: var(--aicl-text-faint);
+  font-size: var(--aicl-text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+}
+
+[data-aicl='day-separator']::before,
+[data-aicl='day-separator']::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--aicl-border);
+}
+
+/* ─── Message row ─────────────────────────────────────────────────── */
+
+[data-aicl='message'] {
+  display: flex;
+  flex-direction: column;
+  gap: var(--aicl-space-2);
+  max-width: 720px;
+  width: 100%;
+  animation: aicl-message-in 220ms var(--aicl-ease) both;
+}
+
+@keyframes aicl-message-in {
+  from { opacity: 0; transform: translateY(2px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+[data-aicl='message'][data-alignment='end'] {
+  align-self: flex-end;
+  margin-left: 18%;
+  align-items: flex-end;
+  text-align: end;
+}
+
+[data-aicl='message'][data-alignment='start'] {
+  align-self: flex-start;
+  margin-right: 18%;
+}
+
+[data-aicl='message'][data-alignment='full'] {
+  align-self: stretch;
+  margin: 0;
+}
+
+[data-aicl='message'][data-state='streaming'] {
+  /* A streaming row keeps the same layout, no shimmer rail here. */
+}
+
+[data-aicl='status-line'] {
+  color: var(--aicl-text-muted);
+  font-size: var(--aicl-text-sm);
+  font-style: italic;
+}
+
+/* ─── Action bar ──────────────────────────────────────────────────── */
+
+[data-aicl='message-actions'] {
+  display: flex;
+  gap: 2px;
+  margin-top: 2px;
+  opacity: 0;
+  transform: translateY(-1px);
+  transition: opacity var(--aicl-anim) var(--aicl-ease),
+              transform var(--aicl-anim) var(--aicl-ease);
+}
+
+[data-aicl='message']:hover [data-aicl='message-actions'][data-visibility='auto'],
+[data-aicl='message']:focus-within [data-aicl='message-actions'][data-visibility='auto'] {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (pointer: coarse) {
+  [data-aicl='message-actions'][data-visibility='auto'] {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+[data-aicl='message'][data-last-assistant] [data-aicl='message-actions'][data-visibility='auto'] {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+[data-aicl='message-actions'] button {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--aicl-text-faint);
+  font-size: var(--aicl-text-sm);
+  border-radius: var(--aicl-radius-sm);
+}
+
+[data-aicl='message-actions'] button:hover {
+  color: var(--aicl-text);
+  background: var(--aicl-surface-tint);
+}
+
+[data-aicl='message-actions'] button[aria-pressed='true'] {
+  color: var(--aicl-accent);
+  background: var(--aicl-accent-soft);
+}
+
+[data-aicl='message-actions'] [data-aicl='action-copy'][data-copied] {
+  color: var(--aicl-success);
+}
+
+/* ─── Branch switcher ────────────────────────────────────────────── */
+
+[data-aicl='branch-switcher'] {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--aicl-space-1);
+  font-size: var(--aicl-text-xs);
+  color: var(--aicl-text-muted);
+  padding: 2px var(--aicl-space-1);
+  background: var(--aicl-surface-tint);
+  border-radius: var(--aicl-radius-pill);
+  width: fit-content;
+}
+
+[data-aicl='branch-switcher'] button {
+  width: 20px;
+  height: 20px;
+  font-size: var(--aicl-text-sm);
+  color: var(--aicl-text-muted);
+  border-radius: 50%;
+}
+
+[data-aicl='branch-switcher'] button:hover {
+  background: var(--aicl-surface-elevated);
+  color: var(--aicl-text);
+}
+
+/* ─── Part: text ──────────────────────────────────────────────────── */
+
+[data-aicl='part'][data-part='text'] {
+  font-size: var(--aicl-text-base);
+  line-height: var(--aicl-leading-normal);
+  color: var(--aicl-text);
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+[data-aicl='message'][data-alignment='end'] [data-aicl='part'][data-part='text'] {
+  background: var(--aicl-accent-soft);
+  color: var(--aicl-text);
+  padding: var(--aicl-space-2) var(--aicl-space-3);
+  border-radius: var(--aicl-radius-md);
+}
+
+/* ─── Part: reasoning (the streaming pending row) ────────────────── */
+
+[data-aicl='reasoning'] {
+  border: 1px solid var(--aicl-border);
+  background: var(--aicl-surface-tint);
+  border-radius: var(--aicl-radius-md);
+  padding: var(--aicl-space-1) var(--aicl-space-2);
+  font-size: var(--aicl-text-sm);
+  align-self: flex-start;
+  max-width: 480px;
+  transition: background var(--aicl-anim) var(--aicl-ease);
+}
+
+[data-aicl='reasoning'] button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--aicl-space-2);
+  padding: 4px 6px;
+  color: var(--aicl-text-muted);
+  font-size: var(--aicl-text-sm);
+  font-weight: 500;
+}
+
+[data-aicl='reasoning'] button::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--aicl-text-faint);
+  transition: background var(--aicl-anim) var(--aicl-ease);
+}
+
+[data-aicl='reasoning'][data-state='pending'] button::before {
+  background: var(--aicl-tool-running);
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--aicl-tool-running) 24%, transparent);
+  animation: aicl-pulse 1.4s var(--aicl-ease) infinite;
+}
+
+[data-aicl='reasoning'][data-state='open'] button::before {
+  background: var(--aicl-accent);
+}
+
+[data-aicl='reasoning'] button:hover {
+  color: var(--aicl-text);
+}
+
+[data-aicl='reasoning-body'] {
+  padding: var(--aicl-space-2) var(--aicl-space-3) var(--aicl-space-3);
+  color: var(--aicl-text-muted);
+  font-size: var(--aicl-text-sm);
+  border-top: 1px solid var(--aicl-border);
+  margin-top: var(--aicl-space-1);
+}
+
+@keyframes aicl-pulse {
+  0%, 100% { box-shadow: 0 0 0 4px color-mix(in oklab, var(--aicl-tool-running) 24%, transparent); }
+  50%      { box-shadow: 0 0 0 8px color-mix(in oklab, var(--aicl-tool-running) 0%, transparent); }
+}
+
+/* ─── Part: tool call ────────────────────────────────────────────── */
+
+[data-aicl='tool-call'] {
+  border: 1px solid var(--aicl-border);
+  background: var(--aicl-surface);
+  border-radius: var(--aicl-radius-md);
+  overflow: hidden;
+  align-self: flex-start;
+  max-width: 600px;
+  width: 100%;
+  font-size: var(--aicl-text-sm);
+  transition: border-color var(--aicl-anim) var(--aicl-ease),
+              background var(--aicl-anim) var(--aicl-ease);
+}
+
+[data-aicl='tool-call'][data-status='running'] {
+  border-color: color-mix(in oklab, var(--aicl-tool-running) 50%, var(--aicl-border));
+  background:
+    linear-gradient(90deg, var(--aicl-shimmer-a), var(--aicl-shimmer-b), var(--aicl-shimmer-c)) 0 0 / 200% 100%,
+    var(--aicl-surface);
+  background-blend-mode: overlay;
+  animation: aicl-shimmer 1.4s linear infinite;
+}
+
+[data-aicl='tool-call'][data-status='error'] {
+  border-color: var(--aicl-tool-error);
+  background: color-mix(in oklab, var(--aicl-tool-error) 6%, var(--aicl-surface));
+}
+
+[data-aicl='tool-call'][data-status='success'] {
+  border-color: color-mix(in oklab, var(--aicl-tool-success) 22%, var(--aicl-border));
+}
+
+[data-aicl='tool-call'][data-status='cancelled'] {
+  border-color: var(--aicl-border);
+  color: var(--aicl-text-muted);
+}
+
+@keyframes aicl-shimmer {
+  from { background-position: 100% 0; }
+  to   { background-position: 0 0; }
+}
+
+[data-aicl='tool-call'] button[aria-expanded] {
+  display: flex;
+  align-items: center;
+  gap: var(--aicl-space-2);
+  width: 100%;
+  padding: var(--aicl-space-2) var(--aicl-space-3);
+  color: var(--aicl-text);
+  text-align: start;
+  font-size: var(--aicl-text-sm);
+  font-weight: 500;
+}
+
+[data-aicl='tool-call'] button[aria-expanded]:hover {
+  background: var(--aicl-surface-tint);
+}
+
+[data-aicl='tool-call'] button[aria-expanded]::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--aicl-tool-pending);
+}
+
+[data-aicl='tool-call'][data-status='running'] button[aria-expanded]::before {
+  background: var(--aicl-tool-running);
+  animation: aicl-pulse-dot 1.2s ease-in-out infinite;
+}
+
+[data-aicl='tool-call'][data-status='success'] button[aria-expanded]::before {
+  background: var(--aicl-tool-success);
+}
+
+[data-aicl='tool-call'][data-status='error'] button[aria-expanded]::before {
+  background: var(--aicl-tool-error);
+}
+
+[data-aicl='tool-call'][data-status='cancelled'] button[aria-expanded]::before {
+  background: var(--aicl-tool-cancelled);
+}
+
+@keyframes aicl-pulse-dot {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.4); }
+}
+
+[data-aicl='tool-call'] pre {
+  margin: 0;
+  padding: var(--aicl-space-3);
+  background: var(--aicl-code-bg);
+  color: var(--aicl-code-fg);
+  font-family: var(--aicl-font-mono);
+  font-size: var(--aicl-text-sm);
+  line-height: var(--aicl-leading-snug);
+  overflow: auto;
+  border-top: 1px solid var(--aicl-border);
+}
+
+/* ─── Part: artifact card ─────────────────────────────────────────── */
+
+[data-aicl='artifact-card'] {
+  display: flex;
+  align-items: center;
+  gap: var(--aicl-space-3);
+  padding: var(--aicl-space-3) var(--aicl-space-4);
+  background: var(--aicl-surface-elevated);
+  border: 1px solid var(--aicl-border);
+  border-radius: var(--aicl-radius-md);
+  box-shadow: var(--aicl-shadow-1);
+  align-self: flex-start;
+  max-width: 600px;
+  width: 100%;
+  transition: border-color var(--aicl-anim) var(--aicl-ease),
+              transform var(--aicl-anim) var(--aicl-ease),
+              box-shadow var(--aicl-anim) var(--aicl-ease);
+}
+
+[data-aicl='artifact-card']:hover {
+  border-color: var(--aicl-border-strong);
+  transform: translateY(-1px);
+  box-shadow: var(--aicl-shadow-2);
+}
+
+[data-aicl='artifact-title'] {
+  flex: 1;
+  color: var(--aicl-text);
+  font-weight: 500;
+  font-size: var(--aicl-text-base);
+}
+
+[data-aicl='artifact-kind'] {
+  font-size: var(--aicl-text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--aicl-accent);
+  background: var(--aicl-accent-soft);
+  padding: 2px var(--aicl-space-2);
+  border-radius: var(--aicl-radius-pill);
+  font-weight: 600;
+}
+
+[data-aicl='artifact-version'] {
+  font-size: var(--aicl-text-xs);
+  color: var(--aicl-text-faint);
+  font-family: var(--aicl-font-mono);
+}
+
+[data-aicl='artifact-open'] {
+  margin-inline-start: auto;
+  padding: 4px var(--aicl-space-3);
+  background: var(--aicl-accent);
+  color: var(--aicl-accent-fg);
+  border-radius: var(--aicl-radius-sm);
+  font-size: var(--aicl-text-sm);
+  font-weight: 500;
+}
+
+[data-aicl='artifact-open']:hover {
+  background: var(--aicl-accent-strong);
+}
+
+/* ─── Part: code block ────────────────────────────────────────────── */
+
+[data-aicl='code-block'] {
+  margin: 0;
+  border: 1px solid var(--aicl-border);
+  border-radius: var(--aicl-radius-md);
+  background: var(--aicl-code-bg);
+  color: var(--aicl-code-fg);
+  overflow: hidden;
+  font-family: var(--aicl-font-mono);
+  font-size: var(--aicl-text-sm);
+  position: relative;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+[data-aicl='code-block'] figcaption {
+  font-size: var(--aicl-text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--aicl-code-comment);
+  padding: var(--aicl-space-1) var(--aicl-space-3);
+  background: color-mix(in oklab, var(--aicl-code-bg) 80%, var(--aicl-border) 20%);
+  border-bottom: 1px solid var(--aicl-border);
+  font-family: var(--aicl-font-sans);
+  font-weight: 600;
+}
+
+[data-aicl='code-block'] pre {
+  margin: 0;
+  padding: var(--aicl-space-3) var(--aicl-space-4);
+  line-height: var(--aicl-leading-snug);
+  overflow: auto;
+}
+
+[data-aicl='code-block'] code {
+  background: transparent;
+  font: inherit;
+  color: inherit;
+}
+
+[data-aicl='code-block'] [aria-label='Copy code'] {
+  position: absolute;
+  top: 6px;
+  inset-inline-end: 6px;
+  padding: 4px 8px;
+  font-size: var(--aicl-text-xs);
+  font-family: var(--aicl-font-sans);
+  background: var(--aicl-surface-elevated);
+  color: var(--aicl-text-muted);
+  border: 1px solid var(--aicl-border);
+  border-radius: var(--aicl-radius-sm);
+  opacity: 0;
+  transition: opacity var(--aicl-anim) var(--aicl-ease),
+              background var(--aicl-anim) var(--aicl-ease),
+              color var(--aicl-anim) var(--aicl-ease);
+}
+
+[data-aicl='code-block']:hover [aria-label='Copy code'],
+[data-aicl='code-block']:focus-within [aria-label='Copy code'] {
+  opacity: 1;
+}
+
+[data-aicl='code-block'] [aria-label='Copy code']:hover {
+  background: var(--aicl-surface-tint);
+  color: var(--aicl-text);
+}
+
+[data-aicl='code-block'] [data-copied] {
+  background: color-mix(in oklab, var(--aicl-success) 14%, transparent);
+  color: var(--aicl-success);
+  border-color: color-mix(in oklab, var(--aicl-success) 30%, transparent);
+}
+
+[data-aicl='code-block'] [aria-live='polite'] {
+  position: absolute;
+  bottom: -1000px; /* off-screen but still announced */
+  left: 0;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+/* ─── Part: tool result ───────────────────────────────────────────── */
+
+[data-aicl='part'][data-part='tool-result'] {
+  padding: var(--aicl-space-2) var(--aicl-space-3);
+  background: var(--aicl-surface-inset);
+  border: 1px solid var(--aicl-border);
+  border-radius: var(--aicl-radius-sm);
+  font-size: var(--aicl-text-sm);
+  color: var(--aicl-text-muted);
+  align-self: flex-start;
+}
+
+[data-aicl='part'][data-part='tool-result'][data-is-error] {
+  color: var(--aicl-danger);
+  border-color: color-mix(in oklab, var(--aicl-danger) 30%, var(--aicl-border));
+  background: color-mix(in oklab, var(--aicl-danger) 6%, var(--aicl-surface));
+}
+
+/* ─── Part: file ──────────────────────────────────────────────────── */
+
+[data-aicl='part'][data-part='file'] {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--aicl-space-2);
+  padding: var(--aicl-space-1) var(--aicl-space-3);
+  background: var(--aicl-surface-inset);
+  border: 1px solid var(--aicl-border);
+  border-radius: var(--aicl-radius-pill);
+  align-self: flex-start;
+  max-width: 100%;
+}
+
+[data-aicl='part'][data-part='file'] button {
+  color: var(--aicl-text);
+  font-size: var(--aicl-text-sm);
+}
+
+[data-aicl='part'][data-part='file'] button:hover {
+  color: var(--aicl-accent);
+}
+
+[data-aicl='part'][data-part='file'][data-state='uploading']::after {
+  content: '· uploading';
+  font-size: var(--aicl-text-xs);
+  color: var(--aicl-text-faint);
+  font-style: italic;
+}
+
+/* ─── Part: error notice ──────────────────────────────────────────── */
+
+[data-aicl='part'][data-part='error'] {
+  display: flex;
+  align-items: center;
+  gap: var(--aicl-space-2);
+  padding: var(--aicl-space-3) var(--aicl-space-4);
+  background: color-mix(in oklab, var(--aicl-danger) 8%, var(--aicl-surface));
+  border: 1px solid color-mix(in oklab, var(--aicl-danger) 30%, var(--aicl-border));
+  border-radius: var(--aicl-radius-md);
+  color: var(--aicl-text);
+  font-size: var(--aicl-text-sm);
+  align-self: flex-start;
+  max-width: 600px;
+}
+
+[data-aicl='part'][data-part='error'] p {
+  flex: 1;
+  color: var(--aicl-text);
+}
+
+[data-aicl='part'][data-part='error'] button[aria-label='Retry'] {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--aicl-danger);
+  background: var(--aicl-surface-elevated);
+  border: 1px solid var(--aicl-border);
+  border-radius: var(--aicl-radius-sm);
+}
+
+[data-aicl='part'][data-part='error'] button[aria-label='Retry']:hover {
+  background: color-mix(in oklab, var(--aicl-danger) 14%, var(--aicl-surface));
+}
+
+/* ─── Part: suggestions ──────────────────────────────────────────── */
+
+[data-aicl='part'][data-part='data-suggested-followups'] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--aicl-space-2);
+  margin-top: var(--aicl-space-2);
+}
+
+[data-aicl='part'][data-part='data-suggested-followups'] button {
+  padding: 6px var(--aicl-space-3);
+  font-size: var(--aicl-text-sm);
+  background: var(--aicl-surface-elevated);
+  border: 1px solid var(--aicl-border);
+  border-radius: var(--aicl-radius-pill);
+  color: var(--aicl-text);
+  transition: border-color var(--aicl-anim) var(--aicl-ease),
+              color var(--aicl-anim) var(--aicl-ease),
+              background var(--aicl-anim) var(--aicl-ease);
+}
+
+[data-aicl='part'][data-part='data-suggested-followups'] button:hover {
+  border-color: var(--aicl-accent);
+  color: var(--aicl-accent);
+  background: var(--aicl-accent-soft);
+}
+
+/* ─── Part: terminal ──────────────────────────────────────────────── */
+
+[data-aicl='terminal-output'] {
+  font-family: var(--aicl-font-mono);
+  font-size: var(--aicl-text-sm);
+  line-height: var(--aicl-leading-snug);
+  background: var(--aicl-terminal-bg);
+  color: var(--aicl-terminal-fg);
+  padding: var(--aicl-space-3) var(--aicl-space-4);
+  border-radius: var(--aicl-radius-md);
+  overflow: auto;
+  max-height: 360px;
+}
+
+[data-aicl='terminal-output'][data-streaming] {
+  border: 1px solid color-mix(in oklab, var(--aicl-terminal-prompt) 32%, transparent);
+  position: relative;
+}
+
+[data-aicl='terminal-output'][data-streaming]::after {
+  content: '• Live';
+  position: absolute;
+  top: 6px;
+  right: var(--aicl-space-3);
+  font-family: var(--aicl-font-sans);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--aicl-terminal-prompt);
+}
+
+/* ─── Part: unknown ──────────────────────────────────────────────── */
+
+[data-aicl='part'][data-part='unknown'] {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  font-family: var(--aicl-font-mono);
+  font-size: var(--aicl-text-xs);
+  color: var(--aicl-text-faint);
+  background: var(--aicl-surface-inset);
+  border: 1px dashed var(--aicl-border-strong);
+  border-radius: var(--aicl-radius-sm);
+  align-self: flex-start;
+}
+
+/* ─── Plan checklist ──────────────────────────────────────────────── */
+
+[data-aicl='plan-checklist'] {
+  display: flex;
+  flex-direction: column;
+  gap: var(--aicl-space-2);
+  align-self: flex-start;
+  max-width: 480px;
+  width: 100%;
+  font-size: var(--aicl-text-sm);
+}
+
+[data-aicl='plan-checklist'] p[aria-live] {
+  font-size: var(--aicl-text-xs);
+  color: var(--aicl-text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  font-family: var(--aicl-font-mono);
+}
+
+[data-aicl='plan-checklist'] ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+[data-aicl='plan-checklist'] li {
+  display: flex;
+  align-items: center;
+  gap: var(--aicl-space-2);
+  padding: 6px var(--aicl-space-2);
+  border-radius: var(--aicl-radius-sm);
+  color: var(--aicl-text-muted);
+}
+
+[data-aicl='plan-checklist'] li::before {
+  content: '';
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1.5px solid var(--aicl-border-strong);
+  flex-shrink: 0;
+  transition: all var(--aicl-anim) var(--aicl-ease);
+}
+
+[data-aicl='plan-checklist'] li[data-status='done'] {
+  color: var(--aicl-text);
+}
+
+[data-aicl='plan-checklist'] li[data-status='done']::before {
+  background: var(--aicl-success);
+  border-color: var(--aicl-success);
+  box-shadow: inset 0 0 0 2px var(--aicl-surface);
+}
+
+[data-aicl='plan-checklist'] li[data-status='running'] {
+  color: var(--aicl-text);
+}
+
+[data-aicl='plan-checklist'] li[data-status='running']::before {
+  border-color: var(--aicl-tool-running);
+  background: var(--aicl-surface);
+  border-top-color: var(--aicl-tool-running);
+  animation: aicl-spin 0.9s linear infinite;
+}
+
+@keyframes aicl-spin {
+  to { transform: rotate(360deg); }
+}
+
+[data-aicl='plan-checklist'] li[data-status='error']::before {
+  background: var(--aicl-danger);
+  border-color: var(--aicl-danger);
+  box-shadow: inset 0 0 0 2px var(--aicl-surface);
+}
+
+/* ─── Composer ──────────────────────────────────────────────────── */
+
+[data-aicl='composer'] {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--aicl-space-2);
+  padding: var(--aicl-space-3);
+  margin: var(--aicl-space-3) var(--aicl-space-4) var(--aicl-space-4);
+  background: var(--aicl-surface-elevated);
+  border: 1px solid var(--aicl-border);
+  border-radius: var(--aicl-radius-lg);
+  box-shadow: var(--aicl-shadow-1);
+  transition: border-color var(--aicl-anim) var(--aicl-ease),
+              box-shadow var(--aicl-anim) var(--aicl-ease);
+  flex-wrap: wrap;
+}
+
+[data-aicl='composer']:focus-within {
+  border-color: var(--aicl-border-focus);
+  box-shadow: var(--aicl-shadow-2);
+}
+
+[data-aicl='composer'][data-state='error'] {
+  border-color: var(--aicl-danger);
+}
+
+[data-aicl='composer'][data-placement='hero'] {
+  max-width: 720px;
+  margin: var(--aicl-space-6) auto;
+  padding: var(--aicl-space-4);
+  box-shadow: var(--aicl-shadow-2);
+}
+
+[data-aicl='composer'][data-placement='rail'] {
+  border-radius: var(--aicl-radius-md);
+  margin: var(--aicl-space-2);
+}
+
+[data-aicl='suggestion-chips'] {
+  flex-basis: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--aicl-space-2);
+  margin-bottom: var(--aicl-space-1);
+}
+
+[data-aicl='suggestion-chips'] button {
+  padding: 4px var(--aicl-space-3);
+  font-size: var(--aicl-text-sm);
+  background: var(--aicl-surface-tint);
+  color: var(--aicl-text-muted);
+  border-radius: var(--aicl-radius-pill);
+  border: 1px solid transparent;
+}
+
+[data-aicl='suggestion-chips'] button:hover {
+  background: var(--aicl-accent-soft);
+  color: var(--aicl-accent);
+  border-color: var(--aicl-accent);
+}
+
+[data-aicl='attachment-row'] {
+  flex-basis: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--aicl-space-1);
+}
+
+[data-aicl='attachment-chip'] {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px var(--aicl-space-2);
+  background: var(--aicl-surface-tint);
+  border: 1px solid var(--aicl-border);
+  border-radius: var(--aicl-radius-sm);
+  font-size: var(--aicl-text-xs);
+  color: var(--aicl-text-muted);
+}
+
+[data-aicl='composer-input'] {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--aicl-text-base);
+  line-height: var(--aicl-leading-normal);
+  color: var(--aicl-text);
+  padding: 6px 0;
+  min-height: 24px;
+}
+
+[data-aicl='composer-input']::placeholder {
+  color: var(--aicl-text-faint);
+}
+
+[data-aicl='composer-attach'] {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--aicl-text-muted);
+  border-radius: var(--aicl-radius-sm);
+  font-size: var(--aicl-text-base);
+  flex-shrink: 0;
+}
+
+[data-aicl='composer-attach']:hover {
+  background: var(--aicl-surface-tint);
+  color: var(--aicl-text);
+}
+
+[data-aicl='composer-submit'] {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--aicl-accent);
+  color: var(--aicl-accent-fg);
+  border-radius: var(--aicl-radius-sm);
+  font-size: var(--aicl-text-base);
+  font-weight: 600;
+  flex-shrink: 0;
+  transition: background var(--aicl-anim) var(--aicl-ease),
+              transform var(--aicl-anim-fast) var(--aicl-ease);
+}
+
+[data-aicl='composer-submit']:not(:disabled):hover {
+  background: var(--aicl-accent-strong);
+}
+
+[data-aicl='composer-submit'][data-role='stop'] {
+  background: var(--aicl-surface-elevated);
+  color: var(--aicl-text);
+  border: 1px solid var(--aicl-border-strong);
+}
+
+[data-aicl='composer-submit'][data-role='stop']:hover {
+  background: color-mix(in oklab, var(--aicl-danger) 10%, var(--aicl-surface-elevated));
+  color: var(--aicl-danger);
+  border-color: var(--aicl-danger);
+}
+
+[data-aicl='composer-submit'][data-role='stop']:not(:disabled)::before {
+  content: '';
+  width: 12px;
+  height: 12px;
+  background: currentColor;
+  border-radius: 2px;
+}
+
+[data-aicl='composer-submit'][data-role='stop']:not(:disabled)::after {
+  content: 'Stop';
+  position: absolute;
+  /* keep the actual Stop label via the slot content; the ::before is a square */
+  display: none;
+}
+
+[data-aicl='composer-disabled-reason'] {
+  flex-basis: 100%;
+  font-size: var(--aicl-text-sm);
+  color: var(--aicl-text-muted);
+  font-style: italic;
+}

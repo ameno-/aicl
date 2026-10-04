@@ -8,7 +8,10 @@
   },
   "dependencies": {
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "@aicl/core": "file:../../packages/core",
+    "@aicl/react": "file:../../packages/react",
+    "@aicl/styles": "file:../../packages/styles"
   },
   "devDependencies": {
     "@types/react": "^18.3.31",
