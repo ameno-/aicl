@@ -97,6 +97,8 @@
 
 [data-aicl='message'][data-alignment='end'] {
   align-self: flex-end;
+  /* width: auto, not the base 100%: 100% plus the margin overflows narrow panes. */
+  width: auto;
   margin-left: 18%;
   align-items: flex-end;
   text-align: end;

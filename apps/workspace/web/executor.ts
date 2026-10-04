@@ -1,0 +1,202 @@
+/**
+ * Applies agent scratchpad ops to the live tldraw editor.
+ *
+ * Every mutation goes through the editor's shape API, so the agent's options
+ * are exactly what the toolbar offers the user: neither author can make
+ * something the other cannot.
+ */
+
+import { createShapeId, toRichText, type Editor, type TLShapeId } from 'tldraw';
+import {
+  fullId,
+  shortId,
+  summarize,
+  type AddShape,
+  type Endpoint,
+  type ScratchOp,
+  type ScratchResult,
+  type UpdateShape,
+} from '../shared/scratch.ts';
+
+const GAP = 80;
+const DEFAULT_W = 200;
+const DEFAULT_H = 120;
+
+export async function execute(editor: Editor, op: ScratchOp): Promise<ScratchResult> {
+  switch (op.op) {
+    case 'read':
+      return { op: 'read', shapes: read(editor) };
+    case 'view':
+      return { op: 'view', png: await view(editor) };
+    case 'add': {
+      const ids = add(editor, op.shapes);
+      editor.zoomToFit({ animation: { duration: 240 } });
+      return { op: 'add', ids };
+    }
+    case 'update':
+      return { op: 'update', ids: update(editor, op.shapes) };
+    case 'delete': {
+      const ids = op.ids.map((id) => fullId(id) as TLShapeId).filter((id) => editor.getShape(id));
+      editor.deleteShapes(ids);
+      return { op: 'delete', ids: ids.map(shortId) };
+    }
+    case 'clear': {
+      const ids = [...editor.getCurrentPageShapeIds()];
+      editor.deleteShapes(ids);
+      return { op: 'clear', ids: ids.map(shortId) };
+    }
+  }
+}
+
+function read(editor: Editor) {
+  const pageShapes = new Set<string>(editor.getCurrentPageShapeIds());
+  const records = editor.store
+    .allRecords()
+    .filter((r) => r.typeName !== 'shape' || pageShapes.has(r.id));
+  return summarize(records, (id) => {
+    const box = editor.getShapePageBounds(id as TLShapeId);
+    return box ? { x: box.x, y: box.y, w: box.w, h: box.h } : undefined;
+  });
+}
+
+async function view(editor: Editor): Promise<string | null> {
+  const ids = [...editor.getCurrentPageShapeIds()];
+  const bounds = editor.getCurrentPageBounds();
+  if (!ids.length || !bounds) return null;
+  // Keep the long side near 1600px: legible for vision, cheap for context.
+  const scale = Math.min(2, 1600 / Math.max(bounds.w, bounds.h));
+  const { blob } = await editor.toImage(ids, { format: 'png', background: true, scale });
+  const bytes = new Uint8Array(await blob.arrayBuffer());
+  let binary = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  return btoa(binary);
+}
+
+function add(editor: Editor, shapes: AddShape[]): string[] {
+  const created: string[] = [];
+  // Shapes without coordinates flow in a row to the right of existing content.
+  const page = editor.getCurrentPageBounds();
+  let cursorX = page ? page.maxX + GAP * 2 : 0;
+  const cursorY = page ? page.minY : 0;
+
+  editor.run(() => {
+    for (const shape of shapes) {
+      const id = shape.id ? createShapeId(shape.id) : createShapeId();
+      if (editor.getShape(id)) throw new Error(`A shape with id "${shortId(id)}" already exists. Use scratch_update.`);
+
+      if (shape.kind === 'arrow') {
+        addArrow(editor, id, shape);
+        created.push(shortId(id));
+        continue;
+      }
+
+      const w = shape.w ?? DEFAULT_W;
+      const x = shape.x ?? cursorX;
+      const y = shape.y ?? cursorY;
+      if (shape.x === undefined) cursorX += w + GAP;
+      const richText = toRichText(shape.text ?? '');
+
+      if (shape.kind === 'rect' || shape.kind === 'ellipse') {
+        editor.createShape({
+          id,
+          type: 'geo',
+          x,
+          y,
+          props: {
+            geo: shape.kind === 'rect' ? 'rectangle' : 'ellipse',
+            w,
+            h: shape.h ?? DEFAULT_H,
+            richText,
+            color: shape.color ?? 'black',
+            fill: shape.fill ?? 'semi',
+          },
+        });
+      } else if (shape.kind === 'note') {
+        editor.createShape({ id, type: 'note', x, y, props: { richText, color: shape.color ?? 'yellow' } });
+      } else {
+        editor.createShape({
+          id,
+          type: 'text',
+          x,
+          y,
+          props: { richText, color: shape.color ?? 'black', ...(shape.w ? { w: shape.w, autoSize: false } : {}) },
+        });
+      }
+      created.push(shortId(id));
+    }
+  });
+  return created;
+}
+
+function addArrow(editor: Editor, id: TLShapeId, shape: AddShape): void {
+  if (!shape.from || !shape.to) throw new Error('An arrow needs both from and to.');
+  const start = endpoint(editor, shape.from);
+  const end = endpoint(editor, shape.to);
+
+  editor.createShape({
+    id,
+    type: 'arrow',
+    x: start.point.x,
+    y: start.point.y,
+    props: {
+      start: { x: 0, y: 0 },
+      end: { x: end.point.x - start.point.x, y: end.point.y - start.point.y },
+      richText: toRichText(shape.text ?? ''),
+      color: shape.color ?? 'black',
+    },
+  });
+
+  const bindings = [
+    { terminal: 'start' as const, target: start.target },
+    { terminal: 'end' as const, target: end.target },
+  ].filter((b) => b.target);
+  editor.createBindings(
+    bindings.map((b) => ({
+      type: 'arrow' as const,
+      fromId: id,
+      toId: b.target!,
+      props: {
+        terminal: b.terminal,
+        normalizedAnchor: { x: 0.5, y: 0.5 },
+        isExact: false,
+        isPrecise: false,
+        snap: 'none' as const,
+      },
+    })),
+  );
+}
+
+function endpoint(editor: Editor, end: Endpoint): { point: { x: number; y: number }; target?: TLShapeId } {
+  if (typeof end !== 'string') return { point: end };
+  const target = fullId(end) as TLShapeId;
+  const box = editor.getShapePageBounds(target);
+  if (!box) throw new Error(`No shape with id "${end}" to bind the arrow to.`);
+  return { point: { x: box.midX, y: box.midY }, target };
+}
+
+function update(editor: Editor, patches: UpdateShape[]): string[] {
+  const updated: string[] = [];
+  editor.run(() => {
+    for (const patch of patches) {
+      const shape = editor.getShape(fullId(patch.id) as TLShapeId);
+      if (!shape) throw new Error(`No shape with id "${patch.id}".`);
+      const props: Record<string, unknown> = {};
+      if (patch.text !== undefined && 'richText' in shape.props) props.richText = toRichText(patch.text);
+      if (patch.color !== undefined && 'color' in shape.props) props.color = patch.color;
+      if (shape.type === 'geo') {
+        if (patch.w !== undefined) props.w = patch.w;
+        if (patch.h !== undefined) props.h = patch.h;
+      }
+      if (shape.type === 'text' && patch.w !== undefined) Object.assign(props, { w: patch.w, autoSize: false });
+      editor.updateShape({
+        id: shape.id,
+        type: shape.type,
+        ...(patch.x !== undefined ? { x: patch.x } : {}),
+        ...(patch.y !== undefined ? { y: patch.y } : {}),
+        props,
+      });
+      updated.push(shortId(shape.id));
+    }
+  });
+  return updated;
+}
