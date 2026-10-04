@@ -152,6 +152,115 @@ test('transport failure surfaces as retryable error state', async () => {
   assert.equal(chat.status, 'error');
 });
 
+test('status is submitted before the first event, then idle after message-end', async () => {
+  let release: (() => void) | undefined;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const chat = new ChatController({
+    transport: {
+      async *send(_req, signal) {
+        await gate;
+        if (signal.aborted) return;
+        yield { type: 'message-start', id: 'a1', role: 'assistant' };
+        yield { type: 'part-start', index: 0, part: { type: 'text', text: 'x' } };
+        yield { type: 'message-end', finishReason: 'stop' };
+      },
+    },
+  });
+
+  const pending = chat.send('hi');
+  await new Promise((r) => setTimeout(r, 0));
+  assert.equal(chat.status, 'submitted');
+  release?.();
+  await pending;
+  assert.equal(chat.status, 'idle');
+  assert.equal(chat.messages[1]?.role, 'assistant');
+});
+
+test('stop during submitted returns to idle and does not invent an assistant message', async () => {
+  let release: (() => void) | undefined;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const chat = new ChatController({
+    transport: {
+      async *send(_req, signal) {
+        await gate;
+        if (signal.aborted) return;
+        yield { type: 'message-start', id: 'a1', role: 'assistant' };
+      },
+    },
+  });
+
+  const pending = chat.send('hi');
+  await new Promise((r) => setTimeout(r, 0));
+  assert.equal(chat.status, 'submitted');
+  chat.stop();
+  release?.();
+  await pending;
+  assert.equal(chat.status, 'idle');
+  assert.equal(chat.messages.length, 1);
+  assert.equal(chat.messages[0]?.role, 'user');
+});
+
+test('stop marks in-flight tool calls cancelled, not failed', async () => {
+  let release: (() => void) | undefined;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const chat = new ChatController({
+    transport: {
+      async *send(_req, signal) {
+        yield { type: 'message-start', id: 'a1', role: 'assistant' };
+        yield {
+          type: 'part-start',
+          index: 0,
+          part: { type: 'text', text: 'partial' },
+        };
+        yield {
+          type: 'part-start',
+          index: 1,
+          part: { type: 'tool-call', toolCallId: 't1', name: 'search', args: {}, status: 'running' },
+        };
+        await gate;
+        if (signal.aborted) return;
+        yield { type: 'message-end', finishReason: 'stop' };
+      },
+    },
+  });
+
+  const pending = chat.send('hi');
+  await new Promise((r) => setTimeout(r, 0));
+  assert.equal(chat.status, 'streaming');
+  chat.stop();
+  release?.();
+  await pending;
+
+  assert.equal(chat.status, 'aborted');
+  const reply = chat.messages[1]!;
+  assert.equal(reply.aborted, true);
+  const tool = reply.parts[1];
+  assert.equal(tool?.type, 'tool-call');
+  assert.equal(tool?.type === 'tool-call' ? tool.status : null, 'cancelled');
+});
+
+test('an error event is terminal and is not overwritten by idle', async () => {
+  const chat = new ChatController({
+    transport: fakeTransport([
+      { type: 'message-start', id: 'a1', role: 'assistant' },
+      { type: 'part-start', index: 0, part: { type: 'text', text: 'partial' } },
+      { type: 'error', error: { message: 'model failed', retryable: true } },
+      { type: 'message-end', finishReason: 'stop' },
+    ]),
+  });
+
+  await chat.send('hi');
+  assert.equal(chat.status, 'error');
+  assert.equal(chat.state.get().error?.message, 'model failed');
+  assert.equal(chat.messages[1]?.parts[0]?.type === 'text' ? chat.messages[1]?.parts[0].text : '', 'partial');
+});
+
 test('empty submissions are ignored', async () => {
   const chat = new ChatController({ transport: fakeTransport([]) });
   await chat.send('   ');

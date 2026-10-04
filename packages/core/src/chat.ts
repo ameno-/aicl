@@ -172,7 +172,14 @@ export class ChatController {
         streamingId: undefined,
         nodes: {
           ...s.nodes,
-          [s.streamingId]: { ...node, message: { ...node.message, aborted: true } },
+          [s.streamingId]: {
+            ...node,
+            message: {
+              ...node.message,
+              aborted: true,
+              parts: cancelInFlightTools(node.message.parts),
+            },
+          },
         },
       };
     });
@@ -220,14 +227,16 @@ export class ChatController {
       for await (const event of stream) {
         if (controller.signal.aborted) break;
         assistantId = this.reduce(event, assistantId);
+        // An error event is terminal. Falling through would overwrite it with idle.
+        if (event.type === 'error') break;
       }
 
-      if (!controller.signal.aborted) {
-        this.store.update((s) => ({ ...s, status: 'idle', streamingId: undefined }));
-        if (assistantId) {
-          const node = this.store.get().nodes[assistantId];
-          if (node) this.options.onFinish?.(node.message);
-        }
+      if (controller.signal.aborted || this.store.get().status === 'error') return;
+
+      this.store.update((s) => ({ ...s, status: 'idle', streamingId: undefined }));
+      if (assistantId) {
+        const node = this.store.get().nodes[assistantId];
+        if (node) this.options.onFinish?.(node.message);
       }
     } catch (cause) {
       // An abort surfaces as a throw in most transports, but the user asked for
@@ -347,6 +356,18 @@ export class ChatController {
       };
     });
   }
+}
+
+/** Abort is not failure. A tool still in flight becomes cancelled, not error. */
+function cancelInFlightTools(parts: Part[]): Part[] {
+  let changed = false;
+  const next = parts.map((part) => {
+    if (part.type !== 'tool-call') return part;
+    if (part.status !== 'pending' && part.status !== 'running') return part;
+    changed = true;
+    return { ...part, status: 'cancelled' as const };
+  });
+  return changed ? next : parts;
 }
 
 /** Builds a linear (unbranched) tree from a flat message list. */

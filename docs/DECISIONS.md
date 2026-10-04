@@ -283,8 +283,21 @@ part renderer and `TerminalOutput` stay in the chat packages. Also falsified if 
 terminal output legible only when interleaved with per-step tool cards such that extraction loses
 meaning (agent-execution §5.4) — that would force the component to own placement.
 
+## Sign-off
+
+**2026-10-04 — Go, slice 1 only.** Ameno authorized implementation of the first
+vertical slice: one live turn. In scope: the status machine (`submitted` distinct
+from `streaming`), one morphing send/stop control, a transcript with stick-to-bottom,
+text / reasoning / tool-call / artifact parts, an unregistered `data-*` part that
+falls back instead of blanking the thread, and abort that keeps partial output and
+marks in-flight tools `cancelled`. The fixture is scripted and does not use the
+network.
+
+This is not a sign-off of the full 28-primitive inventory in `BLUEPRINT.md`.
+Session list, platform primitives, Svelte/Vue, and the moi-style workspace stay
+gated on a further Go. AICL-3 remains the review gate for that remainder.
+
 ## Open questions
 
-None open. The three Phase-1 questions — artifacts in v1, virtualisation location,
-command palette — are resolved by D12–D14 above; the component inventory they
-feed is `BLUEPRINT.md`, awaiting sign-off.
+None open in the design. D12–D14 resolved the three Phase-1 questions. Implementation
+beyond slice 1 is not yet authorized.

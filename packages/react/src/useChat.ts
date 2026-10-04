@@ -5,6 +5,7 @@ export interface UseChatResult {
   messages: Message[];
   status: ChatState['status'];
   error: ChatState['error'];
+  streamingId?: string;
   isBusy: boolean;
   send: (text: string, attachments?: Part[]) => Promise<void>;
   regenerate: () => Promise<void>;
@@ -50,6 +51,7 @@ export function useChat(options: ChatOptions): UseChatResult {
     messages,
     status: state.status,
     error: state.error,
+    streamingId: state.streamingId,
     isBusy: state.status === 'submitted' || state.status === 'streaming',
     send: useCallback((t, a) => controller.send(t, a), [controller]),
     regenerate: useCallback(() => controller.regenerate(), [controller]),

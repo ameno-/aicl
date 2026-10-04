@@ -1,6 +1,7 @@
 import {
   forwardRef,
   useCallback,
+  useId,
   useImperativeHandle,
   useLayoutEffect,
   useRef,
@@ -8,13 +9,26 @@ import {
   type KeyboardEvent,
   type ReactNode,
 } from 'react';
+import type { ChatStatus } from '@aicl/core';
+
+export type ComposerPlacement = 'docked' | 'hero' | 'rail';
 
 export interface ComposerProps {
   onSubmit: (text: string) => void;
   onStop?: () => void;
+  /**
+   * Conversation status. `submitted` and `streaming` are never collapsed:
+   * stop is available only while tokens are arriving.
+   */
+  status?: ChatStatus;
+  /** @deprecated Pass `status`. Treated as `streaming` when `status` is omitted. */
   isBusy?: boolean;
+  /** Disables send only. The field stays editable. */
   disabled?: boolean;
+  disabledReason?: string;
   placeholder?: string;
+  placement?: ComposerPlacement;
+  attachmentCount?: number;
   maxRows?: number;
   /** Render-prop children receive live state so consumers own all markup. */
   children?: (api: ComposerRenderApi) => ReactNode;
@@ -24,7 +38,9 @@ export interface ComposerRenderApi {
   value: string;
   setValue: (v: string) => void;
   submit: () => void;
+  stop: () => void;
   canSubmit: boolean;
+  showStop: boolean;
   isBusy: boolean;
 }
 
@@ -38,18 +54,36 @@ export interface ComposerHandle {
  * submission guards; owns no visual design.
  */
 export const Composer = forwardRef<ComposerHandle, ComposerProps>(function Composer(
-  { onSubmit, onStop, isBusy = false, disabled = false, placeholder, maxRows = 12, children },
+  {
+    onSubmit,
+    onStop,
+    status,
+    isBusy = false,
+    disabled = false,
+    disabledReason,
+    placeholder,
+    placement = 'docked',
+    attachmentCount = 0,
+    maxRows = 10,
+    children,
+  },
   ref,
 ) {
   const [value, setValue] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const reasonId = useId();
 
   // Tracks IME composition. Without this, pressing Enter to confirm a candidate
-  // in a Japanese, Chinese, or Korean IME submits the message mid-word. This is
-  // the single most common accessibility bug in chat composers.
+  // in a Japanese, Chinese, or Korean IME submits the message mid-word.
   const composingRef = useRef(false);
 
-  const canSubmit = value.trim().length > 0 && !isBusy && !disabled;
+  const resolved: ChatStatus = status ?? (isBusy ? 'streaming' : 'idle');
+  const showStop = resolved === 'streaming';
+  const busy = resolved === 'submitted' || resolved === 'streaming';
+  const hasText = value.trim().length > 0;
+  const hasAttachments = attachmentCount > 0;
+  const canSubmit = (hasText || hasAttachments) && !busy && !disabled;
+  const composerState = resolved === 'idle' || resolved === 'aborted' ? 'ready' : resolved;
 
   const submit = useCallback(() => {
     if (!canSubmit) return;
@@ -57,12 +91,15 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(function Compo
     setValue('');
   }, [canSubmit, onSubmit, value]);
 
+  const stop = useCallback(() => {
+    if (showStop) onStop?.();
+  }, [onStop, showStop]);
+
   useImperativeHandle(ref, () => ({
     focus: () => textareaRef.current?.focus(),
     clear: () => setValue(''),
   }));
 
-  // Autosize before paint so the textarea never renders at the wrong height.
   useLayoutEffect(() => {
     const el = textareaRef.current;
     if (!el) return;
@@ -73,48 +110,59 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(function Compo
 
   const handleKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
     if (event.key !== 'Enter') return;
-    // `isComposing` covers browsers that set it; the ref covers those that fire
-    // keydown before compositionend. Both are needed in practice.
     if (composingRef.current || event.nativeEvent.isComposing) return;
-    if (event.shiftKey) return; // newline
+    if (event.shiftKey) return;
     event.preventDefault();
     submit();
   };
 
   if (children) {
-    return <>{children({ value, setValue, submit, canSubmit, isBusy })}</>;
+    return (
+      <>{children({ value, setValue, submit, stop, canSubmit, showStop, isBusy: busy })}</>
+    );
   }
 
   return (
-    <div data-aicl="composer" data-busy={isBusy || undefined}>
+    <div
+      data-aicl="composer"
+      data-state={composerState}
+      data-placement={placement}
+      data-has-text={hasText || undefined}
+      data-has-attachments={hasAttachments || undefined}
+      data-disabled-reason={disabled && disabledReason ? disabledReason : undefined}
+    >
       <textarea
         ref={textareaRef}
         value={value}
         rows={1}
-        disabled={disabled}
         placeholder={placeholder}
-        aria-label={placeholder ?? 'Message'}
+        aria-label="Message"
         onChange={(e) => setValue(e.target.value)}
         onKeyDown={handleKeyDown}
-        onCompositionStart={() => (composingRef.current = true)}
-        onCompositionEnd={() => (composingRef.current = false)}
+        onCompositionStart={() => {
+          composingRef.current = true;
+        }}
+        onCompositionEnd={() => {
+          composingRef.current = false;
+        }}
         data-aicl="composer-input"
       />
-      {isBusy && onStop ? (
-        <button type="button" onClick={onStop} data-aicl="composer-stop" aria-label="Stop generating">
-          Stop
-        </button>
-      ) : (
-        <button
-          type="button"
-          onClick={submit}
-          disabled={!canSubmit}
-          data-aicl="composer-send"
-          aria-label="Send message"
-        >
-          Send
-        </button>
-      )}
+      {disabled && disabledReason ? (
+        <span id={reasonId} data-aicl="composer-disabled-reason">
+          {disabledReason}
+        </span>
+      ) : null}
+      <button
+        type="button"
+        data-aicl="composer-submit"
+        data-role={showStop ? 'stop' : 'send'}
+        aria-label={showStop ? 'Stop generating' : 'Send message'}
+        aria-describedby={disabled && disabledReason ? reasonId : undefined}
+        disabled={showStop ? false : !canSubmit}
+        onClick={showStop ? stop : submit}
+      >
+        {showStop ? 'Stop' : 'Send'}
+      </button>
     </div>
   );
 });
