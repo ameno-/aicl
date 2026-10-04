@@ -5,6 +5,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import TestRenderer from 'react-test-renderer';
 import type { Message } from '@aicl/core';
 import { Composer } from './Composer.js';
+import { ArtifactCard } from './parts.js';
 import { Transcript } from './Transcript.js';
 
 test('composer is one button and does not offer stop before streaming', () => {
@@ -42,6 +43,26 @@ test('unknown part falls back and does not drop the rest of the message', () => 
   assert.match(html, /data-part="unknown"/);
   assert.match(html, /data-raw-type="data-mystery"/);
   assert.match(html, /role="log"/);
+});
+
+test('artifact card offers Open only when the host handles it', () => {
+  const part = {
+    type: 'artifact' as const,
+    artifactId: 'notes',
+    kind: 'document' as const,
+    title: 'Slice notes',
+    version: 2,
+  };
+  const message: Message = { id: 'm1', role: 'assistant', parts: [part] };
+  const closed = renderToStaticMarkup(
+    createElement(ArtifactCard, { part, message, index: 0, streaming: false }),
+  );
+  assert.doesNotMatch(closed, /artifact-open/);
+  const open = renderToStaticMarkup(
+    createElement(ArtifactCard, { part, message, index: 0, streaming: false, onOpen: () => {} }),
+  );
+  assert.match(open, /data-aicl="artifact-open"/);
+  assert.match(open, /Open/);
 });
 
 test('live region node identity survives a token append', () => {

@@ -94,12 +94,20 @@ export function ToolCallDisclosure({ part }: PartProps<ToolCallPart>) {
   );
 }
 
-export function ArtifactCard({ part }: PartProps<ArtifactPart>) {
+export function ArtifactCard({
+  part,
+  onOpen,
+}: PartProps<ArtifactPart> & { onOpen?: (part: ArtifactPart) => void }) {
   return (
-    <div data-aicl="artifact-card" data-artifact-kind={part.kind}>
+    <div data-aicl="artifact-card" data-artifact-kind={part.kind} data-openable={onOpen ? '' : undefined}>
       <span data-aicl="artifact-title">{part.title ?? part.artifactId}</span>
       <span data-aicl="artifact-kind">{part.kind}</span>
       {part.version != null ? <span data-aicl="artifact-version">v{part.version}</span> : null}
+      {onOpen ? (
+        <button type="button" data-aicl="artifact-open" onClick={() => onOpen(part)}>
+          Open
+        </button>
+      ) : null}
     </div>
   );
 }

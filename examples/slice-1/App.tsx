@@ -5,6 +5,7 @@ import {
   type StreamEvent,
 } from '@aicl/core';
 import {
+  ArtifactCard,
   Composer,
   Transcript,
   UnknownPart,
@@ -204,31 +205,101 @@ function transportFor(scenario: Scenario): ChatTransport {
   return { async *send() {} };
 }
 
-function RunReceipt({ part }: PartProps) {
-  const data =
-    part.type === 'data-run-receipt' && part.data && typeof part.data === 'object'
-      ? (part.data as { files?: number; checks?: number; elapsed?: string })
-      : {};
+type ReceiptData = { files?: number; checks?: number; elapsed?: string };
+
+type OpenedView =
+  | { kind: 'artifact'; title: string; artifactKind: string; version?: number }
+  | { kind: 'receipt'; files: number; checks: number; elapsed: string };
+
+function receiptData(part: PartProps['part']): ReceiptData {
+  if (part.type !== 'data-run-receipt' || !part.data || typeof part.data !== 'object') return {};
+  return part.data as ReceiptData;
+}
+
+function RunReceipt({
+  part,
+  onOpen,
+}: PartProps & { onOpen: (view: OpenedView) => void }) {
+  const data = receiptData(part);
   return (
     <div data-aicl="part" data-part="data-run-receipt">
       <div>files {data.files ?? 0}</div>
       <div>checks {data.checks ?? 0}</div>
       <div>elapsed {data.elapsed ?? '—'}</div>
-      <button type="button">Open</button>
+      <button
+        type="button"
+        onClick={() =>
+          onOpen({
+            kind: 'receipt',
+            files: data.files ?? 0,
+            checks: data.checks ?? 0,
+            elapsed: data.elapsed ?? '—',
+          })
+        }
+      >
+        Open
+      </button>
     </div>
   );
 }
 
-function registryFor() {
+function registryFor(onOpen: (view: OpenedView) => void) {
   return createRendererRegistry<ComponentType<PartProps>>(
-    { 'data-run-receipt': RunReceipt },
+    {
+      artifact: ((props: PartProps) =>
+        props.part.type === 'artifact' ? (
+          <ArtifactCard
+            {...props}
+            part={props.part}
+            onOpen={(part) =>
+              onOpen({
+                kind: 'artifact',
+                title: part.title ?? part.artifactId,
+                artifactKind: part.kind,
+                version: part.version,
+              })
+            }
+          />
+        ) : null) as ComponentType<PartProps>,
+      'data-run-receipt': ((props: PartProps) => (
+        <RunReceipt {...props} onOpen={onOpen} />
+      )) as ComponentType<PartProps>,
+    },
     UnknownPart,
+  );
+}
+
+function WorkPane({ view, onClose }: { view: OpenedView; onClose: () => void }) {
+  const title = view.kind === 'artifact' ? view.title : 'Run receipt';
+  return (
+    <aside className="work-pane" data-aicl="work-pane" aria-label="Opened work">
+      <header>
+        <strong>{title}</strong>
+        <button type="button" onClick={onClose}>
+          Close
+        </button>
+      </header>
+      {view.kind === 'artifact' ? (
+        <p>
+          {view.artifactKind}
+          {view.version != null ? ` · v${view.version}` : ''}
+        </p>
+      ) : (
+        <ul>
+          <li>files {view.files}</li>
+          <li>checks {view.checks}</li>
+          <li>elapsed {view.elapsed}</li>
+        </ul>
+      )}
+      <p className="pane-note">Opened from the thread. Not a library page.</p>
+    </aside>
   );
 }
 
 function Stage({ scenario }: { scenario: Scenario }) {
   const transport = useMemo(() => transportFor(scenario), [scenario]);
-  const registry = useMemo(() => registryFor(), []);
+  const [opened, setOpened] = useState<OpenedView | null>(null);
+  const registry = useMemo(() => registryFor(setOpened), []);
   const chat = useChat({ transport, generateId: () => `id-${Math.random().toString(36).slice(2, 8)}` });
 
   const stopRef = useRef(chat.stop);
@@ -250,24 +321,27 @@ function Stage({ scenario }: { scenario: Scenario }) {
   }, [chat.send, scenario]);
 
   return (
-    <div className="stage">
-      <Transcript
-        messages={chat.messages}
-        status={chat.status}
-        streamingId={chat.streamingId}
-        registry={registry}
-      />
-      {chat.status === 'error' ? (
-        <button type="button" className="retry" aria-label="Retry" onClick={() => void chat.regenerate()}>
-          ↻
-        </button>
-      ) : null}
-      <Composer
-        status={chat.status}
-        placeholder="Message"
-        onSubmit={(text) => void chat.send(text)}
-        onStop={chat.stop}
-      />
+    <div className={opened ? 'work work-open' : 'work'}>
+      <div className="stage">
+        <Transcript
+          messages={chat.messages}
+          status={chat.status}
+          streamingId={chat.streamingId}
+          registry={registry}
+        />
+        {chat.status === 'error' ? (
+          <button type="button" className="retry" aria-label="Retry" onClick={() => void chat.regenerate()}>
+            ↻
+          </button>
+        ) : null}
+        <Composer
+          status={chat.status}
+          placeholder="Message"
+          onSubmit={(text) => void chat.send(text)}
+          onStop={chat.stop}
+        />
+      </div>
+      {opened ? <WorkPane view={opened} onClose={() => setOpened(null)} /> : null}
     </div>
   );
 }

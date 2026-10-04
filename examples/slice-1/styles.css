@@ -34,13 +34,46 @@ textarea {
   color: #fff;
 }
 
+.work {
+  display: flex;
+  min-height: 100vh;
+  min-width: 0;
+}
+
 .stage {
   display: flex;
   flex-direction: column;
+  flex: 1;
   max-width: 760px;
   width: 100%;
   margin: 0 auto;
   min-height: 100vh;
+  min-width: 0;
+}
+
+.work-open .stage {
+  margin: 0;
+  max-width: none;
+}
+
+.work-pane {
+  width: 320px;
+  flex: none;
+  border-left: 1px solid #e4e4e7;
+  background: #fff;
+  padding: 16px;
+}
+
+.work-pane header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.pane-note {
+  color: #71717a;
+  font-size: 13px;
 }
 
 [data-aicl='transcript'] {
