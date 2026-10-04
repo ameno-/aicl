@@ -1,13 +1,15 @@
-import { useState, type ComponentType } from 'react';
+import { useState, type ComponentType, type ReactNode } from 'react';
 import {
   createRendererRegistry,
   type ArtifactPart,
+  type FilePart,
   type Message,
   type Part,
   type ReasoningPart,
   type RendererRegistry,
   type TextPart as TextPartModel,
   type ToolCallPart,
+  type ToolResultPart,
 } from '@aicl/core';
 
 export interface PartProps<P extends Part = Part> {
@@ -97,17 +99,144 @@ export function ToolCallDisclosure({ part }: PartProps<ToolCallPart>) {
 export function ArtifactCard({
   part,
   onOpen,
-}: PartProps<ArtifactPart> & { onOpen?: (part: ArtifactPart) => void }) {
+  children,
+}: PartProps<ArtifactPart> & { onOpen?: (part: ArtifactPart) => void; children?: ReactNode }) {
   return (
-    <div data-aicl="artifact-card" data-artifact-kind={part.kind} data-openable={onOpen ? '' : undefined}>
+    <div
+      data-aicl="artifact-card"
+      data-part="artifact"
+      data-artifact-kind={part.kind}
+      data-artifact-id={part.artifactId}
+      data-artifact-version={part.version}
+      data-openable={onOpen ? '' : undefined}
+    >
       <span data-aicl="artifact-title">{part.title ?? part.artifactId}</span>
       <span data-aicl="artifact-kind">{part.kind}</span>
       {part.version != null ? <span data-aicl="artifact-version">v{part.version}</span> : null}
       {onOpen ? (
-        <button type="button" data-aicl="artifact-open" onClick={() => onOpen(part)}>
+        <button type="button" data-aicl="artifact-open" aria-label={`Open ${part.kind} artifact${part.version != null ? `, version ${part.version}` : ''}`} onClick={() => onOpen(part)}>
           Open
         </button>
       ) : null}
+      {children}
+    </div>
+  );
+}
+
+export function CodeBlock({
+  content,
+  language,
+  inline = false,
+}: {
+  content: string;
+  language?: string;
+  inline?: boolean;
+}) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <figure data-aicl="code-block" data-language={language} data-copied={copied || undefined} data-inline={inline || undefined}>
+      {language ? <figcaption>{language}</figcaption> : null}
+      <pre>
+        <code>{content}</code>
+      </pre>
+      <button
+        type="button"
+        aria-label="Copy code"
+        onClick={() => {
+          void navigator.clipboard?.writeText(content);
+          setCopied(true);
+        }}
+      >
+        Copy
+      </button>
+      <span aria-live="polite">{copied ? 'Copied' : ''}</span>
+    </figure>
+  );
+}
+
+export function ToolResultView({ part }: PartProps<ToolResultPart>) {
+  return (
+    <div
+      data-aicl="part"
+      data-part="tool-result"
+      data-is-error={part.isError || undefined}
+      role="region"
+      aria-label={part.toolCallId}
+    >
+      {part.isError ? 'Error' : 'Result'}
+    </div>
+  );
+}
+
+export function FileChip({ part, onOpen }: PartProps<FilePart> & { onOpen?: (part: FilePart) => void }) {
+  const uploading = part.uploadProgress != null && part.uploadProgress < 100;
+  return (
+    <div
+      data-aicl="part"
+      data-part="file"
+      data-media-type={part.mediaType}
+      data-state={uploading ? 'uploading' : 'uploaded'}
+      data-progress={part.uploadProgress}
+    >
+      <button type="button" onClick={() => onOpen?.(part)}>
+        {part.name ?? part.url}
+      </button>
+    </div>
+  );
+}
+
+export function ErrorNotice({
+  part,
+  streaming,
+  onRetry,
+}: PartProps & { onRetry?: () => void }) {
+  if (part.type !== 'error') return null;
+  return (
+    <div data-aicl="part" data-part="error" data-retryable={part.retryable || undefined} role={streaming ? 'alert' : 'status'}>
+      <p>{part.message}</p>
+      {part.retryable && onRetry ? (
+        <button type="button" aria-label="Retry" onClick={onRetry}>
+          ↻
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
+export function SuggestionRows({ part, onSelect }: PartProps & { onSelect?: (label: string) => void }) {
+  const suggestions =
+    part.type === 'data-suggested-followups' &&
+    part.data &&
+    typeof part.data === 'object' &&
+    'suggestions' in part.data &&
+    Array.isArray((part.data as { suggestions: unknown }).suggestions)
+      ? (part.data as { suggestions: Array<{ id?: string; label: string }> }).suggestions
+      : [];
+  if (!suggestions.length) return null;
+  return (
+    <div data-aicl="part" data-part="data-suggested-followups" data-count={suggestions.length} data-behavior="insert">
+      {suggestions.map((item) => (
+        <button key={item.id ?? item.label} type="button" onClick={() => onSelect?.(item.label)}>
+          {item.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+export function TerminalOutput({ lines, streaming = false }: { lines: string[]; streaming?: boolean }) {
+  return (
+    <div
+      data-aicl="terminal-output"
+      data-streaming={streaming || undefined}
+      data-following={streaming || undefined}
+      data-line-count={lines.length}
+      role="log"
+      aria-live="off"
+    >
+      {lines.map((line, index) => (
+        <div key={`${index}:${line}`}>{line}</div>
+      ))}
     </div>
   );
 }
@@ -129,8 +258,21 @@ const sharedRegistry = createRendererRegistry<ComponentType<PartProps>>(
       ) : null) as ComponentType<PartProps>,
     'tool-call': ((props: PartProps) =>
       props.part.type === 'tool-call' ? <ToolCallDisclosure {...props} part={props.part} /> : null) as ComponentType<PartProps>,
-    artifact: ((props: PartProps) =>
-      props.part.type === 'artifact' ? <ArtifactCard {...props} part={props.part} /> : null) as ComponentType<PartProps>,
+    artifact: ((props: PartProps) => {
+      if (props.part.type !== 'artifact') return null;
+      if (props.part.kind === 'terminal') {
+        return (
+          <ArtifactCard {...props} part={props.part}>
+            <TerminalOutput lines={['ready']} streaming={props.streaming} />
+          </ArtifactCard>
+        );
+      }
+      return <ArtifactCard {...props} part={props.part} />;
+    }) as ComponentType<PartProps>,
+    'tool-result': ToolResultView as ComponentType<PartProps>,
+    file: FileChip as ComponentType<PartProps>,
+    error: ErrorNotice as ComponentType<PartProps>,
+    'data-suggested-followups': SuggestionRows as ComponentType<PartProps>,
   },
   UnknownPart,
 );

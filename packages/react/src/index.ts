@@ -12,6 +12,16 @@ export {
   ReasoningDisclosure,
   ToolCallDisclosure,
   ArtifactCard,
+  CodeBlock,
+  ToolResultView,
+  FileChip,
+  ErrorNotice,
+  SuggestionRows,
+  TerminalOutput,
   UnknownPart,
 } from './parts.js';
 export type { PartProps } from './parts.js';
+export { MessageActions } from './MessageActions.js';
+export type { MessageAction } from './MessageActions.js';
+export { PlanChecklist } from './PlanChecklist.js';
+export type { PlanItem } from './PlanChecklist.js';

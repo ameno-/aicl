@@ -29,6 +29,9 @@ export interface ComposerProps {
   placeholder?: string;
   placement?: ComposerPlacement;
   attachmentCount?: number;
+  attachments?: Array<{ id: string; name: string }>;
+  suggestions?: string[];
+  onSelectSuggestion?: (label: string) => void;
   maxRows?: number;
   /** Render-prop children receive live state so consumers own all markup. */
   children?: (api: ComposerRenderApi) => ReactNode;
@@ -64,6 +67,9 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(function Compo
     placeholder,
     placement = 'docked',
     attachmentCount = 0,
+    attachments = [],
+    suggestions = [],
+    onSelectSuggestion,
     maxRows = 10,
     children,
   },
@@ -81,7 +87,7 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(function Compo
   const showStop = resolved === 'streaming';
   const busy = resolved === 'submitted' || resolved === 'streaming';
   const hasText = value.trim().length > 0;
-  const hasAttachments = attachmentCount > 0;
+  const hasAttachments = attachmentCount > 0 || attachments.length > 0;
   const canSubmit = (hasText || hasAttachments) && !busy && !disabled;
   const composerState = resolved === 'idle' || resolved === 'aborted' ? 'ready' : resolved;
 
@@ -131,6 +137,22 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(function Compo
       data-has-attachments={hasAttachments || undefined}
       data-disabled-reason={disabled && disabledReason ? disabledReason : undefined}
     >
+      {suggestions.length ? (
+        <div data-aicl="suggestion-chips" data-count={suggestions.length}>
+          {suggestions.map((label) => (
+            <button key={label} type="button" onClick={() => onSelectSuggestion?.(label)}>
+              {label}
+            </button>
+          ))}
+        </div>
+      ) : null}
+      {attachments.length ? (
+        <div data-aicl="attachment-row">
+          {attachments.map((file) => (
+            <span key={file.id} data-aicl="attachment-chip">{file.name}</span>
+          ))}
+        </div>
+      ) : null}
       <textarea
         ref={textareaRef}
         value={value}
