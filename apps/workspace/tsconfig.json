@@ -16,6 +16,7 @@
     "paths": {
       "@aicl/core": ["../../packages/core/src/index.ts"],
       "@aicl/react": ["../../packages/react/src/index.ts"],
+      "@aicl/react/markdown": ["../../packages/react/src/markdown.tsx"],
       "@aicl/server": ["../../packages/server/src/index.ts"]
     }
   },

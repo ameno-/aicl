@@ -1736,3 +1736,94 @@
   height: 28px;
   padding: 0;
 }
+
+/* ═══ Markdown prose (opt-in @aicl/react/markdown) ════════════════════ */
+
+[data-aicl='part'][data-part='text'][data-format='markdown'] {
+  white-space: normal;
+}
+
+[data-format='markdown'] > :first-child { margin-top: 0; }
+[data-format='markdown'] > :last-child { margin-bottom: 0; }
+
+[data-format='markdown'] p,
+[data-format='markdown'] ul,
+[data-format='markdown'] ol,
+[data-format='markdown'] blockquote,
+[data-format='markdown'] table,
+[data-format='markdown'] [data-aicl='code-block'] {
+  margin: 0 0 0.75em;
+}
+
+[data-format='markdown'] h1,
+[data-format='markdown'] h2,
+[data-format='markdown'] h3,
+[data-format='markdown'] h4 {
+  margin: 1.2em 0 0.5em;
+  font-weight: 600;
+  line-height: var(--aicl-leading-tight);
+}
+
+[data-format='markdown'] h1 { font-size: 1.35em; }
+[data-format='markdown'] h2 { font-size: 1.2em; }
+[data-format='markdown'] h3 { font-size: 1.05em; }
+[data-format='markdown'] h4 { font-size: 1em; }
+
+[data-format='markdown'] ul,
+[data-format='markdown'] ol {
+  padding-left: 1.4em;
+}
+
+[data-format='markdown'] li + li { margin-top: 0.25em; }
+[data-format='markdown'] li > p { margin: 0; }
+
+[data-format='markdown'] a {
+  color: var(--aicl-text-link);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+}
+
+[data-format='markdown'] blockquote {
+  padding-left: var(--aicl-space-3);
+  border-left: 2px solid var(--aicl-border-strong);
+  color: var(--aicl-text-muted);
+}
+
+[data-format='markdown'] hr {
+  margin: 1.2em 0;
+  border: 0;
+  border-top: 1px solid var(--aicl-border);
+}
+
+[data-aicl='inline-code'] {
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+  background: var(--aicl-surface-inset);
+  font-family: var(--aicl-font-mono);
+  font-size: 0.88em;
+}
+
+[data-format='markdown'] table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+  font-size: var(--aicl-text-sm);
+}
+
+[data-format='markdown'] th,
+[data-format='markdown'] td {
+  padding: 6px var(--aicl-space-3);
+  border-bottom: 1px solid var(--aicl-border);
+  text-align: left;
+}
+
+[data-format='markdown'] th {
+  color: var(--aicl-text-muted);
+  font-weight: 500;
+}
+
+[data-format='markdown'] input[type='checkbox'] {
+  margin-right: 6px;
+}

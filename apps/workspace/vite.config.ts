@@ -10,10 +10,13 @@ export default defineConfig({
   root: path.resolve(root, 'web'),
   plugins: [react()],
   resolve: {
-    alias: {
-      '@aicl/core': path.resolve(root, '../../packages/core/src/index.ts'),
-      '@aicl/react': path.resolve(root, '../../packages/react/src/index.ts'),
-    },
+    dedupe: ['react', 'react-dom', 'lucide-react'],
+    // Exact matches: '@aicl/react/markdown' must not resolve through '@aicl/react'.
+    alias: [
+      { find: /^@aicl\/core$/, replacement: path.resolve(root, '../../packages/core/src/index.ts') },
+      { find: /^@aicl\/react\/markdown$/, replacement: path.resolve(root, '../../packages/react/src/markdown.tsx') },
+      { find: /^@aicl\/react$/, replacement: path.resolve(root, '../../packages/react/src/index.ts') },
+    ],
   },
   build: { outDir: path.resolve(root, 'dist'), emptyOutDir: true },
   server: {

@@ -43,7 +43,7 @@ const twoTurns: PiEvent[] = [
 
 const mapAll = (events: PiEvent[]): StreamEvent[] => {
   const map = createPiEventMapper('m1');
-  return events.flatMap(map);
+  return [...events.flatMap(map), ...map.finish()];
 };
 
 test('turns append to one message; the second turn does not overwrite the first', () => {
@@ -76,6 +76,26 @@ test('an empty thinking block emits nothing; text still lands at index 0', () =>
   ]);
   const parts = out.filter((e) => e.type === 'part-start').map((e) => (e as { index: number; part: { type: string } }));
   assert.deepEqual(parts.map((p) => [p.index, p.part.type]), [[0, 'text']]);
+});
+
+test('an auto-retried run is one message that ends cleanly, not an error', () => {
+  const out = mapAll([
+    { type: 'agent_start' },
+    { type: 'message_start', message: { role: 'assistant' } },
+    { type: 'message_end', message: assistant({ stopReason: 'error', errorMessage: 'overloaded' }) },
+    { type: 'agent_end' },
+    { type: 'auto_retry_start' },
+    { type: 'agent_start' },
+    { type: 'message_start', message: { role: 'assistant' } },
+    { type: 'message_update', assistantMessageEvent: { type: 'text_start', contentIndex: 0, partial: assistant() } },
+    { type: 'message_update', assistantMessageEvent: { type: 'text_end', contentIndex: 0, content: 'ok' } },
+    { type: 'message_end', message: assistant() },
+    { type: 'auto_retry_end' },
+    { type: 'agent_end' },
+  ]);
+  assert.equal(out.filter((e) => e.type === 'message-start').length, 1, 'one message');
+  assert.equal(out.filter((e) => e.type === 'error').length, 0, 'no error');
+  assert.equal(out[out.length - 1]!.type, 'message-end');
 });
 
 test('a failed run surfaces as an error event, not a clean finish', () => {

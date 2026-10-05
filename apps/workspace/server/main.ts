@@ -51,12 +51,17 @@ async function* runPrompt(text: string, signal: AbortSignal): AsyncGenerator<Str
   const onAbort = () => void agent.abort();
   signal.addEventListener('abort', onAbort, { once: true });
 
+  // prompt() resolves only after the whole run, auto-retries included, so it
+  // and not agent_end is the end of the turn.
   agent
     .prompt(text)
-    .catch((cause: unknown) => {
-      const message = cause instanceof Error ? cause.message : String(cause);
-      push([{ type: 'error', error: { message, retryable: true } }]);
-    })
+    .then(
+      () => push(map.finish()),
+      (cause: unknown) => {
+        const message = cause instanceof Error ? cause.message : String(cause);
+        push([{ type: 'error', error: { message, retryable: true } }]);
+      },
+    )
     .finally(() => {
       done = true;
       wake?.();
@@ -67,7 +72,6 @@ async function* runPrompt(text: string, signal: AbortSignal): AsyncGenerator<Str
       if (queue.length) {
         const event = queue.shift()!;
         yield event;
-        if (event.type === 'message-end' || event.type === 'error') return;
         continue;
       }
       if (done) return;
@@ -118,12 +122,16 @@ async function handleChat(req: IncomingMessage, res: ServerResponse): Promise<vo
   }
 
   res.writeHead(200, { 'content-type': 'text/event-stream', 'cache-control': 'no-cache', connection: 'keep-alive' });
+  // A model can think for a long time between events; a comment frame keeps
+  // proxies from treating the stream as idle. Clients ignore non-data lines.
+  const keepAlive = setInterval(() => res.write(': ping\n\n'), 15_000);
   try {
     for await (const frame of response.toSse()) {
       if (res.writableEnded) break;
       res.write(frame);
     }
   } finally {
+    clearInterval(keepAlive);
     res.end();
   }
 }
@@ -152,6 +160,7 @@ const server = createServer((req, res) => {
         return json(res, 200, {
           workspace: WORKSPACE,
           model: agent.model ? `${agent.model.provider}/${agent.model.id}` : null,
+          busy: agent.isStreaming,
         });
       default:
         return json(res, 404, { message: 'not found' });

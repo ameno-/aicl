@@ -54,6 +54,7 @@ export function createPiEventMapper(messageId: string) {
   };
   let lastStop: string | undefined;
   let lastError: string | undefined;
+  let started = false;
 
   const start = (contentIndex: number, part: Part): StreamEvent => {
     const index = next++;
@@ -68,9 +69,20 @@ export function createPiEventMapper(messageId: string) {
     return [{ type: 'part-end', index: tool.index, part: tool.part }];
   };
 
-  return function map(event: PiEvent): StreamEvent[] {
+  /** Terminal events, once the whole run (including retries) has settled. */
+  function finish(): StreamEvent[] {
+    if (lastStop === 'error') {
+      return [{ type: 'error', error: { message: lastError ?? 'The agent failed.', retryable: true } }];
+    }
+    return [{ type: 'message-end', finishReason: finishReason(lastStop), usage }];
+  }
+
+  return Object.assign(function map(event: PiEvent): StreamEvent[] {
     switch (event.type) {
       case 'agent_start':
+        // Pi auto-retries a failed run with a fresh agent_start; it is still one message.
+        if (started) return [];
+        started = true;
         return [{ type: 'message-start', id: messageId, role: 'assistant' }];
 
       case 'message_start': {
@@ -100,16 +112,13 @@ export function createPiEventMapper(messageId: string) {
         return setTool(end.toolCallId, end.isError ? 'error' : 'success');
       }
 
-      case 'agent_end':
-        if (lastStop === 'error') {
-          return [{ type: 'error', error: { message: lastError ?? 'The agent failed.', retryable: true } }];
-        }
-        return [{ type: 'message-end', finishReason: finishReason(lastStop), usage }];
+      // agent_end is not the end of the turn: an auto-retry may follow it.
+      // The caller ends the stream with finish() once prompt() settles.
 
       default:
         return [];
     }
-  };
+  }, { finish });
 
   function mapAssistant(e: PiAssistantEvent): StreamEvent[] {
     switch (e.type) {
