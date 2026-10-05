@@ -5,6 +5,7 @@
 
 import { defineTool } from '@earendil-works/pi-coding-agent';
 import { Type } from 'typebox';
+import { COMPONENTS, COMPONENT_NAMES } from '../shared/components.ts';
 import { COLORS, FILLS, summarize, type ScratchOp, type ScratchResult } from '../shared/scratch.ts';
 import { NoCanvasError, type Relay } from './relay.ts';
 import { snapshotRecords, type WorkspaceStore } from './store.ts';
@@ -15,8 +16,17 @@ const Point = Type.Object({ x: Type.Number(), y: Type.Number() });
 const Endpoint = Type.Union([Type.String({ description: 'id of a shape to bind to' }), Point]);
 const Color = literals(COLORS);
 
+const Props = Type.Record(Type.String(), Type.Unknown(), {
+  description: 'Component props as a JSON object; see the scratch_add description for each component.',
+});
+
+/** One line per component for the scratch_add description. */
+export function describeComponents(): string {
+  return COMPONENTS.map((c) => `- ${c.name}: ${c.description} props: ${c.propsHint}`).join('\n');
+}
+
 const AddShape = Type.Object({
-  kind: literals(['text', 'rect', 'ellipse', 'note', 'arrow'] as const),
+  kind: literals(['text', 'rect', 'ellipse', 'note', 'arrow', 'component'] as const),
   id: Type.Optional(Type.String({ description: 'Stable handle for later edits and arrow binding, e.g. "gateway".' })),
   x: Type.Optional(Type.Number({ description: 'Page x of the top-left corner. Not used by arrows.' })),
   y: Type.Optional(Type.Number()),
@@ -27,6 +37,9 @@ const AddShape = Type.Object({
   fill: Type.Optional(literals(FILLS)),
   from: Type.Optional(Endpoint),
   to: Type.Optional(Endpoint),
+  component: Type.Optional(literals(COMPONENT_NAMES)),
+  props: Type.Optional(Props),
+  title: Type.Optional(Type.String({ description: 'component header title (defaults to the component name)' })),
 });
 
 const UpdateShape = Type.Object({
@@ -37,6 +50,8 @@ const UpdateShape = Type.Object({
   h: Type.Optional(Type.Number()),
   text: Type.Optional(Type.String()),
   color: Type.Optional(Color),
+  props: Type.Optional(Props),
+  title: Type.Optional(Type.String()),
 });
 
 const text = (value: unknown) => ({ content: [{ type: 'text' as const, text: JSON.stringify(value) }], details: {} });
@@ -80,7 +95,9 @@ export function createScratchTools(relay: Relay, store: WorkspaceStore) {
     name: 'scratch_add',
     label: 'Draw on scratchpad',
     description:
-      'Add shapes in one batch. Kinds: text, rect, ellipse, note (sticky), arrow. Give shapes an id so arrows can bind with from/to; bound arrows follow their shapes when moved. Shapes are created in order, so add boxes before the arrows that connect them. Returns the created ids.',
+      'Add shapes in one batch. Kinds: text, rect, ellipse, note (sticky), arrow, component. Give shapes an id so arrows can bind with from/to; bound arrows follow their shapes when moved. Shapes are created in order, so add boxes before the arrows that connect them. Returns the created ids.\n\n' +
+      'kind "component" places a live component: set `component` to a name below and `props` to its JSON. w/h default to a good size.\n' +
+      describeComponents(),
     parameters: Type.Object({ shapes: Type.Array(AddShape, { minItems: 1 }) }),
     async execute(_id, params, signal) {
       return text(await run({ op: 'add', shapes: params.shapes }, signal));
@@ -90,7 +107,8 @@ export function createScratchTools(relay: Relay, store: WorkspaceStore) {
   const update = defineTool({
     name: 'scratch_update',
     label: 'Edit scratchpad',
-    description: 'Move, resize, relabel, or recolor existing shapes by id.',
+    description:
+      'Move, resize, relabel, or recolor existing shapes by id. For component shapes, `props` replaces the whole props object (scratch_read first) and `title` sets the header.',
     parameters: Type.Object({ shapes: Type.Array(UpdateShape, { minItems: 1 }) }),
     async execute(_id, params, signal) {
       return text(await run({ op: 'update', shapes: params.shapes }, signal));

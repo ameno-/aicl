@@ -3,6 +3,8 @@ import { getSnapshot, loadSnapshot, Tldraw, type Editor } from 'tldraw';
 import 'tldraw/tldraw.css';
 import type { ScratchOp } from '../shared/scratch.ts';
 import { execute } from './executor.ts';
+import { shapeUtils } from './ComponentShape.tsx';
+import { InsertMenu } from './InsertMenu.tsx';
 
 const SAVE_DEBOUNCE_MS = 400;
 
@@ -76,7 +78,17 @@ export function Scratchpad() {
 
   return (
     <div className="scratchpad" data-loaded={loaded || undefined}>
-      <Tldraw onMount={setEditor} />
+      <Tldraw
+        shapeUtils={shapeUtils}
+        onMount={(mounted) => {
+          setEditor(mounted);
+          // Dev-only handle for browser tests and console debugging.
+          if ((import.meta as { env?: { DEV?: boolean } }).env?.DEV) {
+            (window as unknown as { __aiclEditor?: Editor }).__aiclEditor = mounted;
+          }
+        }}
+      />
+      <InsertMenu editor={editor} />
     </div>
   );
 }
