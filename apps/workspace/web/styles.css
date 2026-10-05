@@ -1,0 +1,87 @@
+/**
+ * Workspace shell: canvas fills the page, chat docks on the right. Primitive
+ * styling comes from @aicl/styles; tldraw brings its own.
+ */
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: var(--aicl-font-sans);
+  font-size: var(--aicl-text-base);
+  line-height: var(--aicl-leading-normal);
+  color: var(--aicl-text);
+  background: var(--aicl-bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 400px;
+  height: 100vh;
+}
+
+.canvas,
+.scratchpad {
+  position: relative;
+  min-width: 0;
+  height: 100%;
+}
+
+.chat {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-left: 1px solid var(--aicl-border);
+  background: var(--aicl-surface);
+}
+
+.chat-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--aicl-space-3);
+  padding: var(--aicl-space-3) var(--aicl-space-4);
+  border-bottom: 1px solid var(--aicl-border);
+}
+
+.chat-header strong {
+  font-weight: 600;
+}
+
+.chat-model {
+  overflow: hidden;
+  font-size: var(--aicl-text-xs);
+  color: var(--aicl-text-faint);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chat [data-aicl='transcript-root'] {
+  flex: 1;
+}
+
+.chat [data-aicl='composer'] {
+  margin: var(--aicl-space-3) var(--aicl-space-4) var(--aicl-space-4);
+}
+
+.chat-error {
+  margin: 0 var(--aicl-space-4);
+  font-size: var(--aicl-text-sm);
+  color: var(--aicl-danger, #b42318);
+}
+
+@media (max-width: 760px) {
+  .workspace {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(0, 1fr) 45vh;
+  }
+  .chat {
+    border-left: 0;
+    border-top: 1px solid var(--aicl-border);
+  }
+}

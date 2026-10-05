@@ -1,0 +1,121 @@
+/**
+ * Scratchpad tools for the Pi agent. Each tool is a thin call into the relay;
+ * the shape semantics live in the browser executor.
+ */
+
+import { defineTool } from '@earendil-works/pi-coding-agent';
+import { Type } from 'typebox';
+import { COLORS, FILLS, summarize, type ScratchOp, type ScratchResult } from '../shared/scratch.ts';
+import { NoCanvasError, type Relay } from './relay.ts';
+import { snapshotRecords, type WorkspaceStore } from './store.ts';
+
+const literals = <T extends readonly string[]>(values: T) => Type.Union(values.map((v) => Type.Literal(v)));
+
+const Point = Type.Object({ x: Type.Number(), y: Type.Number() });
+const Endpoint = Type.Union([Type.String({ description: 'id of a shape to bind to' }), Point]);
+const Color = literals(COLORS);
+
+const AddShape = Type.Object({
+  kind: literals(['text', 'rect', 'ellipse', 'note', 'arrow'] as const),
+  id: Type.Optional(Type.String({ description: 'Stable handle for later edits and arrow binding, e.g. "gateway".' })),
+  x: Type.Optional(Type.Number({ description: 'Page x of the top-left corner. Not used by arrows.' })),
+  y: Type.Optional(Type.Number()),
+  w: Type.Optional(Type.Number({ description: 'rect/ellipse width (default 200); text wrap width.' })),
+  h: Type.Optional(Type.Number({ description: 'rect/ellipse height (default 120).' })),
+  text: Type.Optional(Type.String({ description: 'Label. Use \\n for line breaks.' })),
+  color: Type.Optional(Color),
+  fill: Type.Optional(literals(FILLS)),
+  from: Type.Optional(Endpoint),
+  to: Type.Optional(Endpoint),
+});
+
+const UpdateShape = Type.Object({
+  id: Type.String(),
+  x: Type.Optional(Type.Number()),
+  y: Type.Optional(Type.Number()),
+  w: Type.Optional(Type.Number()),
+  h: Type.Optional(Type.Number()),
+  text: Type.Optional(Type.String()),
+  color: Type.Optional(Color),
+});
+
+const text = (value: unknown) => ({ content: [{ type: 'text' as const, text: JSON.stringify(value) }], details: {} });
+
+export function createScratchTools(relay: Relay, store: WorkspaceStore) {
+  const run = (op: ScratchOp, signal?: AbortSignal): Promise<ScratchResult> => relay.request(op, signal);
+
+  const read = defineTool({
+    name: 'scratch_read',
+    label: 'Read scratchpad',
+    description:
+      'List every shape on the shared scratchpad as JSON: id, kind, position, size, text, color, and arrow endpoints. Use before editing, and to see what the user drew.',
+    parameters: Type.Object({}),
+    async execute(_id, _params, signal) {
+      try {
+        const result = await run({ op: 'read' }, signal);
+        return text(result.op === 'read' ? result.shapes : result);
+      } catch (cause) {
+        if (!(cause instanceof NoCanvasError)) throw cause;
+        // No tab open: answer from the last saved snapshot instead.
+        const shapes = summarize(snapshotRecords(await store.readScratch()));
+        return text({ source: 'disk (no canvas open)', shapes });
+      }
+    },
+  });
+
+  const view = defineTool({
+    name: 'scratch_view',
+    label: 'View scratchpad',
+    description:
+      'Render the whole scratchpad to an image so you can see freehand drawing, layout, and overlaps that JSON cannot show.',
+    parameters: Type.Object({}),
+    async execute(_id, _params, signal) {
+      const result = await run({ op: 'view' }, signal);
+      if (result.op !== 'view' || !result.png) return text({ empty: true });
+      return { content: [{ type: 'image' as const, data: result.png, mimeType: 'image/png' }], details: {} };
+    },
+  });
+
+  const add = defineTool({
+    name: 'scratch_add',
+    label: 'Draw on scratchpad',
+    description:
+      'Add shapes in one batch. Kinds: text, rect, ellipse, note (sticky), arrow. Give shapes an id so arrows can bind with from/to; bound arrows follow their shapes when moved. Shapes are created in order, so add boxes before the arrows that connect them. Returns the created ids.',
+    parameters: Type.Object({ shapes: Type.Array(AddShape, { minItems: 1 }) }),
+    async execute(_id, params, signal) {
+      return text(await run({ op: 'add', shapes: params.shapes }, signal));
+    },
+  });
+
+  const update = defineTool({
+    name: 'scratch_update',
+    label: 'Edit scratchpad',
+    description: 'Move, resize, relabel, or recolor existing shapes by id.',
+    parameters: Type.Object({ shapes: Type.Array(UpdateShape, { minItems: 1 }) }),
+    async execute(_id, params, signal) {
+      return text(await run({ op: 'update', shapes: params.shapes }, signal));
+    },
+  });
+
+  const remove = defineTool({
+    name: 'scratch_delete',
+    label: 'Delete from scratchpad',
+    description: 'Delete shapes by id.',
+    parameters: Type.Object({ ids: Type.Array(Type.String(), { minItems: 1 }) }),
+    async execute(_id, params, signal) {
+      return text(await run({ op: 'delete', ids: params.ids }, signal));
+    },
+  });
+
+  const clear = defineTool({
+    name: 'scratch_clear',
+    label: 'Clear scratchpad',
+    description: "Delete every shape. Only when the user asks for a fresh canvas — it also removes the user's own drawing.",
+    parameters: Type.Object({}),
+    async execute(_id, _params, signal) {
+      return text(await run({ op: 'clear' }, signal));
+    },
+  });
+
+  return [read, view, add, update, remove, clear];
+}
