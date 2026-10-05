@@ -78,7 +78,16 @@ export function Scratchpad() {
 
   return (
     <div className="scratchpad" data-loaded={loaded || undefined}>
-      <Tldraw shapeUtils={shapeUtils} onMount={setEditor} />
+      <Tldraw
+        shapeUtils={shapeUtils}
+        onMount={(mounted) => {
+          setEditor(mounted);
+          // Dev-only handle for browser tests and console debugging.
+          if ((import.meta as { env?: { DEV?: boolean } }).env?.DEV) {
+            (window as unknown as { __aiclEditor?: Editor }).__aiclEditor = mounted;
+          }
+        }}
+      />
       <InsertMenu editor={editor} />
     </div>
   );

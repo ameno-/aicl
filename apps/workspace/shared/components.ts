@@ -69,7 +69,7 @@ export const COMPONENTS: ComponentSpec[] = [
     title: 'Artifact',
     description: 'A card for a produced artifact (document, diff, preview, table, chart, code, terminal) with kind and version.',
     propsHint: "{ title: string; kind: 'code' | 'document' | 'diff' | 'preview' | 'terminal' | 'table' | 'chart'; version?: number }",
-    defaultSize: { w: 360, h: 96 },
+    defaultSize: { w: 360, h: 112 },
     sample: { title: 'Q4 roadmap', kind: 'document', version: 3 },
   },
   {

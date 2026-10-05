@@ -19,8 +19,19 @@ export function describe(part: ToolCallPart): string {
     case 'scratch_view':
       return done ? 'Looked at the canvas' : 'Looking at the canvas';
     case 'scratch_add': {
-      const n = count(args, 'shapes');
-      return done ? `Drew ${plural(n, 'shape')}` : n ? `Drawing ${plural(n, 'shape')}` : 'Drawing';
+      // Say what was made: "Placed 3 components and 1 arrow", not "Drew 4 shapes".
+      const shapes = Array.isArray(args?.['shapes']) ? (args!['shapes'] as Array<{ kind?: string }>) : [];
+      const components = shapes.filter((s) => s.kind === 'component').length;
+      const arrows = shapes.filter((s) => s.kind === 'arrow').length;
+      const other = shapes.length - components - arrows;
+      const parts = [
+        components ? plural(components, 'component') : '',
+        other ? plural(other, 'shape') : '',
+        arrows ? plural(arrows, 'arrow') : '',
+      ].filter(Boolean);
+      const what = parts.length > 1 ? `${parts.slice(0, -1).join(', ')} and ${parts[parts.length - 1]}` : (parts[0] ?? '');
+      const verb = components ? (done ? 'Placed' : 'Placing') : done ? 'Drew' : 'Drawing';
+      return what ? `${verb} ${what}` : verb;
     }
     case 'scratch_update':
       return done ? `Edited ${plural(count(args, 'shapes'), 'shape')}` : 'Editing shapes';

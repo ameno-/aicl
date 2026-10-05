@@ -133,3 +133,27 @@
   border-radius: var(--aicl-radius-md, 8px);
   background: var(--aicl-surface);
 }
+
+/* Inside a canvas card, components drop their own frame: the card is the one frame. */
+.aicl-card__body [data-aicl='plan-checklist'],
+.aicl-card__body [data-aicl='artifact-card'],
+.aicl-card__body [data-aicl='code-block'] {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+}
+
+.aicl-card__body [data-aicl='plan-checklist'] {
+  padding: 0;
+}
+
+.aicl-card__body [data-aicl='artifact-card'] {
+  max-width: none;
+  padding: 0;
+}
+
+.aicl-card__body [data-aicl='code-block'] figcaption {
+  padding-left: 0;
+  padding-right: 0;
+}
