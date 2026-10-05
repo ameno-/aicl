@@ -20,6 +20,8 @@ import {
   type RefObject,
 } from 'react';
 import { createComboboxModel, type Attachment, type Mention } from '@aicl/core';
+import { File, RotateCcw, X } from 'lucide-react';
+import { Icon } from './icons.js';
 import { useReadable } from './useReadable.js';
 
 /* -------------------------------------------------------------------------- */
@@ -320,7 +322,13 @@ export function AttachmentChip({ attachment: a, onRemove, onRetry }: AttachmentC
       data-media-type={a.mediaType}
       data-has-preview={isImage ? '' : undefined}
     >
-      {isImage ? <img data-aicl="attachment-preview" src={a.previewUrl} alt="" /> : null}
+      {isImage ? (
+        <img data-aicl="attachment-preview" src={a.previewUrl} alt="" />
+      ) : (
+        <span data-aicl="attachment-icon">
+          <Icon as={File} size={14} />
+        </span>
+      )}
       <span data-aicl="attachment-name" title={a.name}>
         {a.name}
       </span>
@@ -344,12 +352,12 @@ export function AttachmentChip({ attachment: a, onRemove, onRetry }: AttachmentC
       ) : null}
       {a.status === 'error' && onRetry ? (
         <button type="button" data-aicl="attachment-retry" aria-label={`Retry ${a.name}`} onClick={() => onRetry(a.id)}>
-          Retry
+          <Icon as={RotateCcw} size={13} />
         </button>
       ) : null}
       {onRemove ? (
         <button type="button" data-aicl="attachment-remove" aria-label={`Remove ${a.name}`} onClick={() => onRemove(a.id)}>
-          ×
+          <Icon as={X} size={13} />
         </button>
       ) : null}
     </div>

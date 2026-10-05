@@ -11,7 +11,9 @@ import {
   type ReactNode,
 } from 'react';
 import type { Attachment, ChatStatus } from '@aicl/core';
+import { ArrowUp, Plus, Square } from 'lucide-react';
 import { AttachmentChip, SuggestionChips } from './composer-surface.js';
+import { Icon } from './icons.js';
 
 export type ComposerPlacement = 'docked' | 'hero' | 'rail';
 
@@ -185,7 +187,7 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(function Compo
           aria-label="Attach file"
           onClick={onAttach}
         >
-          Attach
+          <Icon as={Plus} size={18} />
         </button>
       ) : null}
       <textarea
@@ -221,7 +223,7 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(function Compo
         disabled={showStop ? false : !canSubmit}
         onClick={showStop ? stop : submit}
       >
-        {showStop ? 'Stop' : 'Send'}
+        <Icon as={showStop ? Square : ArrowUp} size={showStop ? 12 : 18} />
       </button>
     </div>
   );

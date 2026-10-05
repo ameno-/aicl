@@ -5,14 +5,15 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "e2e": "node e2e/components.mjs"
+    "e2e": "node e2e/components.mjs && node e2e/shell.mjs"
   },
   "dependencies": {
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
     "@aicl/core": "file:../../packages/core",
     "@aicl/react": "file:../../packages/react",
-    "@aicl/styles": "file:../../packages/styles"
+    "@aicl/styles": "file:../../packages/styles",
+    "lucide-react": "^1.52.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
     "@types/react": "^18.3.31",
