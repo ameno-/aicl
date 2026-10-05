@@ -84,6 +84,39 @@ export interface FilePart {
   uploadProgress?: number;
 }
 
+/**
+ * A staged draft attachment. Not a `Part` yet: it has no URL, can be removed,
+ * and can fail. `toFilePart` converts it once the host has uploaded it.
+ */
+export interface Attachment {
+  id: string;
+  mediaType: string;
+  name: string;
+  size?: number;
+  previewUrl?: string;
+  status: 'uploading' | 'ready' | 'error';
+  /** 0–1 while uploading. */
+  progress?: number;
+}
+
+export function toFilePart(attachment: Attachment, url: string): FilePart {
+  return {
+    type: 'file',
+    mediaType: attachment.mediaType,
+    url,
+    name: attachment.name,
+    ...(attachment.size !== undefined ? { size: attachment.size } : {}),
+  };
+}
+
+/** A structured reference inserted by a mention menu; `range` indexes the draft text. */
+export interface Mention {
+  id: string;
+  label: string;
+  range: [number, number];
+  metadata?: Record<string, unknown>;
+}
+
 export interface CitationPart {
   type: 'citation';
   sourceId: string;

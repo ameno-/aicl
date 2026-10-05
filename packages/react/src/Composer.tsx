@@ -7,9 +7,11 @@ import {
   useRef,
   useState,
   type KeyboardEvent,
+  type MutableRefObject,
   type ReactNode,
 } from 'react';
-import type { ChatStatus } from '@aicl/core';
+import type { Attachment, ChatStatus } from '@aicl/core';
+import { AttachmentChip, SuggestionChips } from './composer-surface.js';
 
 export type ComposerPlacement = 'docked' | 'hero' | 'rail';
 
@@ -29,7 +31,15 @@ export interface ComposerProps {
   placeholder?: string;
   placement?: ComposerPlacement;
   attachmentCount?: number;
-  attachments?: Array<{ id: string; name: string }>;
+  /** Staged attachments. Minimal `{ id, name }` entries render as ready. */
+  attachments?: Array<Pick<Attachment, 'id' | 'name'> & Partial<Attachment>>;
+  onRemoveAttachment?: (id: string) => void;
+  onRetryAttachment?: (id: string) => void;
+  /** Controlled draft text. Omit for an uncontrolled field. */
+  value?: string;
+  onChange?: (value: string) => void;
+  /** The field element, for a `TriggerMenu` to attach to. */
+  inputRef?: MutableRefObject<HTMLTextAreaElement | null>;
   suggestions?: string[];
   onSelectSuggestion?: (label: string) => void;
   onAttach?: () => void;
@@ -69,6 +79,11 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(function Compo
     placement = 'docked',
     attachmentCount = 0,
     attachments = [],
+    onRemoveAttachment,
+    onRetryAttachment,
+    value: controlledValue,
+    onChange,
+    inputRef,
     suggestions = [],
     onSelectSuggestion,
     onAttach,
@@ -77,8 +92,16 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(function Compo
   },
   ref,
 ) {
-  const [value, setValue] = useState('');
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [innerValue, setInnerValue] = useState('');
+  const value = controlledValue ?? innerValue;
+  const setValue = useCallback(
+    (next: string) => {
+      if (controlledValue === undefined) setInnerValue(next);
+      onChange?.(next);
+    },
+    [controlledValue, onChange],
+  );
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const reasonId = useId();
 
   // Tracks IME composition. Without this, pressing Enter to confirm a candidate
@@ -97,7 +120,7 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(function Compo
     if (!canSubmit) return;
     onSubmit(value);
     setValue('');
-  }, [canSubmit, onSubmit, value]);
+  }, [canSubmit, onSubmit, setValue, value]);
 
   const stop = useCallback(() => {
     if (showStop) onStop?.();
@@ -139,19 +162,19 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(function Compo
       data-has-attachments={hasAttachments || undefined}
       data-disabled-reason={disabled && disabledReason ? disabledReason : undefined}
     >
-      {suggestions.length ? (
-        <div data-aicl="suggestion-chips" data-count={suggestions.length}>
-          {suggestions.map((label) => (
-            <button key={label} type="button" onClick={() => onSelectSuggestion?.(label)}>
-              {label}
-            </button>
-          ))}
-        </div>
-      ) : null}
+      <SuggestionChips
+        suggestions={suggestions.map((label) => ({ id: label, label }))}
+        onSelect={(s) => onSelectSuggestion?.(s.label)}
+      />
       {attachments.length ? (
         <div data-aicl="attachment-row">
           {attachments.map((file) => (
-            <span key={file.id} data-aicl="attachment-chip">{file.name}</span>
+            <AttachmentChip
+              key={file.id}
+              attachment={{ mediaType: 'application/octet-stream', status: 'ready', ...file }}
+              onRemove={onRemoveAttachment}
+              onRetry={onRetryAttachment}
+            />
           ))}
         </div>
       ) : null}
@@ -166,7 +189,10 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(function Compo
         </button>
       ) : null}
       <textarea
-        ref={textareaRef}
+        ref={(el) => {
+          textareaRef.current = el;
+          if (inputRef) inputRef.current = el;
+        }}
         value={value}
         rows={1}
         placeholder={placeholder}

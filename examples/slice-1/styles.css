@@ -153,7 +153,7 @@ body {
   color: var(--aicl-text);
 }
 
-.gallery section {
+.gallery > section {
   margin: var(--aicl-space-6) 0;
   padding-top: var(--aicl-space-4);
   border-top: 1px solid var(--aicl-border);
@@ -195,4 +195,69 @@ body {
 .theme-switcher button[aria-pressed='true'] {
   background: var(--aicl-accent);
   color: var(--aicl-accent-fg);
+}
+
+/* Components page */
+.components .row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--aicl-space-2);
+}
+
+.components .panel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border: 1px solid var(--aicl-border);
+  border-radius: var(--aicl-radius-md);
+  background: var(--aicl-surface);
+  overflow: hidden;
+}
+
+.components .split-demo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--aicl-space-3);
+}
+
+.components .nav-panel {
+  width: 220px;
+}
+
+.components .nav-panel[data-collapsed] {
+  width: 64px;
+}
+
+.components .composer-host {
+  position: relative;
+}
+
+.components .demo-log,
+.components .note {
+  display: block;
+  margin-top: var(--aicl-space-2);
+  font-size: var(--aicl-text-sm);
+  color: var(--aicl-text-faint);
+}
+
+.components .demo-button {
+  padding: 6px var(--aicl-space-3);
+  border: 1px solid var(--aicl-border-strong);
+  border-radius: var(--aicl-radius-md);
+  background: var(--aicl-surface);
+  font-size: var(--aicl-text-sm);
+  cursor: pointer;
+}
+
+.components .form-grid {
+  display: grid;
+  gap: var(--aicl-space-4);
+  max-width: 360px;
+}
+
+@media (max-width: 640px) {
+  .components .split-demo {
+    grid-template-columns: 1fr;
+  }
 }

@@ -19,7 +19,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "tsc -p tsconfig.test.json && node --test dist-test/chat.test.js",
+    "test": "tsc -p tsconfig.test.json && node --test dist-test/chat.test.js dist-test/services.test.js",
     "clean": "rm -rf dist"
   },
   "devDependencies": {
