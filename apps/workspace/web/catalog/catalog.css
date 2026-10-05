@@ -1,0 +1,135 @@
+/* Body content for canvas components. Every selector is prefixed .aicl-cmp-. */
+.aicl-cmp-body,
+.aicl-cmp-chat,
+.aicl-cmp-transcript,
+.aicl-cmp-metric,
+.aicl-cmp-empty {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  color: var(--aicl-text);
+  font-size: var(--aicl-text-sm);
+}
+
+.aicl-cmp-body {
+  overflow: auto;
+  padding: var(--aicl-space-3);
+}
+
+.aicl-cmp-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--aicl-text-faint);
+}
+
+/* chat */
+.aicl-cmp-chat {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.aicl-cmp-chat [data-aicl='transcript-root'] {
+  flex: 1;
+  min-height: 0;
+}
+.aicl-cmp-chat [data-aicl='transcript'] {
+  padding: var(--aicl-space-2) var(--aicl-space-3);
+  gap: var(--aicl-space-3);
+}
+.aicl-cmp-chat .aicl-cmp-empty {
+  flex: 1;
+  height: auto;
+}
+.aicl-cmp-chat-composer {
+  flex: none;
+  padding: var(--aicl-space-2);
+}
+.aicl-cmp-chat-composer [data-aicl='composer'] {
+  box-shadow: none;
+}
+
+/* transcript */
+.aicl-cmp-transcript {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.aicl-cmp-transcript [data-aicl='transcript-root'] {
+  flex: 1;
+  min-height: 0;
+}
+.aicl-cmp-transcript [data-aicl='transcript'] {
+  padding: var(--aicl-space-2) var(--aicl-space-3);
+  gap: var(--aicl-space-3);
+}
+
+/* table */
+.aicl-cmp-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--aicl-text-sm);
+}
+.aicl-cmp-table th,
+.aicl-cmp-table td {
+  padding: var(--aicl-space-2) var(--aicl-space-3);
+  border: 1px solid var(--aicl-border);
+  text-align: left;
+  vertical-align: top;
+}
+.aicl-cmp-table th {
+  color: var(--aicl-text-muted);
+  font-weight: 600;
+}
+
+/* metric */
+.aicl-cmp-metric {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: var(--aicl-space-1);
+  padding: var(--aicl-space-3) var(--aicl-space-4);
+  overflow: hidden;
+}
+.aicl-cmp-metric-label {
+  color: var(--aicl-text-muted);
+}
+.aicl-cmp-metric-value {
+  font-size: 2.5rem;
+  font-weight: 650;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.aicl-cmp-metric-delta {
+  color: var(--aicl-text-muted);
+  font-weight: 500;
+}
+.aicl-cmp-metric-delta[data-trend='up'] {
+  color: var(--aicl-success);
+}
+.aicl-cmp-metric-delta[data-trend='down'] {
+  color: var(--aicl-danger);
+}
+
+/* gallery */
+.aicl-cmp-gallery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--aicl-space-4);
+  padding: var(--aicl-space-4);
+  background: var(--aicl-bg);
+}
+.aicl-cmp-gallery h3 {
+  margin: 0 0 var(--aicl-space-1);
+  font-size: var(--aicl-text-sm);
+  color: var(--aicl-text-muted);
+}
+.aicl-cmp-gallery-box {
+  overflow: hidden;
+  border: 1px solid var(--aicl-border);
+  border-radius: var(--aicl-radius-md, 8px);
+  background: var(--aicl-surface);
+}
