@@ -3,6 +3,8 @@ import { getSnapshot, loadSnapshot, Tldraw, type Editor } from 'tldraw';
 import 'tldraw/tldraw.css';
 import type { ScratchOp } from '../shared/scratch.ts';
 import { execute } from './executor.ts';
+import { shapeUtils } from './ComponentShape.tsx';
+import { InsertMenu } from './InsertMenu.tsx';
 
 const SAVE_DEBOUNCE_MS = 400;
 
@@ -76,7 +78,8 @@ export function Scratchpad() {
 
   return (
     <div className="scratchpad" data-loaded={loaded || undefined}>
-      <Tldraw onMount={setEditor} />
+      <Tldraw shapeUtils={shapeUtils} onMount={setEditor} />
+      <InsertMenu editor={editor} />
     </div>
   );
 }
