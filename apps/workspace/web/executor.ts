@@ -7,6 +7,7 @@
  */
 
 import { createShapeId, toRichText, type Editor, type TLShapeId } from 'tldraw';
+import { COMPONENT_NAMES, COMPONENT_SHAPE_TYPE, componentSpec } from '../shared/components.ts';
 import {
   fullId,
   shortId,
@@ -86,6 +87,25 @@ function add(editor: Editor, shapes: AddShape[]): string[] {
 
       if (shape.kind === 'arrow') {
         addArrow(editor, id, shape);
+        created.push(shortId(id));
+        continue;
+      }
+
+      if (shape.kind === 'component') {
+        const spec = componentSpec(shape.component ?? '');
+        if (!spec) {
+          throw new Error(`Unknown component "${shape.component}". Valid components: ${COMPONENT_NAMES.join(', ')}.`);
+        }
+        const cw = shape.w ?? spec.defaultSize.w;
+        const cx = shape.x ?? cursorX;
+        if (shape.x === undefined) cursorX += cw + GAP;
+        editor.createShape({
+          id,
+          type: COMPONENT_SHAPE_TYPE,
+          x: cx,
+          y: shape.y ?? cursorY,
+          props: { w: cw, h: shape.h ?? spec.defaultSize.h, component: spec.name, title: shape.title ?? spec.title, props: shape.props ?? {} },
+        } as never);
         created.push(shortId(id));
         continue;
       }
@@ -186,6 +206,12 @@ function update(editor: Editor, patches: UpdateShape[]): string[] {
       if (shape.type === 'geo') {
         if (patch.w !== undefined) props.w = patch.w;
         if (patch.h !== undefined) props.h = patch.h;
+      }
+      if ((shape.type as string) === COMPONENT_SHAPE_TYPE) {
+        if (patch.w !== undefined) props.w = patch.w;
+        if (patch.h !== undefined) props.h = patch.h;
+        if (patch.title !== undefined) props.title = patch.title;
+        if (patch.props !== undefined) props.props = patch.props;
       }
       if (shape.type === 'text' && patch.w !== undefined) Object.assign(props, { w: patch.w, autoSize: false });
       editor.updateShape({

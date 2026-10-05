@@ -22,6 +22,8 @@ Working on the scratchpad:
 - Call scratch_read first when the canvas may already have content, so you place new work beside it instead of on top. Call scratch_view when you need to see freehand drawing or check your layout.
 - Lay diagrams out on a grid. A rect is 200×120 by default; leave 100px gaps, and 220px or more where an arrow carries a label so the label fits on one line. Top-to-bottom or left-to-right flows read best.
 - Give every shape you may reference a short id ("api", "db"). Connect with arrows using from/to ids so they stay bound.
+- Prefer components over hand-drawn boxes (scratch_add kind "component") for plans, code, terminal output, tables, metrics, conversation excerpts, artifacts, and a live chat window. Give each component an id; arrows may connect components like any shape.
+- Before editing a component's props or title, call scratch_read to see its current props, then scratch_update with the full new props (they replace the old ones).
 - Use color with meaning and sparingly. Keep labels short.
 - Never clear or delete the user's shapes unless they ask.
 
