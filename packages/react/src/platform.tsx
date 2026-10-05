@@ -24,6 +24,8 @@ import {
 } from 'react';
 import { createPortal } from 'react-dom';
 import { createComboboxModel, type ToastQueue, type ToastState } from '@aicl/core';
+import { Check, ChevronDown, CircleAlert, CircleCheck, Info, X, type LucideIcon } from 'lucide-react';
+import { Icon } from './icons.js';
 import { useReadable } from './useReadable.js';
 
 /* -------------------------------------------------------------------------- */
@@ -278,11 +280,11 @@ function DialogDescription({ children }: { children: ReactNode }) {
   );
 }
 
-function DialogClose({ children = 'Close', ariaLabel }: { children?: ReactNode; ariaLabel?: string }) {
+function DialogClose({ children, ariaLabel = 'Close' }: { children?: ReactNode; ariaLabel?: string }) {
   const { close } = useDialog();
   return (
-    <button type="button" data-aicl="dialog-close" aria-label={ariaLabel} onClick={() => close('close-button')}>
-      {children}
+    <button type="button" data-aicl="dialog-close" aria-label={children ? undefined : ariaLabel} onClick={() => close('close-button')}>
+      {children ?? <Icon as={X} />}
     </button>
   );
 }
@@ -505,6 +507,8 @@ export interface ToastProps {
   renderAction?: (toast: ToastState) => ReactNode;
 }
 
+const TOAST_ICON: Record<ToastState['variant'], LucideIcon> = { info: Info, success: CircleCheck, error: CircleAlert };
+
 export function Toast({ toast, onDismiss, renderAction }: ToastProps) {
   // Errors that need action interrupt; everything else waits its turn.
   const assertive = toast.variant === 'error' && toast.action !== undefined;
@@ -522,6 +526,9 @@ export function Toast({ toast, onDismiss, renderAction }: ToastProps) {
         if (e.key === 'Escape') onDismiss(toast.id);
       }}
     >
+      <span data-aicl="toast-icon">
+        <Icon as={TOAST_ICON[toast.variant]} />
+      </span>
       <div data-aicl="toast-title">{toast.title}</div>
       {toast.description ? <div data-aicl="toast-description">{toast.description}</div> : null}
       {renderAction
@@ -541,7 +548,7 @@ export function Toast({ toast, onDismiss, renderAction }: ToastProps) {
             )
           : null}
       <button type="button" data-aicl="toast-dismiss" aria-label="Dismiss notification" onClick={() => onDismiss(toast.id)}>
-        ×
+        <Icon as={X} size={14} />
       </button>
     </div>
   );
@@ -799,7 +806,8 @@ export function Select<T>({
         onKeyDown={onKeyDown}
         onBlur={() => model.close()}
       >
-        {selected?.label ?? placeholder}
+        <span data-aicl="select-value">{selected?.label ?? placeholder}</span>
+        <Icon as={ChevronDown} />
       </button>
       <ul id={listId} role="listbox" hidden={!state.open} data-aicl="select-listbox">
         {options.map((o, i) => (
@@ -819,6 +827,11 @@ export function Select<T>({
             }}
           >
             <span data-aicl="select-option-label">{o.label}</span>
+            {i === selectedIndex ? (
+              <span data-aicl="select-option-check">
+                <Icon as={Check} size={14} />
+              </span>
+            ) : null}
             {o.description ? <span data-aicl="select-option-description">{o.description}</span> : null}
           </li>
         ))}

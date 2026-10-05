@@ -15,6 +15,8 @@ import {
   type ReactNode,
 } from 'react';
 import { createComboboxModel, type SessionMeta } from '@aicl/core';
+import { PanelLeft, Search } from 'lucide-react';
+import { Icon } from './icons.js';
 import { useReadable } from './useReadable.js';
 
 export type SessionGroups = { id: string; label?: string; ids: string[] }[];
@@ -367,6 +369,9 @@ export function SessionSearch({
       data-empty={isEmpty || undefined}
       data-loading={loading || undefined}
     >
+      <span data-aicl="session-search-icon">
+        <Icon as={Search} />
+      </span>
       <input
         type="search"
         role="combobox"
@@ -476,7 +481,9 @@ export function SidebarNav({
         aria-controls={listId}
         aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         onClick={toggle}
-      />
+      >
+        <Icon as={PanelLeft} />
+      </button>
       <ul id={listId} data-aicl="sidebar-nav-list">
         {items.map((item) => {
           const active = item.active ?? false;

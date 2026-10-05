@@ -1,0 +1,160 @@
+/**
+ * Workspace shell: the canvas fills the page and the chat floats as a
+ * rounded panel on the right (Cofounder 23, Manus 59). Primitive styling
+ * comes from @aicl/styles; tldraw brings its own.
+ */
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: var(--aicl-font-sans);
+  font-size: var(--aicl-text-base);
+  line-height: var(--aicl-leading-normal);
+  color: var(--aicl-text);
+  background: var(--aicl-bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 420px;
+  height: 100vh;
+  background: var(--aicl-bg);
+}
+
+.canvas,
+.scratchpad {
+  position: relative;
+  min-width: 0;
+  height: 100%;
+}
+
+.chat {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  margin: var(--aicl-space-2) var(--aicl-space-2) var(--aicl-space-2) 0;
+  border: 1px solid var(--aicl-border);
+  border-radius: var(--aicl-radius-lg);
+  background: var(--aicl-surface);
+  box-shadow: var(--aicl-shadow-2);
+  overflow: hidden;
+}
+
+.chat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--aicl-space-3);
+  padding: var(--aicl-space-3) var(--aicl-space-3) var(--aicl-space-2) var(--aicl-space-4);
+}
+
+.chat-header > div {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.chat-header strong {
+  font-size: var(--aicl-text-md);
+  font-weight: 600;
+}
+
+.chat-model {
+  overflow: hidden;
+  font-size: var(--aicl-text-xs);
+  color: var(--aicl-text-faint);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.icon-button {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--aicl-radius-sm);
+  background: transparent;
+  color: var(--aicl-text-muted);
+  cursor: pointer;
+}
+
+.icon-button:hover:not(:disabled) {
+  background: var(--aicl-surface-tint);
+  color: var(--aicl-text);
+}
+
+.icon-button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.chat [data-aicl='transcript-root'] {
+  flex: 1;
+}
+
+/* The panel is narrow: tighter gutters than the full-page thread. */
+.chat [data-aicl='transcript'] {
+  padding: var(--aicl-space-3) var(--aicl-space-4);
+  gap: var(--aicl-space-4);
+  font-size: var(--aicl-text-base);
+}
+
+.chat-empty {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: var(--aicl-space-4);
+}
+
+.chat-empty-title {
+  margin: 0 0 var(--aicl-space-1);
+  font-size: var(--aicl-text-lg);
+  font-weight: 600;
+}
+
+.chat-empty-hint {
+  margin: 0;
+  color: var(--aicl-text-muted);
+  font-size: var(--aicl-text-sm);
+}
+
+.chat-composer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--aicl-space-2);
+  padding: var(--aicl-space-2) var(--aicl-space-3) var(--aicl-space-3);
+}
+
+.chat-composer [data-aicl='suggestion-chips'] {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.chat-composer [data-aicl='composer'] {
+  box-shadow: none;
+}
+
+/* The canvas keeps tldraw's chrome; give it the same neutral ground. */
+.scratchpad .tl-background {
+  background-color: var(--aicl-bg);
+}
+
+@media (max-width: 760px) {
+  .workspace {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(0, 1fr) 50vh;
+  }
+  .chat {
+    margin: 0 var(--aicl-space-2) var(--aicl-space-2);
+  }
+}

@@ -1,5 +1,7 @@
 import { useLayoutEffect, useRef, useState, type ComponentType } from 'react';
 import type { ChatStatus, Message, Part, RendererRegistry } from '@aicl/core';
+import { ArrowDown, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Icon } from './icons.js';
 import { MessageActions, type MessageAction } from './MessageActions.js';
 import { PartRenderer, ReasoningDisclosure, type PartProps } from './parts.js';
 
@@ -14,6 +16,17 @@ export interface TranscriptProps {
  * Unstyled transcript. The `role="log"` node is unconditional so token appends
  * do not recreate the live region.
  */
+/** "Today", "Yesterday", then a short date, the way the surveyed products label days. */
+function dayLabel(ts: number): string {
+  const day = new Date(ts);
+  const today = new Date();
+  const yesterday = new Date(today);
+  yesterday.setDate(today.getDate() - 1);
+  if (day.toDateString() === today.toDateString()) return 'Today';
+  if (day.toDateString() === yesterday.toDateString()) return 'Yesterday';
+  return day.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+}
+
 export function Transcript({ messages, status, streamingId, registry }: TranscriptProps) {
   const logRef = useRef<HTMLDivElement>(null);
   const pinned = useRef(true);
@@ -72,8 +85,8 @@ export function Transcript({ messages, status, streamingId, registry }: Transcri
             return -1;
           })();
           return (
-            <div key={message.id}>
-              {showDay ? <div data-aicl="day-separator"><time dateTime={new Date(message.createdAt!).toISOString()}>{day}</time></div> : null}
+            <div key={message.id} data-aicl="message-row" data-role={message.role}>
+              {showDay ? <div data-aicl="day-separator"><time dateTime={new Date(message.createdAt!).toISOString()}>{dayLabel(message.createdAt!)}</time></div> : null}
               <MessageItem
                 message={message}
                 isStreaming={message.id === streamingId}
@@ -85,8 +98,8 @@ export function Transcript({ messages, status, streamingId, registry }: Transcri
         })}
       </div>
       {atBottom ? null : (
-        <button type="button" data-aicl="scroll-to-bottom" onClick={scrollToBottom}>
-          Jump to latest
+        <button type="button" data-aicl="scroll-to-bottom" aria-label="Jump to latest" onClick={scrollToBottom}>
+          <Icon as={ArrowDown} />
         </button>
       )}
     </div>
@@ -127,13 +140,13 @@ export function MessageItem({
       {branch && branch.count > 1 ? (
         <div data-aicl="branch-switcher">
           <button type="button" aria-label="Previous version" onClick={() => branch.onSelect(Math.max(0, branch.index - 1))}>
-            ‹
+            <Icon as={ChevronLeft} size={14} />
           </button>
           <span>
             {branch.index + 1}/{branch.count}
           </span>
           <button type="button" aria-label="Next version" onClick={() => branch.onSelect(Math.min(branch.count - 1, branch.index + 1))}>
-            ›
+            <Icon as={ChevronRight} size={14} />
           </button>
         </div>
       ) : null}

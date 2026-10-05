@@ -8,6 +8,7 @@ const root = path.dirname(fileURLToPath(import.meta.url));
 export default defineConfig({
   plugins: [react()],
   resolve: {
+    dedupe: ['react', 'react-dom', 'lucide-react'],
     alias: {
       '@aicl/core': path.resolve(root, '../../packages/core/src/index.ts'),
       '@aicl/react': path.resolve(root, '../../packages/react/src/index.ts'),
