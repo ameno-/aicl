@@ -32,6 +32,7 @@
     "react-test-renderer": "^18.3.1"
   },
   "dependencies": {
-    "@aicl/core": "*"
+    "@aicl/core": "*",
+    "lucide-react": "^1.52.0"
   }
 }

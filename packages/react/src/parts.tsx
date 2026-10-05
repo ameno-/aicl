@@ -11,6 +11,28 @@ import {
   type ToolCallPart,
   type ToolResultPart,
 } from '@aicl/core';
+import {
+  Ban,
+  ChartColumn,
+  Check,
+  ChevronRight,
+  CircleAlert,
+  CircleCheck,
+  CircleX,
+  Code,
+  Copy,
+  Eye,
+  File,
+  FileText,
+  GitCompare,
+  Lightbulb,
+  LoaderCircle,
+  RotateCcw,
+  SquareTerminal,
+  Table,
+  type LucideIcon,
+} from 'lucide-react';
+import { Icon } from './icons.js';
 
 export interface PartProps<P extends Part = Part> {
   part: P;
@@ -51,6 +73,8 @@ export function ReasoningDisclosure({
 }) {
   const [open, setOpen] = useState(false);
   const pending = streaming && !part?.text;
+  // Only the thought still in progress spins; a finished one carries its duration.
+  const thinking = pending || (streaming && part?.durationMs === undefined);
   const label = part?.durationMs
     ? `Thought for ${Math.max(1, Math.round(part.durationMs / 1000))}s`
     : pending || streaming
@@ -59,12 +83,32 @@ export function ReasoningDisclosure({
   return (
     <div data-aicl="reasoning" data-state={pending ? 'pending' : open ? 'open' : 'closed'}>
       <button type="button" aria-expanded={open} onClick={() => setOpen((v) => !v)}>
-        {label}
+        <Icon as={thinking ? LoaderCircle : Lightbulb} spin={thinking} />
+        <span>{label}</span>
+        {part?.text ? <Icon as={ChevronRight} /> : null}
       </button>
       {open && part?.text ? <div data-aicl="reasoning-body">{part.text}</div> : null}
     </div>
   );
 }
+
+const TOOL_ICON: Record<ToolCallPart['status'], LucideIcon> = {
+  pending: LoaderCircle,
+  running: LoaderCircle,
+  success: CircleCheck,
+  error: CircleX,
+  cancelled: Ban,
+};
+
+const ARTIFACT_ICON: Record<string, LucideIcon> = {
+  code: Code,
+  document: FileText,
+  diff: GitCompare,
+  preview: Eye,
+  terminal: SquareTerminal,
+  table: Table,
+  chart: ChartColumn,
+};
 
 export function ToolCallDisclosure({ part }: PartProps<ToolCallPart>) {
   const forceOpen = part.status === 'error';
@@ -87,7 +131,9 @@ export function ToolCallDisclosure({ part }: PartProps<ToolCallPart>) {
           if (!forceOpen) setOpen((v) => !v);
         }}
       >
-        {label}
+        <Icon as={TOOL_ICON[part.status]} spin={part.status === 'running' || part.status === 'pending'} />
+        <span>{label}</span>
+        <Icon as={ChevronRight} />
       </button>
       {shown ? (
         <pre data-aicl="tool-call-body">{part.argsText ?? JSON.stringify(part.args)}</pre>
@@ -110,9 +156,14 @@ export function ArtifactCard({
       data-artifact-version={part.version}
       data-openable={onOpen ? '' : undefined}
     >
+      <span data-aicl="artifact-icon">
+        <Icon as={ARTIFACT_ICON[part.kind] ?? FileText} size={18} />
+      </span>
       <span data-aicl="artifact-title">{part.title ?? part.artifactId}</span>
-      <span data-aicl="artifact-kind">{part.kind}</span>
-      {part.version != null ? <span data-aicl="artifact-version">v{part.version}</span> : null}
+      <span data-aicl="artifact-meta">
+        <span data-aicl="artifact-kind">{part.kind}</span>
+        {part.version != null ? <span data-aicl="artifact-version">v{part.version}</span> : null}
+      </span>
       {onOpen ? (
         <button type="button" data-aicl="artifact-open" aria-label={`Open ${part.kind} artifact${part.version != null ? `, version ${part.version}` : ''}`} onClick={() => onOpen(part)}>
           Open
@@ -147,9 +198,10 @@ export function CodeBlock({
           setCopied(true);
         }}
       >
-        Copy
+        <Icon as={copied ? Check : Copy} size={14} />
+        <span>{copied ? 'Copied' : 'Copy'}</span>
       </button>
-      <span aria-live="polite">{copied ? 'Copied' : ''}</span>
+      <span aria-live="polite" data-aicl="visually-hidden">{copied ? 'Copied' : ''}</span>
     </figure>
   );
 }
@@ -179,7 +231,8 @@ export function FileChip({ part, onOpen }: PartProps<FilePart> & { onOpen?: (par
       data-progress={part.uploadProgress}
     >
       <button type="button" onClick={() => onOpen?.(part)}>
-        {part.name ?? part.url}
+        <Icon as={File} size={14} />
+        <span>{part.name ?? part.url}</span>
       </button>
     </div>
   );
@@ -193,10 +246,12 @@ export function ErrorNotice({
   if (part.type !== 'error') return null;
   return (
     <div data-aicl="part" data-part="error" data-retryable={part.retryable || undefined} role={streaming ? 'alert' : 'status'}>
+      <Icon as={CircleAlert} />
       <p>{part.message}</p>
       {part.retryable && onRetry ? (
         <button type="button" aria-label="Retry" onClick={onRetry}>
-          ↻
+          <Icon as={RotateCcw} size={14} />
+          <span>Retry</span>
         </button>
       ) : null}
     </div>

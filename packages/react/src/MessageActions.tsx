@@ -1,5 +1,22 @@
 import { useState } from 'react';
 import type { Message, Part } from '@aicl/core';
+import { Check, Copy, Pencil, RotateCcw, ThumbsDown, ThumbsUp, type LucideIcon } from 'lucide-react';
+import { Icon } from './icons.js';
+
+const LABEL: Record<MessageAction, string> = {
+  copy: 'Copy',
+  'thumbs-up': 'Good response',
+  'thumbs-down': 'Bad response',
+  retry: 'Retry',
+  edit: 'Edit',
+};
+const GLYPH: Record<MessageAction, LucideIcon> = {
+  copy: Copy,
+  'thumbs-up': ThumbsUp,
+  'thumbs-down': ThumbsDown,
+  retry: RotateCcw,
+  edit: Pencil,
+};
 
 export type MessageAction = 'copy' | 'thumbs-up' | 'thumbs-down' | 'retry' | 'edit';
 
@@ -42,7 +59,9 @@ export function MessageActions({
         <button
           key={action}
           type="button"
-          aria-label={action === 'retry' ? 'Retry' : action}
+          aria-label={LABEL[action]}
+          title={LABEL[action]}
+          data-action={action}
           aria-pressed={action === 'thumbs-up' ? feedback === 'up' : action === 'thumbs-down' ? feedback === 'down' : undefined}
           onClick={() => {
             if (action === 'copy') {
@@ -54,7 +73,7 @@ export function MessageActions({
             onAction?.(action, message);
           }}
         >
-          {action === 'copy' ? 'Copy' : action === 'retry' ? '↻' : action === 'edit' ? 'Edit' : action === 'thumbs-up' ? 'Up' : 'Down'}
+          <Icon as={action === 'copy' && copied ? Check : GLYPH[action]} size={15} />
         </button>
       ))}
     </div>
