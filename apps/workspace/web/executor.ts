@@ -6,18 +6,20 @@
  * something the other cannot.
  */
 
-import { createShapeId, toRichText, type Editor, type TLShapeId } from 'tldraw';
+import { Box, createShapeId, toRichText, type Editor, type TLShapeId } from 'tldraw';
 import { COMPONENT_NAMES, COMPONENT_SHAPE_TYPE, componentSpec } from '../shared/components.ts';
 import {
   fullId,
   shortId,
   summarize,
   type AddShape,
+  type ArrangeMode,
   type Endpoint,
   type ScratchOp,
   type ScratchResult,
   type UpdateShape,
 } from '../shared/scratch.ts';
+import { asAgent } from './canvasContext.ts';
 import { addImage, viewShapes } from './executor-image.ts';
 import { uiGet, uiSet } from './ui/executor-ui.ts';
 
@@ -25,7 +27,11 @@ const GAP = 80;
 const DEFAULT_W = 200;
 const DEFAULT_H = 120;
 
-export async function execute(editor: Editor, op: ScratchOp): Promise<ScratchResult> {
+export function execute(editor: Editor, op: ScratchOp): Promise<ScratchResult> {
+  return asAgent(() => run(editor, op));
+}
+
+async function run(editor: Editor, op: ScratchOp): Promise<ScratchResult> {
   switch (op.op) {
     case 'read':
       return { op: 'read', shapes: read(editor) };
@@ -52,6 +58,10 @@ export async function execute(editor: Editor, op: ScratchOp): Promise<ScratchRes
       return { op: 'ui_get', spec: uiGet(editor, op.id) };
     case 'ui_set':
       return { op: 'ui_set', ids: [uiSet(editor, op.id, op.spec)] };
+    case 'arrange':
+      return { op: 'arrange', ids: arrange(editor, op.ids, op.mode, op.gap) };
+    case 'focus':
+      return { op: 'focus', ids: focus(editor, op.ids, op.bounds) };
   }
 }
 
@@ -238,4 +248,70 @@ function update(editor: Editor, patches: UpdateShape[]): string[] {
     }
   });
   return updated;
+}
+
+function existing(editor: Editor, ids: string[]): TLShapeId[] {
+  const found = ids.map((id) => fullId(id) as TLShapeId).filter((id) => editor.getShape(id));
+  const missing = ids.filter((id) => !editor.getShape(fullId(id) as TLShapeId));
+  if (missing.length) throw new Error(`No shape with id: ${missing.join(', ')}.`);
+  return found;
+}
+
+function arrange(editor: Editor, ids: string[], mode: ArrangeMode, gap?: number): string[] {
+  const shapes = existing(editor, ids);
+  if (!shapes.length) throw new Error('arrange needs at least one id.');
+  editor.run(() => {
+    if (mode.startsWith('align-')) {
+      editor.alignShapes(shapes, mode.slice(6) as never);
+    } else if (mode.startsWith('distribute-')) {
+      editor.distributeShapes(shapes, mode.slice(11) as never);
+    } else if (mode === 'stack-horizontal') {
+      stack(editor, shapes, 'x', gap ?? 40);
+    } else if (mode === 'stack-vertical') {
+      stack(editor, shapes, 'y', gap ?? 40);
+    } else {
+      grid(editor, shapes, gap ?? 40);
+    }
+  });
+  return shapes.map(shortId);
+}
+
+/** One row (x) or column (y) in the given order, starting at the group's top-left. */
+function stack(editor: Editor, shapes: TLShapeId[], axis: 'x' | 'y', gap: number): void {
+  const boxes = shapes.map((id) => ({ id, box: editor.getShapePageBounds(id)! }));
+  const left = Math.min(...boxes.map((b) => b.box.x));
+  const top = Math.min(...boxes.map((b) => b.box.y));
+  let cursor = axis === 'x' ? left : top;
+  for (const { id, box } of boxes) {
+    const target = axis === 'x' ? { x: cursor, y: top } : { x: left, y: cursor };
+    const shape = editor.getShape(id)!;
+    editor.updateShape({ id, type: shape.type, x: shape.x + (target.x - box.x), y: shape.y + (target.y - box.y) });
+    cursor += (axis === 'x' ? box.w : box.h) + gap;
+  }
+}
+
+/** Row-major grid anchored at the group's top-left; columns ≈ √n, cells fit the largest shape. */
+function grid(editor: Editor, shapes: TLShapeId[], gap: number): void {
+  const boxes = shapes.map((id) => ({ id, box: editor.getShapePageBounds(id)! }));
+  const left = Math.min(...boxes.map((b) => b.box.x));
+  const top = Math.min(...boxes.map((b) => b.box.y));
+  const cols = Math.ceil(Math.sqrt(boxes.length));
+  const cellW = Math.max(...boxes.map((b) => b.box.w)) + gap;
+  const cellH = Math.max(...boxes.map((b) => b.box.h)) + gap;
+  boxes.forEach(({ id, box }, i) => {
+    const target = { x: left + (i % cols) * cellW, y: top + Math.floor(i / cols) * cellH };
+    const shape = editor.getShape(id)!;
+    editor.updateShape({ id, type: shape.type, x: shape.x + (target.x - box.x), y: shape.y + (target.y - box.y) });
+  });
+}
+
+function focus(editor: Editor, ids?: string[], bounds?: { x: number; y: number; w: number; h: number }): string[] {
+  const shapes = ids?.length ? existing(editor, ids) : [];
+  const box = shapes.length
+    ? Box.Common(shapes.map((id) => editor.getShapePageBounds(id)!))
+    : bounds
+      ? new Box(bounds.x, bounds.y, bounds.w, bounds.h)
+      : editor.getCurrentPageBounds();
+  if (box) editor.zoomToBounds(box, { inset: 64, targetZoom: 1, animation: { duration: 320 } });
+  return shapes.map(shortId);
 }

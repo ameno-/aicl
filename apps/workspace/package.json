@@ -2,6 +2,9 @@
   "name": "aicl-workspace",
   "private": true,
   "type": "module",
+  "bin": {
+    "aicl": "bin/aicl.mjs"
+  },
   "description": "Generative canvas workspace: a Pi agent and a person share a scratchpad beside the chat.",
   "scripts": {
     "dev": "node scripts/dev.mjs",
