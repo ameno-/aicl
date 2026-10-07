@@ -46,7 +46,7 @@ export interface AgentOptions {
   tools: ToolDefinition[];
 }
 
-export async function createWorkspaceAgent(options: AgentOptions) {
+export async function createAgentFactory(options: AgentOptions) {
   const agentDir = getAgentDir();
   const modelRuntime = await ModelRuntime.create();
   const settingsManager = SettingsManager.create(options.cwd, agentDir);
@@ -67,8 +67,8 @@ export async function createWorkspaceAgent(options: AgentOptions) {
   });
   await resourceLoader.reload();
 
-  let model;
-  let thinkingLevel;
+  let model: ReturnType<typeof resolveCliModel>['model'];
+  let thinkingLevel: ReturnType<typeof resolveCliModel>['thinkingLevel'];
   if (options.model) {
     const resolved = resolveCliModel({ cliModel: options.model, modelRuntime });
     if (resolved.error || !resolved.model) throw new Error(resolved.error ?? `Unknown model ${options.model}`);
@@ -76,22 +76,27 @@ export async function createWorkspaceAgent(options: AgentOptions) {
     thinkingLevel = resolved.thinkingLevel;
   }
 
-  const { session, modelFallbackMessage } = await createAgentSession({
-    cwd: options.cwd,
-    agentDir,
-    modelRuntime,
-    settingsManager,
-    resourceLoader,
-    model,
-    thinkingLevel,
-    // write/edit let the agent author applets in .aicl/applets (moi-style generative code).
-    tools: ['read', 'grep', 'find', 'ls', 'write', 'edit', ...options.tools.map((t) => t.name)],
-    customTools: options.tools,
-    sessionManager: SessionManager.inMemory(options.cwd),
-  });
-  if (modelFallbackMessage) console.warn(`[agent] ${modelFallbackMessage}`);
-
-  return session;
+  return {
+    /** Builds one Pi session on `sessionManager` (persisted or not). */
+    async createSession(sessionManager: SessionManager) {
+      const { session, modelFallbackMessage } = await createAgentSession({
+        cwd: options.cwd,
+        agentDir,
+        modelRuntime,
+        settingsManager,
+        resourceLoader,
+        model,
+        thinkingLevel,
+        // write/edit let the agent author applets in .aicl/applets (moi-style generative code).
+        tools: ['read', 'grep', 'find', 'ls', 'write', 'edit', ...options.tools.map((t) => t.name)],
+        customTools: options.tools,
+        sessionManager,
+      });
+      if (modelFallbackMessage) console.warn(`[agent] ${modelFallbackMessage}`);
+      return session;
+    },
+  };
 }
 
-export type WorkspaceAgent = Awaited<ReturnType<typeof createWorkspaceAgent>>;
+export type AgentFactory = Awaited<ReturnType<typeof createAgentFactory>>;
+export type WorkspaceAgent = Awaited<ReturnType<AgentFactory['createSession']>>;

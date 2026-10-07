@@ -3,13 +3,13 @@
  * `/api/events`, and the scratchpad snapshot behind `/api/scratch`.
  */
 
-import { randomUUID } from 'node:crypto';
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
 import path from 'node:path';
-import type { Message, StreamEvent } from '@aicl/core';
+import type { Message } from '@aicl/core';
 import { ChatHandlerError, createChatHandler } from '@aicl/server';
-import { createWorkspaceAgent } from './agent.ts';
-import { createPiEventMapper, type PiEvent } from './pi-mapper.ts';
+import { SessionManager } from '@earendil-works/pi-coding-agent';
+import { createAgentFactory } from './agent.ts';
+import { createSessionHub, SessionError, type AgentLike } from './sessions.ts';
 import { serveFile, defaultReferencesRoot } from './files.ts';
 import { createReferenceTools } from './references.ts';
 import { createRelay } from './relay.ts';
@@ -18,7 +18,8 @@ import { createScratchTools } from './tools.ts';
 import { createUiTools } from './ui-tools.ts';
 import { createApplets } from './applets.ts';
 import { createCanvasTools } from './canvas-tools.ts';
-import { matchRoute, type RouteTable } from './http.ts';
+import { json, matchRoute, readBody, readJson, type RouteTable } from './http.ts';
+import { MAIN_SESSION_ID } from '../shared/runtime.ts';
 
 const PORT = Number(process.env['AICL_PORT'] ?? '5180');
 const HOST = process.env['AICL_HOST'] ?? '127.0.0.1';
@@ -40,12 +41,24 @@ function allTools() {
 
 /** Feature modules' endpoints, tried after the core routes below. */
 const featureRoutes: RouteTable[] = [applets.routes, canvasTools.routes(allTools())];
-
-const agent = await createWorkspaceAgent({
+const SESSIONS_DIR = path.join(WORKSPACE, '.aicl', 'sessions');
+const factory = await createAgentFactory({
   cwd: WORKSPACE,
   model: process.env['AICL_MODEL'],
   tools: allTools(),
 });
+
+const hub = await createSessionHub({
+  dir: SESSIONS_DIR,
+  createAgent: async (file) =>
+    (await factory.createSession(
+      file ? SessionManager.open(file, SESSIONS_DIR) : SessionManager.create(WORKSPACE, SESSIONS_DIR),
+    )) as unknown as AgentLike,
+  onChange: (session) => relay.broadcast({ type: 'session', session }),
+  onRemove: (id) => relay.broadcast({ type: 'session-removed', id }),
+});
+// Load main now so a missing model or key fails at startup, as before.
+const modelLabel = await hub.modelLabel();
 
 const lastUserText = (messages: Message[]): string => {
   const last = messages[messages.length - 1];
@@ -56,60 +69,12 @@ const lastUserText = (messages: Message[]): string => {
     .trim();
 };
 
-/** Runs one prompt and yields its events as AICL stream events. */
-async function* runPrompt(text: string, signal: AbortSignal): AsyncGenerator<StreamEvent> {
-  const map = createPiEventMapper(randomUUID());
-  const queue: StreamEvent[] = [];
-  let wake: (() => void) | null = null;
-  let done = false;
-
-  const push = (events: StreamEvent[]) => {
-    if (!events.length) return;
-    queue.push(...events);
-    wake?.();
-  };
-  const unsubscribe = agent.subscribe((event) => push(map(event as PiEvent)));
-  const onAbort = () => void agent.abort();
-  signal.addEventListener('abort', onAbort, { once: true });
-
-  // prompt() resolves only after the whole run, auto-retries included, so it
-  // and not agent_end is the end of the turn.
-  agent
-    .prompt(text)
-    .then(
-      () => push(map.finish()),
-      (cause: unknown) => {
-        const message = cause instanceof Error ? cause.message : String(cause);
-        push([{ type: 'error', error: { message, retryable: true } }]);
-      },
-    )
-    .finally(() => {
-      done = true;
-      wake?.();
-    });
-
-  try {
-    while (true) {
-      if (queue.length) {
-        const event = queue.shift()!;
-        yield event;
-        continue;
-      }
-      if (done) return;
-      await new Promise<void>((resolve) => (wake = resolve));
-      wake = null;
-    }
-  } finally {
-    unsubscribe();
-    signal.removeEventListener('abort', onAbort);
-  }
-}
-
 /**
  * What the user has selected, sent by the dock with every request. Appended to
  * the prompt for the agent only; the client renders its own text.
  */
 function canvasContextBlock(body: Record<string, unknown>): string {
+  const staged = Array.isArray(body['context']) ? (body['context'] as Array<{ label?: unknown; text?: unknown }>) : [];
   const ctx = body['canvasContext'] as { selectedShapes?: unknown; uiSelection?: { shapeId?: unknown; nodeId?: unknown } | null } | undefined;
   if (!ctx || typeof ctx !== 'object') return '';
   const lines: string[] = [];
@@ -119,28 +84,50 @@ function canvasContextBlock(body: Record<string, unknown>): string {
   if (ui && typeof ui.shapeId === 'string' && typeof ui.nodeId === 'string') {
     lines.push(`ui-selection: screen ${ui.shapeId.replace(/^shape:/, '')}, element ${ui.nodeId}`);
   }
+  // Context the user staged with the Add-context chips: sent here so the dock never shows it.
+  for (const item of staged) {
+    if (typeof item?.text !== 'string') continue;
+    const label = typeof item.label === 'string' ? item.label : 'context';
+    lines.push(`context (${label}):\n${item.text.replaceAll('</canvas-context>', '')}`);
+  }
   return lines.length ? `\n\n<canvas-context>\n${lines.join('\n')}\n</canvas-context>` : '';
 }
 
-const chat = createChatHandler((req) => {
+/** HTTP surface for conversations (shared/runtime.ts). Hub errors carry their own status. */
+const sessionRoutes: RouteTable = {
+  'GET /api/sessions': (_req, res) => json(res, 200, { sessions: hub.list() }),
+  'POST /api/sessions': async (req, res) => {
+    const body = await readJson<{ title?: string; kind?: 'chat' | 'node' }>(req);
+    json(res, 200, { session: await hub.create(body) });
+  },
+  'PATCH /api/sessions/:id': async (req, res, { params }) => {
+    const body = await readJson<{ title?: string }>(req);
+    json(res, 200, { session: await hub.rename(params['id']!, body.title ?? '') });
+  },
+  'DELETE /api/sessions/:id': async (_req, res, { params }) => {
+    await hub.remove(params['id']!);
+    json(res, 200, { ok: true });
+  },
+  'GET /api/sessions/:id/messages': async (_req, res, { params }) =>
+    json(res, 200, { messages: await hub.messages(params['id']!) }),
+  'POST /api/sessions/:id/stop': async (_req, res, { params }) => {
+    await hub.stop(params['id']!);
+    json(res, 200, { ok: true });
+  },
+};
+
+const chat = createChatHandler(async (req) => {
   const text = lastUserText(req.messages);
   if (!text) throw new ChatHandlerError(400, 'The last message must be user text.', false);
-  if (agent.isStreaming) throw new ChatHandlerError(409, 'The agent is still working. Stop it or wait.', true);
-  return runPrompt(text + canvasContextBlock(req.body), req.signal);
+  const sessionId = typeof req.body['sessionId'] === 'string' ? req.body['sessionId'] : MAIN_SESSION_ID;
+  try {
+    hub.reserve(sessionId);
+  } catch (cause) {
+    if (cause instanceof SessionError) throw new ChatHandlerError(cause.status, cause.message, cause.status === 409);
+    throw cause;
+  }
+  return hub.run(sessionId, text + canvasContextBlock(req.body), req.signal);
 });
-
-const readBody = (req: IncomingMessage): Promise<string> =>
-  new Promise((resolve, reject) => {
-    const chunks: Buffer[] = [];
-    req.on('data', (chunk: Buffer) => chunks.push(chunk));
-    req.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
-    req.on('error', reject);
-  });
-
-const json = (res: ServerResponse, status: number, body: unknown) => {
-  res.writeHead(status, { 'content-type': 'application/json' });
-  res.end(JSON.stringify(body));
-};
 
 async function handleChat(req: IncomingMessage, res: ServerResponse): Promise<void> {
   const controller = new AbortController();
@@ -199,16 +186,20 @@ const server = createServer((req, res) => {
       case 'GET /api/info':
         return json(res, 200, {
           workspace: WORKSPACE,
-          model: agent.model ? `${agent.model.provider}/${agent.model.id}` : null,
-          busy: agent.isStreaming,
+          model: modelLabel,
+          busy: hub.anyBusy,
         });
       default: {
-        const hit = matchRoute(featureRoutes, req.method ?? 'GET', url.pathname);
+        const hit = matchRoute([sessionRoutes, ...featureRoutes], req.method ?? 'GET', url.pathname);
         if (hit) return hit.handler(req, res, { url, params: hit.params });
         return json(res, 404, { message: 'not found' });
       }
     }
   })().catch((cause: unknown) => {
+    if (cause instanceof SessionError) {
+      if (!res.headersSent) json(res, cause.status, { message: cause.message });
+      return;
+    }
     console.error(cause);
     if (!res.headersSent) json(res, 500, { message: 'internal error' });
     else res.end();
@@ -216,6 +207,5 @@ const server = createServer((req, res) => {
 });
 
 server.listen(PORT, HOST, () => {
-  const model = agent.model ? `${agent.model.provider}/${agent.model.id}` : 'none';
-  console.log(`aicl workspace server on http://${HOST}:${PORT} · workspace ${WORKSPACE} · model ${model}`);
+  console.log(`aicl workspace server on http://${HOST}:${PORT} · workspace ${WORKSPACE} · model ${modelLabel ?? 'none'}`);
 });
