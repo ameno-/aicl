@@ -29,6 +29,10 @@ import { MAIN_SESSION_ID } from '../shared/runtime.ts';
 import { formatCanvasContext } from '../shared/canvas-context-format.ts';
 import type { CanvasContext } from '../shared/runtime.ts';
 
+// A failing tool, applet function or stray promise must not take every conversation down with it.
+process.on('unhandledRejection', (reason) => console.error('[aicl] unhandled rejection:', reason));
+process.on('uncaughtException', (error) => console.error('[aicl] uncaught exception:', error));
+
 const PORT = Number(process.env['AICL_PORT'] ?? '5180');
 const HOST = process.env['AICL_HOST'] ?? '127.0.0.1';
 const WORKSPACE = path.resolve(process.env['AICL_WORKSPACE'] ?? process.cwd());
@@ -185,6 +189,13 @@ async function handleChat(req: IncomingMessage, res: ServerResponse): Promise<vo
     for await (const frame of response.toSse()) {
       if (res.writableEnded) break;
       res.write(frame);
+    }
+  } catch (cause) {
+    // The stream broke after it began: say so in-band so the client does not mistake it for a clean end.
+    console.error('[aicl] chat stream failed:', cause);
+    if (!res.writableEnded) {
+      const message = cause instanceof Error ? cause.message : 'The agent stream failed.';
+      res.write(`data: ${JSON.stringify({ type: 'error', error: { message, retryable: true } })}\n\n`);
     }
   } finally {
     clearInterval(keepAlive);

@@ -2,7 +2,7 @@
  * Wave 2, work package B — live plan (plan_update) and streaming terminal output.
  * CONTRACT: shared/agentic.ts + server/feature.ts.
  */
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { defineTool } from '@earendil-works/pi-coding-agent';
 import { Type } from 'typebox';
@@ -12,6 +12,8 @@ import type { FeatureContext, FeatureModule } from './feature.ts';
 import { sessionIdFromToolContext } from './session-context.ts';
 
 export const MAX_TERMINAL_LINES = 400;
+export const MAX_TERMINAL_CALLS = 20;
+const TERMINAL_SAVE_DEBOUNCE_MS = 250;
 const STATUSES = ['pending', 'running', 'done', 'error'] as const;
 
 export const LIVE_PROMPT = `# Live plan and terminal
@@ -84,6 +86,69 @@ export function createLive(context: FeatureContext): FeatureModule {
   const plans = new Map<string, LivePlan | null>();
   const terminals = new Map<string, Map<string, TerminalState>>(); // session → toolCallId → state
   const latestTool = new Map<string, string>();
+  const terminalDir = path.join(context.workspace, '.aicl', 'terminal');
+  const terminalFile = (sessionId: string) => path.join(terminalDir, `${encodeURIComponent(sessionId)}.json`);
+  const terminalsLoaded = new Set<string>();
+  const saveTimers = new Map<string, NodeJS.Timeout>();
+
+  /** Reads a session's saved terminals once. A call still running when the process died is closed as interrupted. */
+  const loadTerminals = (sessionId: string): void => {
+    if (terminalsLoaded.has(sessionId)) return;
+    terminalsLoaded.add(sessionId);
+    try {
+      const saved = JSON.parse(readFileSync(terminalFile(sessionId), 'utf8')) as {
+        latest?: string;
+        calls?: Array<TerminalState & { id: string }>;
+      };
+      const calls = new Map<string, TerminalState>();
+      for (const { id, ...t } of saved.calls ?? []) {
+        const state: TerminalState = { ...t, snapshot: '' };
+        if (!state.done) {
+          if (state.partial) state.lines.push(state.partial);
+          state.partial = '';
+          state.lines.push('(interrupted: the server restarted)');
+          state.done = true;
+          state.exitCode = 1;
+        }
+        calls.set(id, state);
+      }
+      terminals.set(sessionId, calls);
+      if (saved.latest) latestTool.set(sessionId, saved.latest);
+    } catch {
+      /* nothing saved, or unreadable: start empty */
+    }
+  };
+
+  const saveTerminals = (sessionId: string): void => {
+    saveTimers.delete(sessionId);
+    const calls = terminals.get(sessionId);
+    if (!calls) return;
+    try {
+      mkdirSync(terminalDir, { recursive: true });
+      const body = {
+        latest: latestTool.get(sessionId),
+        calls: [...calls].map(([id, { snapshot: _snapshot, ...t }]) => ({ id, ...t })),
+      };
+      const file = terminalFile(sessionId);
+      writeFileSync(`${file}.tmp`, JSON.stringify(body));
+      renameSync(`${file}.tmp`, file);
+    } catch {
+      /* in-memory still works */
+    }
+  };
+
+  /** Output arrives in bursts: write at most once per debounce window, and at once when a call ends. */
+  const persistTerminals = (sessionId: string, now = false): void => {
+    const pending = saveTimers.get(sessionId);
+    if (now) {
+      if (pending) clearTimeout(pending);
+      saveTerminals(sessionId);
+    } else if (!pending) {
+      const timer = setTimeout(() => saveTerminals(sessionId), TERMINAL_SAVE_DEBOUNCE_MS);
+      timer.unref();
+      saveTimers.set(sessionId, timer);
+    }
+  };
 
   const planFile = (sessionId: string) => path.join(plansDir, `${encodeURIComponent(sessionId)}.json`);
 
@@ -134,6 +199,7 @@ export function createLive(context: FeatureContext): FeatureModule {
   });
 
   const terminalFor = (sessionId: string, toolCallId: string): TerminalState => {
+    loadTerminals(sessionId);
     let session = terminals.get(sessionId);
     if (!session) terminals.set(sessionId, (session = new Map()));
     let t = session.get(toolCallId);
@@ -141,7 +207,7 @@ export function createLive(context: FeatureContext): FeatureModule {
       t = { lines: [], partial: '', snapshot: '', done: false };
       session.set(toolCallId, t);
       // Bound memory: keep the 20 most recent commands per session.
-      while (session.size > 20) session.delete(session.keys().next().value!);
+      while (session.size > MAX_TERMINAL_CALLS) session.delete(session.keys().next().value!);
     }
     return t;
   };
@@ -173,6 +239,7 @@ export function createLive(context: FeatureContext): FeatureModule {
       const t = terminalFor(sessionId, id);
       t.command = event.args?.command;
       latestTool.set(sessionId, id);
+      persistTerminals(sessionId);
       emit(sessionId, { toolCallId: id, command: t.command, text: '' });
     } else if (event.type === 'tool_execution_update') {
       const t = terminalFor(sessionId, id);
@@ -180,6 +247,7 @@ export function createLive(context: FeatureContext): FeatureModule {
       const fresh = newText(t.snapshot, snap);
       t.snapshot = snap;
       append(t, fresh);
+      persistTerminals(sessionId);
       if (fresh) emit(sessionId, { toolCallId: id, text: fresh });
     } else if (event.type === 'tool_execution_end') {
       const t = terminalFor(sessionId, id);
@@ -195,6 +263,7 @@ export function createLive(context: FeatureContext): FeatureModule {
       }
       t.done = true;
       t.exitCode = exit ? Number(exit[1]) : event.isError ? 1 : 0;
+      persistTerminals(sessionId, true);
       emit(sessionId, { toolCallId: id, text: fresh, done: true, exitCode: t.exitCode });
     }
   }
@@ -204,6 +273,7 @@ export function createLive(context: FeatureContext): FeatureModule {
       'GET /api/sessions/:id/plan': (_req, res, { params }) => json(res, 200, { plan: getPlan(params['id']!) }),
       'GET /api/sessions/:id/terminal/:toolId': (_req, res, { params }) => {
         const sessionId = params['id']!;
+        loadTerminals(sessionId);
         const toolId = params['toolId'] === 'latest' ? latestTool.get(sessionId) : params['toolId'];
         const t = toolId ? terminals.get(sessionId)?.get(toolId) : undefined;
         if (!t || !toolId) return json(res, 200, { lines: [], done: false });

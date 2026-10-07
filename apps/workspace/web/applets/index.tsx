@@ -5,6 +5,7 @@
  */
 import { Component, useEffect, useState, useSyncExternalStore, type ComponentType, type ReactNode } from 'react';
 import type { AppletInfo, WorkspaceConfig } from '../../shared/runtime.ts';
+import { ErrorBoundary } from '../ErrorBoundary.tsx';
 import { onServerEvent } from '../events.ts';
 import { sendToSession } from '../sessionsApi.ts';
 import './host.ts';
@@ -217,9 +218,11 @@ export function AppletHost({ id }: { id: string }) {
   const { Applet } = loaded;
   return (
     <div style={{ width: '100%', height: '100%', overflow: 'auto', position: 'relative' }}>
-      <Boundary id={id} key={builtAt ?? 0}>
-        <Applet />
-      </Boundary>
+      <ErrorBoundary label="applet" resetKeys={[builtAt]}>
+        <Boundary id={id} key={builtAt ?? 0}>
+          <Applet />
+        </Boundary>
+      </ErrorBoundary>
     </div>
   );
 }

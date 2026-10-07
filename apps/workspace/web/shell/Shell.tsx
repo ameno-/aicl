@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ChatPanel } from '../ChatPanel.tsx';
+import { ConnectionBanner } from '../ConnectionBanner.tsx';
 import { Scratchpad } from '../Scratchpad.tsx';
 import { onServerEvent } from '../events.ts';
 import { navigate, useRoute } from '../router.ts';
@@ -48,6 +49,7 @@ export function Shell() {
 
   return (
     <div className="shell" data-aicl-root="" data-route={route.tab}>
+      <ConnectionBanner />
       <TopBar name={config.name} route={route} views={views} dockVisible={dockVisible} dockOpen={dockOpen} onToggleDock={toggleDock} />
       <div className="shell-body">
         <div className="shell-stage">

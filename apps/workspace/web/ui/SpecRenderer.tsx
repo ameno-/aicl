@@ -1,4 +1,5 @@
 import { Component, useCallback, useEffect, useMemo, useRef, type MouseEvent, type ReactNode } from 'react';
+import { ErrorBoundary } from '../ErrorBoundary.tsx';
 import { THEME_PRESETS, resolveTheme, type ScreenSpec, type UiNode } from '../../shared/ui-spec.ts';
 import { NodeBody, isObj, layoutStyle } from './nodes.tsx';
 import { themeVars } from './theme.ts';
@@ -72,7 +73,7 @@ function NodeInner({ node, selectedId, depth }: { node: UiNode; selectedId: stri
 }
 
 /** Renders a ScreenSpec at its natural size. The parent decides the frame and scale. */
-export function SpecRenderer({ spec, mode, selectedId, onSelect }: SpecRendererProps) {
+function SpecRendererInner({ spec, mode, selectedId, onSelect }: SpecRendererProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   const hoverRef = useRef<Element | null>(null);
 
@@ -127,5 +128,14 @@ export function SpecRenderer({ spec, mode, selectedId, onSelect }: SpecRendererP
         <div className="aicl-ui-quiet">This screen has no content yet</div>
       )}
     </div>
+  );
+}
+
+/** A broken spec shows a small error in place of the screen; the page around it keeps working. */
+export function SpecRenderer(props: SpecRendererProps) {
+  return (
+    <ErrorBoundary label="screen" resetKeys={[props.spec]}>
+      <SpecRendererInner {...props} />
+    </ErrorBoundary>
   );
 }
