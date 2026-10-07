@@ -16,6 +16,7 @@ import {
 } from '@earendil-works/pi-coding-agent';
 import { APPLETS_PROMPT } from './applets.ts';
 import { CANVAS_PROMPT } from './canvas-tools.ts';
+import { findModel } from './models.ts';
 
 const SYSTEM_PROMPT = `You are the agent inside an AICL workspace: a web page where the user chats with you beside a shared scratchpad, an infinite tldraw whiteboard. You and the user both draw on it, live.
 
@@ -83,15 +84,19 @@ export async function createAgentFactory(options: AgentOptions) {
   }
 
   return {
-    /** Builds one Pi session on `sessionManager` (persisted or not). */
-    async createSession(sessionManager: SessionManager) {
+    modelRuntime,
+    /** "provider/id" → Pi model (undefined when unknown). */
+    resolveModel: (key: string) => findModel(modelRuntime, key),
+    /** Builds one Pi session on `sessionManager` (persisted or not); `modelKey` overrides the default model. */
+    async createSession(sessionManager: SessionManager, modelKey?: string) {
+      const chosen = modelKey ? findModel(modelRuntime, modelKey) : undefined;
       const { session, modelFallbackMessage } = await createAgentSession({
         cwd: options.cwd,
         agentDir,
         modelRuntime,
         settingsManager,
         resourceLoader,
-        model,
+        model: (chosen as typeof model | undefined) ?? model,
         thinkingLevel,
         // write/edit let the agent author applets in .aicl/applets (moi-style generative code).
         // bash runs commands (gated by approval, streamed to live terminals).
