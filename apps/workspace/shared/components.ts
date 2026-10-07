@@ -118,6 +118,15 @@ export const COMPONENTS: ComponentSpec[] = [
     defaultSize: { w: 220, h: 120 },
     sample: { label: 'Tests passing', value: 44, delta: '+4 today', trend: 'up' },
   },
+  {
+    name: 'applet',
+    title: 'Applet',
+    description:
+      'A live applet (a React widget written in .aicl/applets/<id>.tsx). Prefer applet_place, which builds it and sizes the card.',
+    propsHint: '{ id: string }',
+    defaultSize: { w: 320, h: 260 },
+    sample: { id: 'example' },
+  },
 ];
 
 export const COMPONENT_NAMES = COMPONENTS.map((c) => c.name);

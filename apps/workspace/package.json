@@ -18,6 +18,7 @@
     "@aicl/server": "file:../../packages/server",
     "@aicl/styles": "file:../../packages/styles",
     "@earendil-works/pi-coding-agent": "0.84.2",
+    "lucide-react": "^1.52.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "tldraw": "^5.5.2",
@@ -28,8 +29,9 @@
     "@types/react": "^18.3.31",
     "@types/react-dom": "^18.3.7",
     "@vitejs/plugin-react": "^4.3.4",
+    "esbuild": "^0.25.12",
+    "playwright-core": "1.58.2",
     "typescript": "^5.6.0",
-    "vite": "^6.2.0",
-    "playwright-core": "1.58.2"
+    "vite": "^6.2.0"
   }
 }
