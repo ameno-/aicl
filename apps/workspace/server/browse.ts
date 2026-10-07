@@ -16,6 +16,21 @@ export interface FileEntry {
 }
 
 const HIDDEN = new Set(['node_modules', '.git', '.DS_Store']);
+/** Never listed or indexed by the files surface: build output, VCS data, agent session logs. */
+const TREE_IGNORED = new Set(['node_modules', '.git', '.DS_Store', 'dist']);
+
+/** True for entries the file tree and quick-open skip. `rel` is workspace-relative with "/" separators. */
+export function isTreeIgnored(rel: string, dotfiles = false): boolean {
+  const parts = rel.split('/');
+  if (parts.some((p) => TREE_IGNORED.has(p))) return true;
+  if (rel === '.aicl/sessions' || rel.startsWith('.aicl/sessions/')) return true;
+  return !dotfiles && parts.some((p) => p.startsWith('.'));
+}
+
+export interface ListOptions {
+  /** Apply the files-surface ignore rules (dist, .aicl/sessions; dotfiles only when asked). */
+  tree?: { dotfiles: boolean };
+}
 export const MAX_TEXT_BYTES = 200_000;
 
 export class BrowseError extends Error {
@@ -41,10 +56,12 @@ export async function resolveInside(root: string, requested: string): Promise<{ 
   return { real, rel: path.relative(realRoot, real).split(path.sep).join('/') };
 }
 
-export async function listDir(root: string, dir: string): Promise<{ dir: string; entries: FileEntry[] }> {
+export async function listDir(root: string, dir: string, options: ListOptions = {}): Promise<{ dir: string; entries: FileEntry[] }> {
   const { real, rel } = await resolveInside(root, dir);
   if (!(await stat(real)).isDirectory()) throw new BrowseError(400, 'not a directory');
-  const names = (await readdir(real, { withFileTypes: true })).filter((d) => !HIDDEN.has(d.name));
+  const names = (await readdir(real, { withFileTypes: true })).filter((d) =>
+    options.tree ? !isTreeIgnored(rel ? `${rel}/${d.name}` : d.name, options.tree.dotfiles) : !HIDDEN.has(d.name),
+  );
   const entries: FileEntry[] = [];
   for (const d of names) {
     const full = path.join(real, d.name);
