@@ -17,6 +17,10 @@ Adapted means: imports rewritten to relative paths, shadcn colour names kept
 <!-- One row per file: | src/vendor/... | project | source path | -->
 | File | Project | Source path |
 |---|---|---|
+| src/vendor/spell-ui/kbd.tsx | Spell UI | registry/spell-ui/kbd.tsx |
+| src/vendor/uselayouts/discrete-tabs.tsx | uselayouts | registry/default/example/discrete-tabs.tsx |
+| src/vendor/uselayouts/inline-edit.tsx | uselayouts | registry/default/example/inline-edit.tsx |
+| src/vendor/uselayouts/smooth-dropdown.tsx | uselayouts | registry/default/example/smooth-dropdown.tsx |
 
 ## MIT licence text
 
