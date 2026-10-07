@@ -15,6 +15,7 @@ import { navigate, useRoute } from '../router.ts';
 import { useApplets, useWorkspaceConfig } from '../applets/index.tsx';
 import { AgentPage } from './AgentPage.tsx';
 import { OverviewPage } from './OverviewPage.tsx';
+import { AgentsView } from '../swarm/AgentsView.tsx';
 import { TopBar } from './TopBar.tsx';
 import { ViewPage } from './ViewPage.tsx';
 import './shell.css';
@@ -115,6 +116,11 @@ function ShellBody({ kit, prefersDark }: { kit: ReturnType<typeof withTheme>; pr
           {route.tab === 'agent' ? (
             <div className="shell-pane" data-pane="agent">
               <AgentPage routeSessionId={route.sessionId} kit={kit} />
+            </div>
+          ) : null}
+          {route.tab === 'agents' ? (
+            <div className="shell-pane" data-pane="agents">
+              <AgentsView kit={kit} />
             </div>
           ) : null}
           {route.tab === 'overview' ? (

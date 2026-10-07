@@ -48,7 +48,12 @@ function upsert(session: SessionInfo): void {
 function start(): void {
   if (started || typeof window === 'undefined') return;
   started = true;
-  onServerEvent('session', (e) => upsert(e.session));
+  onServerEvent('session', (e) => {
+    const before = list.get().find((s) => s.id === e.session.id);
+    upsert(e.session);
+    // Server-run sessions (sub-agents) never stream into this page: pull their transcript as they work and when they finish.
+    if (e.session.parentId || before?.status === 'running') syncFromServer(e.session.id);
+  });
   onServerEvent('session-removed', (e) => {
     list.set(list.get().filter((s) => s.id !== e.id));
     holders.delete(e.id);
@@ -355,6 +360,36 @@ function makeHolder(sessionId: string, initial: Message[] | null): Holder {
       store.set(holder.controller);
     });
   return holder;
+}
+
+/** Cheap change signature of a transcript: messages, parts, and text length. */
+const transcriptSize = (messages: Message[]): number =>
+  messages.reduce((n, m) => n + 1 + m.parts.reduce((k, p) => k + 1 + (p.type === 'text' ? p.text.length : 0), 0), 0);
+
+const syncTimers = new Map<string, ReturnType<typeof setTimeout>>();
+
+/** Reloads a mounted conversation from the server when the server has more than the page shows (throttled). */
+function syncFromServer(sessionId: string): void {
+  const holder = holders.get(sessionId);
+  if (!holder || !holder.isReady || syncTimers.has(sessionId)) return;
+  syncTimers.set(
+    sessionId,
+    setTimeout(() => {
+      syncTimers.delete(sessionId);
+      const state = holder.controller.state.get().status;
+      if (state === 'submitted' || state === 'streaming' || holders.get(sessionId) !== holder) return;
+      void fetch(`/api/sessions/${encodeURIComponent(sessionId)}/messages`)
+        .then((r) => (r.ok ? (r.json() as Promise<{ messages: Message[] }>) : null))
+        .then((body) => {
+          const status = holder.controller.state.get().status;
+          if (!body || holders.get(sessionId) !== holder || status === 'submitted' || status === 'streaming') return;
+          if (transcriptSize(body.messages) === transcriptSize(holder.controller.messages)) return;
+          holder.controller = makeController(sessionId, body.messages);
+          holder.store.set(holder.controller);
+        })
+        .catch(() => {});
+    }, 1200),
+  );
 }
 
 function holderFor(sessionId: string): Holder {

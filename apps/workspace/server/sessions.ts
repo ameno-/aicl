@@ -14,7 +14,7 @@ import { randomUUID } from 'node:crypto';
 import { mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import type { Message, Part, StreamEvent } from '@aicl/core';
-import { MAIN_SESSION_ID, type SessionInfo } from '../shared/runtime.ts';
+import { MAIN_SESSION_ID, type SessionInfo, type SessionUsage } from '../shared/runtime.ts';
 import { createPiEventMapper, type PiEvent } from './pi-mapper.ts';
 
 /** The slice of a Pi AgentSession the hub uses. */
@@ -26,6 +26,8 @@ export interface AgentLike {
   subscribe(listener: (event: unknown) => void): () => void;
   prompt(text: string): Promise<void>;
   abort(): Promise<void>;
+  /** Queues a message for delivery after the current turn's tool calls (Pi `steer`). */
+  steer?(text: string): Promise<void>;
   /** Switches the live session's model (persisted in its transcript by Pi). */
   setModel?(model: never): Promise<void>;
   dispose?(): void;
@@ -44,6 +46,15 @@ export interface IndexEntry {
   preview?: string;
   /** "provider/id" the user picked for this session; absent = the workspace default. */
   model?: string;
+  /** Swarm lineage: who spawned this session, the top of its tree, and what it was asked to do. */
+  parentId?: string;
+  rootId?: string;
+  role?: string;
+  task?: string;
+  spawnedBy?: 'user' | 'agent';
+  usage?: SessionUsage;
+  startedAt?: number;
+  finishedAt?: number;
 }
 
 export class SessionError extends Error {
@@ -53,6 +64,23 @@ export class SessionError extends Error {
     this.status = status;
     this.name = 'SessionError';
   }
+}
+
+/** A short label for a running tool call: "bash: npm test", "read: src/a.ts". */
+export function stepLabel(tool: string, args: unknown): string {
+  const a = (args ?? {}) as Record<string, unknown>;
+  const pick = [a['command'], a['path'], a['name'], a['to'], a['id'], a['query'], a['question']].find((v) => typeof v === 'string' && v) as string | undefined;
+  const flat = pick ? pick.replace(/\s+/g, ' ').trim() : '';
+  const detail = flat.length > 50 ? `${flat.slice(0, 49)}…` : flat;
+  return detail ? `${tool}: ${detail}` : tool;
+}
+
+interface PiLiveEvent {
+  type?: string;
+  toolName?: string;
+  args?: unknown;
+  message?: { role?: string; usage?: { input?: number; output?: number; cost?: { total?: number } } };
+  assistantMessageEvent?: { type?: string };
 }
 
 /* ── History conversion ───────────────────────────────────────────── */
@@ -183,6 +211,8 @@ export async function createSessionHub(options: SessionHubOptions) {
   const status = new Map<string, 'running' | 'error'>();
   const agents = new Map<string, Promise<AgentLike>>();
   const busy = new Set<string>();
+  const steps = new Map<string, string>();
+  const stopped = new Set<string>();
   let writing: Promise<void> = Promise.resolve();
 
   await mkdir(options.dir, { recursive: true });
@@ -206,7 +236,63 @@ export async function createSessionHub(options: SessionHubOptions) {
     kind: e.kind,
     ...(e.preview ? { preview: e.preview } : {}),
     ...(e.model ? { model: e.model } : {}),
+    ...(e.parentId ? { parentId: e.parentId } : {}),
+    ...(e.rootId ? { rootId: e.rootId } : {}),
+    ...(e.role ? { role: e.role } : {}),
+    ...(e.task ? { task: e.task } : {}),
+    ...(e.spawnedBy ? { spawnedBy: e.spawnedBy } : {}),
+    ...(e.usage ? { usage: e.usage } : {}),
+    ...(steps.has(e.id) ? { currentStep: steps.get(e.id)! } : {}),
+    ...(e.startedAt ? { startedAt: e.startedAt } : {}),
+    ...(e.finishedAt ? { finishedAt: e.finishedAt } : {}),
+    ...(stopped.has(e.id) ? { stopped: true } : {}),
   });
+
+  /** Every session below `id`, nearest first. */
+  const descendantsOf = (id: string): IndexEntry[] => {
+    const out: IndexEntry[] = [];
+    const queue = [id];
+    while (queue.length) {
+      const at = queue.shift()!;
+      for (const e of entries.values()) {
+        if (e.parentId === at && !out.includes(e)) {
+          out.push(e);
+          queue.push(e.id);
+        }
+      }
+    }
+    return out;
+  };
+
+  /** Folds one live Pi event into the session's usage and current step. */
+  const track = (id: string, raw: unknown): void => {
+    const e = entries.get(id);
+    const event = raw as PiLiveEvent;
+    if (!e || !event?.type) return;
+    let step: string | undefined;
+    if (event.type === 'tool_execution_start') step = stepLabel(event.toolName ?? 'tool', event.args);
+    else if (event.type === 'message_update') {
+      const t = event.assistantMessageEvent?.type;
+      if (t === 'thinking_start') step = 'thinking';
+      else if (t === 'text_start') step = 'writing';
+    } else if (event.type === 'message_end' && event.message?.role === 'assistant') {
+      const u = event.message.usage;
+      if (u) {
+        const prev = e.usage ?? { inputTokens: 0, outputTokens: 0 };
+        const cost = (prev.costUsd ?? 0) + (u.cost?.total ?? 0);
+        e.usage = {
+          inputTokens: prev.inputTokens + (u.input ?? 0),
+          outputTokens: prev.outputTokens + (u.output ?? 0),
+          ...(cost > 0 ? { costUsd: cost } : {}),
+        };
+        options.onChange?.(info(e));
+      }
+    }
+    if (step && busy.has(id) && steps.get(id) !== step) {
+      steps.set(id, step);
+      options.onChange?.(info(e));
+    }
+  };
 
   const persist = (): Promise<void> => {
     const body = JSON.stringify({ sessions: [...entries.values()] }, null, 2);
@@ -244,7 +330,10 @@ export async function createSessionHub(options: SessionHubOptions) {
         .then((existing) => options.createAgent(existing, e.model))
         .then((a) => {
           if (a.sessionFile && !e.file) e.file = path.basename(a.sessionFile);
-          if (options.onAgentEvent) a.subscribe((event) => options.onAgentEvent!(id, event));
+          a.subscribe((event) => {
+            track(id, event);
+            options.onAgentEvent?.(id, event);
+          });
           return a;
         });
       agents.set(id, agent);
@@ -276,8 +365,11 @@ export async function createSessionHub(options: SessionHubOptions) {
       return undefined;
     },
 
-    async create(input: { title?: string; kind?: SessionInfo['kind'] } = {}): Promise<SessionInfo> {
+    async create(
+      input: { title?: string; kind?: SessionInfo['kind']; parentId?: string; role?: string; task?: string; spawnedBy?: 'user' | 'agent'; model?: string } = {},
+    ): Promise<SessionInfo> {
       const t = now();
+      const parent = input.parentId ? need(input.parentId) : undefined;
       const title = input.title?.trim();
       const e: IndexEntry = {
         id: randomUUID().slice(0, 8),
@@ -286,6 +378,10 @@ export async function createSessionHub(options: SessionHubOptions) {
         updatedAt: t,
         kind: input.kind === 'node' ? 'node' : 'chat',
         ...(title ? { titleSource: 'user' as const } : {}),
+        ...(parent ? { parentId: parent.id, rootId: parent.rootId ?? parent.id, spawnedBy: input.spawnedBy ?? 'agent' } : {}),
+        ...(input.role ? { role: input.role } : {}),
+        ...(input.task ? { task: input.task } : {}),
+        ...(input.model ? { model: input.model } : {}),
       };
       entries.set(e.id, e);
       await touch(e);
@@ -331,6 +427,8 @@ export async function createSessionHub(options: SessionHubOptions) {
       agents.delete(id);
       busy.delete(id);
       status.delete(id);
+      steps.delete(id);
+      stopped.delete(id);
       entries.delete(id);
       if (e.file) await rm(path.join(options.dir, e.file), { force: true });
       options.onRemove?.(id);
@@ -344,10 +442,44 @@ export async function createSessionHub(options: SessionHubOptions) {
       return convertHistory(agent.messages, id);
     },
 
+    /** Aborts the session's run and, with it, every running session it spawned. */
     async stop(id: string): Promise<void> {
       need(id);
-      const agent = await agents.get(id)?.catch(() => undefined);
-      await agent?.abort();
+      const targets = [id, ...descendantsOf(id).map((d) => d.id)].filter((x) => x === id || busy.has(x));
+      await Promise.all(
+        targets.map(async (x) => {
+          if (busy.has(x)) {
+            stopped.add(x);
+            const e = entries.get(x);
+            if (e) options.onChange?.(info(e));
+          }
+          const agent = await agents.get(x)?.catch(() => undefined);
+          await agent?.abort();
+        }),
+      );
+    },
+
+    /** Delivers a message to a running session after its current tool calls (Pi steer). */
+    async steer(id: string, text: string): Promise<void> {
+      need(id);
+      if (!busy.has(id)) throw new SessionError(409, 'The agent is not running.');
+      const agent = await agentFor(id);
+      if (agent.steer) await agent.steer(text);
+      else await (agent as AgentLike).prompt(text);
+    },
+
+    wasStopped(id: string): boolean {
+      return stopped.has(id);
+    },
+
+    /** Sessions spawned directly by `id`. */
+    children(id: string): SessionInfo[] {
+      return [...entries.values()].filter((e) => e.parentId === id).map(info);
+    },
+
+    /** All sessions below `id`. */
+    descendants(id: string): SessionInfo[] {
+      return descendantsOf(id).map(info);
     },
 
     isBusy(id: string): boolean {
@@ -385,6 +517,10 @@ export async function createSessionHub(options: SessionHubOptions) {
           }
         }
         status.set(id, 'running');
+        stopped.delete(id);
+        steps.delete(id);
+        e.startedAt = now();
+        delete e.finishedAt;
         e.updatedAt = now();
         void touch(e);
 
@@ -440,8 +576,10 @@ export async function createSessionHub(options: SessionHubOptions) {
         throw cause;
       } finally {
         busy.delete(id);
+        steps.delete(id);
         if (failed) status.set(id, 'error');
         else status.delete(id);
+        e.finishedAt = now();
         e.updatedAt = now();
         void touch(e);
       }

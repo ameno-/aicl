@@ -15,6 +15,7 @@ import { createHitl } from './hitl.ts';
 import { createLive } from './live.ts';
 import { createNodes } from './nodes.ts';
 import { createGraph } from './graph.ts';
+import { createSwarm } from './swarm.ts';
 import { createSurfaceRegistry } from './surfaces/registry.ts';
 import type { SurfaceContext } from './surfaces/context.ts';
 import { createTerminalSurface } from './surfaces/terminal.ts';
@@ -72,6 +73,7 @@ const features: FeatureModule[] = [
   createLive(featureContext),
   createNodes(featureContext),
   createGraph(featureContext),
+  createSwarm(featureContext),
   { routes: surfaces.routes, tools: [] },
   createTerminalSurface(surfaceContext),
   createBrowserSurface(surfaceContext),

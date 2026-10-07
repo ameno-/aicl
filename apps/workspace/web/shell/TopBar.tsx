@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { Check, ChevronDown, Command, LayoutGrid, MessageSquare, PanelRight, PenTool, Settings } from 'lucide-react';
+import { Check, ChevronDown, Command, LayoutGrid, MessageSquare, Network, PanelRight, PenTool, Settings } from 'lucide-react';
 import type { ProviderKit } from '../../shared/kits.ts';
 import type { AppletInfo, WorkspaceRoute } from '../../shared/runtime.ts';
 import { KitSwitcher } from '../app/KitSwitcher.tsx';
@@ -104,6 +104,7 @@ export function TopBar({ kit, name, route, views, dockVisible, dockOpen, onToggl
       <nav className="shell-tabs" role="tablist" aria-label="Workspace tabs">
         {tab('agent', 'Agent', <MessageSquare size={14} aria-hidden="true" />, route.tab === 'agent', () => navigate({ tab: 'agent' }))}
         {tab('canvas', 'Canvas', <PenTool size={14} aria-hidden="true" />, route.tab === 'canvas', () => navigate({ tab: 'canvas' }))}
+        {tab('agents', 'Agents', <Network size={14} aria-hidden="true" />, route.tab === 'agents', () => navigate({ tab: 'agents' }))}
         {tab('overview', 'Overview', <LayoutGrid size={14} aria-hidden="true" />, route.tab === 'overview', () => navigate({ tab: 'overview' }))}
         {views.map((v) =>
           tab(`view:${v.id}`, v.title, <AppletIcon name={v.icon} size={14} />, route.tab === 'view' && route.appletId === v.id, () =>

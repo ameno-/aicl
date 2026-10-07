@@ -22,6 +22,7 @@ import {
 import { asAgent } from './canvasContext.ts';
 import { addImage, viewShapes } from './executor-image.ts';
 import { uiGet, uiSet } from './ui/executor-ui.ts';
+import { applySwarmRun } from './swarm/canvas.ts';
 
 const GAP = 80;
 const DEFAULT_W = 200;
@@ -62,6 +63,8 @@ async function run(editor: Editor, op: ScratchOp): Promise<ScratchResult> {
       return { op: 'arrange', ids: arrange(editor, op.ids, op.mode, op.gap) };
     case 'focus':
       return { op: 'focus', ids: focus(editor, op.ids, op.bounds) };
+    case 'swarm':
+      return { op: 'swarm', ids: applySwarmRun(editor, op.run) };
   }
 }
 

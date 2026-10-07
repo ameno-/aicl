@@ -61,7 +61,7 @@ function start(): void {
   onReconnect(() => load(true));
 }
 
-function useHitl(): State {
+export function useHitl(): State {
   start();
   return useSyncExternalStore(
     (l) => {
@@ -223,7 +223,7 @@ export function AskUserPart({ part }: PartProps) {
 
 /* ── Approvals strip ──────────────────────────────────────────────── */
 
-function ApprovalCard({ request }: { request: Approval }) {
+export function ApprovalCard({ request }: { request: Approval }) {
   const [open, setOpen] = useState(false);
   const [note, setNote] = useState('');
   const [busy, setBusy] = useState(false);

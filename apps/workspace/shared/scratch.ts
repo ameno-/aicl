@@ -72,7 +72,40 @@ export type ScratchOp =
   /** Tidy shapes with the editor's own align/distribute/stack, or a grid. */
   | { op: 'arrange'; ids: string[]; mode: ArrangeMode; gap?: number }
   /** Animate the USER's camera to these shapes or page bounds. */
-  | { op: 'focus'; ids?: string[]; bounds?: { x: number; y: number; w: number; h: number } };
+  | { op: 'focus'; ids?: string[]; bounds?: { x: number; y: number; w: number; h: number } }
+  /** Create or update one swarm run frame (agent cards + arrows); the layout is the server's. */
+  | { op: 'swarm'; run: SwarmRun };
+
+export type SwarmStatus = 'idle' | 'running' | 'done' | 'error' | 'stopped';
+
+/** One box of a swarm run: the root (a plain box) or an agent card bound to a session. Positions are relative to the frame. */
+export interface SwarmRunNode {
+  /** Short shape id of the box. */
+  id: string;
+  /** Agent card: the session it shows. Absent for the root box. */
+  sessionId?: string;
+  name: string;
+  role?: string;
+  /** Short shape id of the parent box; an arrow runs parent → this, labelled `label`. */
+  parent?: string;
+  label?: string;
+  status: SwarmStatus;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
+export interface SwarmRun {
+  /** Short shape id of the frame. */
+  frameId: string;
+  title: string;
+  /** Create the frame when missing (a spawn happened); otherwise only update what exists. */
+  create: boolean;
+  w: number;
+  h: number;
+  nodes: SwarmRunNode[];
+}
 
 export const ARRANGE_MODES = [
   'align-left',
@@ -113,7 +146,8 @@ export type ScratchResult =
   | { op: 'read'; shapes: ShapeSummary[] }
   | { op: 'view'; png: string | null }
   | { op: 'add' | 'update' | 'delete' | 'clear' | 'ui_set' | 'arrange' | 'focus'; ids: string[] }
-  | { op: 'ui_get'; spec: unknown };
+  | { op: 'ui_get'; spec: unknown }
+  | { op: 'swarm'; ids: string[] };
 
 /** Agent-facing ids drop tldraw's `shape:` prefix. */
 export const shortId = (id: string): string => (id.startsWith('shape:') ? id.slice(6) : id);
