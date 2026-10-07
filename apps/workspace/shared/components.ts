@@ -27,6 +27,15 @@ export interface ComponentSpec {
 
 export const COMPONENTS: ComponentSpec[] = [
   {
+    name: 'surface',
+    title: 'Surface',
+    description:
+      'A live shared surface: a terminal, browser, file, diff or PR review that the user and agents both use. Open surfaces with their tools (terminal_open, browser_open, file_open, diff_show…), then place them here by kind and id.',
+    propsHint: "{ kind: 'terminal' | 'browser' | 'file' | 'diff' | 'review' | 'process' | 'sideshow'; id: string }",
+    defaultSize: { w: 640, h: 420 },
+    sample: { kind: 'terminal', id: 'main' },
+  },
+  {
     name: 'agent',
     title: 'Agent',
     description:

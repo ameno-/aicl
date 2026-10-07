@@ -16,6 +16,7 @@ import { AgentRenderer } from './agent.tsx';
 import { LivePlanRenderer } from './live-plan.tsx';
 import { LiveTerminalRenderer } from './live-terminal.tsx';
 import { QuestionRenderer } from './question.tsx';
+import { SurfaceRenderer } from './surface.tsx';
 
 /**
  * Renderers keyed by catalog name (shared/components.ts). The shape falls back
@@ -37,4 +38,6 @@ export const renderers: Record<string, ComponentRenderer> = {
   'live-plan': LivePlanRenderer,
   'live-terminal': LiveTerminalRenderer,
   question: QuestionRenderer,
+  // Wave 4 (shared/surfaces.ts)
+  surface: SurfaceRenderer,
 };

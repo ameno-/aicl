@@ -9,6 +9,7 @@
  *   D  canvas agent — viewport/action context, arrange + focus tools, CLI
  */
 
+import type { SurfaceInfo, SurfaceKind } from './surfaces.ts';
 import type { Message } from '@aicl/core';
 import type { GraphEdge, GraphNode, HitlAnswer, HitlRequest, LivePlan, TerminalChunk } from './agentic.ts';
 
@@ -199,4 +200,6 @@ export type ServerEvent =
   | { type: 'hitl'; request: HitlRequest }
   | { type: 'hitl-resolved'; id: string; answer: HitlAnswer }
   | { type: 'plan'; plan: LivePlan }
-  | { type: 'terminal'; chunk: TerminalChunk };
+  | { type: 'terminal'; chunk: TerminalChunk }
+  | { type: 'surface'; surface: SurfaceInfo }
+  | { type: 'surface-removed'; kind: SurfaceKind; id: string };

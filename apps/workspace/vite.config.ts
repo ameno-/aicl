@@ -30,6 +30,9 @@ export default defineConfig({
   server: {
     port: Number(process.env['AICL_WEB_PORT'] ?? '5181'),
     strictPort: true,
-    proxy: { '/api': { target: `http://127.0.0.1:${serverPort}`, changeOrigin: true } },
+    proxy: {
+      '/api': { target: `http://127.0.0.1:${serverPort}`, changeOrigin: true },
+      '/ws': { target: `ws://127.0.0.1:${serverPort}`, ws: true },
+    },
   },
 });
