@@ -1,3 +1,4 @@
+import { formatGraph } from './canvas-graph.ts';
 import { formatAddress, type CanvasContext } from './runtime.ts';
 
 /**
@@ -13,6 +14,11 @@ export function formatCanvasContext(ctx: CanvasContext | null | undefined): stri
   const ui = ctx.uiSelection;
   if (ui && typeof ui.shapeId === 'string' && typeof ui.nodeId === 'string') {
     lines.push(`ui-selection: screen ${ui.shapeId.replace(/^shape:/, '')}, element ${ui.nodeId}`);
+  }
+  const around = ctx.neighbourhood;
+  if (around && Array.isArray(around.nodes) && around.nodes.length) {
+    const graph = { nodes: around.nodes, edges: Array.isArray(around.edges) ? around.edges : [], builtAt: 0 };
+    lines.push(`neighbourhood (selection plus what is near, inside, connected):\n${formatGraph(graph, { maxNodes: 15 })}`);
   }
   const v = ctx.viewport;
   if (v && [v.x, v.y, v.w, v.h].every((n) => typeof n === 'number' && Number.isFinite(n))) {
