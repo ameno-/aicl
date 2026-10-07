@@ -68,7 +68,26 @@ export type ScratchOp =
   /** Read the ScreenSpec stored on a screen shape (aicl-component, component "screen"). */
   | { op: 'ui_get'; id: string }
   /** Replace a screen shape's ScreenSpec (already normalised/patched by the server). */
-  | { op: 'ui_set'; id: string; spec: unknown };
+  | { op: 'ui_set'; id: string; spec: unknown }
+  /** Tidy shapes with the editor's own align/distribute/stack, or a grid. */
+  | { op: 'arrange'; ids: string[]; mode: ArrangeMode; gap?: number }
+  /** Animate the USER's camera to these shapes or page bounds. */
+  | { op: 'focus'; ids?: string[]; bounds?: { x: number; y: number; w: number; h: number } };
+
+export const ARRANGE_MODES = [
+  'align-left',
+  'align-center-horizontal',
+  'align-right',
+  'align-top',
+  'align-center-vertical',
+  'align-bottom',
+  'distribute-horizontal',
+  'distribute-vertical',
+  'stack-horizontal',
+  'stack-vertical',
+  'grid',
+] as const;
+export type ArrangeMode = (typeof ARRANGE_MODES)[number];
 
 /** What the agent reads back. Coordinates are page space, rounded. */
 export interface ShapeSummary {
@@ -93,7 +112,7 @@ export interface ShapeSummary {
 export type ScratchResult =
   | { op: 'read'; shapes: ShapeSummary[] }
   | { op: 'view'; png: string | null }
-  | { op: 'add' | 'update' | 'delete' | 'clear' | 'ui_set'; ids: string[] }
+  | { op: 'add' | 'update' | 'delete' | 'clear' | 'ui_set' | 'arrange' | 'focus'; ids: string[] }
   | { op: 'ui_get'; spec: unknown };
 
 /** Agent-facing ids drop tldraw's `shape:` prefix. */

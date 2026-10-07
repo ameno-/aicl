@@ -1,5 +1,6 @@
 import './catalog.css';
 import type { ComponentRenderer } from './types.ts';
+import { AppletRenderer } from './applet.tsx';
 import { ScreenRenderer } from './screen.tsx';
 import {
   ArtifactRenderer,
@@ -26,4 +27,5 @@ export const renderers: Record<string, ComponentRenderer> = {
   table: TableRenderer,
   metric: MetricRenderer,
   screen: ScreenRenderer,
+  applet: AppletRenderer,
 };

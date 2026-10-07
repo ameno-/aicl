@@ -1,92 +1,36 @@
-import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
-import type { Editor } from 'tldraw';
-import { ChatController, createSseTransport, createToastQueue, type ChatState, type Message, type ToastQueue } from '@aicl/core';
+import { useMemo, useSyncExternalStore } from 'react';
+import { createToastQueue, type ChatController, type ChatState, type Message, type ToastQueue } from '@aicl/core';
 
-import { getUiSelection } from './ui/selection.ts';
+import { getCanvasContext } from './canvasContext.ts';
+import { createSession, useSessionChat } from './sessionsApi.ts';
 
-let canvasEditor: Editor | null = null;
+export {
+  registerCanvasEditor,
+  getSelectedShapeIds,
+  screenName,
+  useSelectedShapeIds,
+  clearCanvasSelection,
+} from './canvasContext.ts';
 
-/** The Scratchpad registers its tldraw editor so the chat can see and clear the selection. */
-export function registerCanvasEditor(editor: Editor | null): void {
-  canvasEditor = editor;
-}
-
-const currentEditor = (): Editor | null => canvasEditor ?? (window as unknown as { __aiclEditor?: Editor }).__aiclEditor ?? null;
-
-/** Short ids of the shapes selected on the canvas. */
-export function getSelectedShapeIds(): string[] {
-  const editor = currentEditor();
-  if (!editor) return [];
-  return editor.getSelectedShapeIds().map((id) => (id.startsWith('shape:') ? id.slice(6) : id));
-}
-
-/** Name of the screen shape `shapeId`, if the editor can see it. */
-export function screenName(shapeId: string): string | undefined {
-  const shape = currentEditor()?.getShape((shapeId.startsWith('shape:') ? shapeId : `shape:${shapeId}`) as never) as
-    | { props?: { props?: { name?: unknown } } }
-    | undefined;
-  const name = shape?.props?.props?.name;
-  return typeof name === 'string' ? name : undefined;
-}
-
-/** Selected shape ids, kept current (the editor is not reactive from here, so poll cheaply). */
-export function useSelectedShapeIds(): string[] {
-  const [ids, setIds] = useState<string[]>([]);
-  useEffect(() => {
-    const tick = () => {
-      const next = getSelectedShapeIds();
-      setIds((prev) => (prev.join('|') === next.join('|') ? prev : next));
-    };
-    tick();
-    const timer = setInterval(tick, 300);
-    return () => clearInterval(timer);
-  }, []);
-  return ids;
-}
-
-export function clearCanvasSelection(): void {
-  currentEditor()?.selectNone();
-}
-
-/** Adds what the user has selected to every chat request body. */
-const withCanvasContext: typeof globalThis.fetch = (input, init) => {
-  if (typeof init?.body === 'string') {
-    try {
-      const body = JSON.parse(init.body) as Record<string, unknown>;
-      body['canvasContext'] = { selectedShapes: getSelectedShapeIds(), uiSelection: getUiSelection() };
-      return globalThis.fetch(input, { ...init, body: JSON.stringify(body) });
-    } catch {
-      // Not JSON: send untouched.
+/** Adds what the user has selected (and any `extra` body fields) to every chat request body. */
+export function withCanvasContext(extra?: () => Record<string, unknown>): typeof globalThis.fetch {
+  return (input, init) => {
+    if (typeof init?.body === 'string') {
+      try {
+        const body = JSON.parse(init.body) as Record<string, unknown>;
+        body['canvasContext'] = getCanvasContext();
+        Object.assign(body, extra?.());
+        return globalThis.fetch(input, { ...init, body: JSON.stringify(body) });
+      } catch {
+        // Not JSON: send untouched.
+      }
     }
-  }
-  return globalThis.fetch(input, init);
-};
-
-/** One workspace conversation, shared by the dock and any canvas chat windows. */
-export const toasts: ToastQueue = createToastQueue();
-
-const makeController = () =>
-  new ChatController({
-    transport: createSseTransport({ url: '/api/chat', fetch: withCanvasContext }),
-    onError: (e) => toasts.push({ title: 'The agent stopped', description: e.message, variant: 'error' }),
-  });
-
-let controller = makeController();
-const listeners = new Set<() => void>();
-
-/** Swap in a fresh conversation; every subscriber re-renders against it. */
-export function newWorkspaceChat(): void {
-  controller = makeController();
-  for (const l of listeners) l();
+    return globalThis.fetch(input, init);
+  };
 }
 
-const subscribe = (onChange: () => void) => {
-  listeners.add(onChange);
-  return () => {
-    listeners.delete(onChange);
-  };
-};
-const getController = () => controller;
+/** Shared by the dock and any canvas chat windows. */
+export const toasts: ToastQueue = createToastQueue();
 
 export interface WorkspaceChat {
   messages: Message[];
@@ -98,8 +42,8 @@ export interface WorkspaceChat {
   controller: ChatController;
 }
 
-export function useWorkspaceChat(): WorkspaceChat {
-  const c = useSyncExternalStore(subscribe, getController, getController);
+/** Subscribes to one controller and exposes it as a WorkspaceChat. */
+export function useControllerChat(c: ChatController, send: (text: string) => Promise<void> = (text) => c.send(text)): WorkspaceChat {
   const state = useSyncExternalStore(c.state.subscribe, c.state.get, c.state.get);
   const messages = useMemo(() => state.path.map((id) => state.nodes[id]!.message), [state]);
   return {
@@ -107,8 +51,18 @@ export function useWorkspaceChat(): WorkspaceChat {
     status: state.status,
     streamingId: state.streamingId,
     isBusy: state.status === 'submitted' || state.status === 'streaming',
-    send: (text) => c.send(text),
+    send,
     stop: () => c.stop(),
     controller: c,
   };
+}
+
+/** The active session's conversation (the dock, canvas chat windows). */
+export function useWorkspaceChat(): WorkspaceChat {
+  return useSessionChat();
+}
+
+/** Starts a fresh conversation and makes it active. */
+export function newWorkspaceChat(): void {
+  void createSession();
 }

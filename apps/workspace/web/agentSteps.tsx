@@ -46,6 +46,24 @@ export function describe(part: ToolCallPart): string {
       const q = [args?.['product'], args?.['archetype'], args?.['component'], args?.['text']].filter(Boolean).join(' ');
       return `${done ? 'Searched' : 'Searching'} references${q ? ` for ${String(q)}` : ''}`;
     }
+    case 'write':
+      return `${done ? 'Wrote' : 'Writing'} ${String(args?.['path'] ?? 'a file')}`;
+    case 'edit':
+      return `${done ? 'Edited' : 'Editing'} ${String(args?.['path'] ?? 'a file')}`;
+    case 'applet_build':
+      return `${done ? 'Built' : 'Building'} applet ${String(args?.['id'] ?? '')}`.trim();
+    case 'applet_place':
+      return `${done ? 'Placed' : 'Placing'} ${String(args?.['id'] ?? 'applet')} on the ${args?.['where'] === 'canvas' ? 'canvas' : 'Overview'}`;
+    case 'applet_open':
+      return `${done ? 'Opened' : 'Opening'} ${String(args?.['id'] ?? 'applet')}`;
+    case 'applet_list':
+      return done ? 'Listed applets' : 'Listing applets';
+    case 'applet_logs':
+      return `${done ? 'Checked' : 'Checking'} ${String(args?.['id'] ?? 'applet')} for errors`;
+    case 'canvas_arrange':
+      return `${done ? 'Arranged' : 'Arranging'} ${plural(count(args, 'ids'), 'shape')}`;
+    case 'canvas_focus':
+      return done ? 'Showed you the result' : 'Showing you the result';
     case 'ref_place':
       return done ? 'Placed a reference screenshot' : 'Placing a reference screenshot';
     case 'ui_create_screen':

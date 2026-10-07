@@ -15,3 +15,6 @@ dist-test/
 
 # Claude Code hook logs written into whatever directory the session is in
 logs/
+
+# Claude Code session data written by hooks
+.claude/
