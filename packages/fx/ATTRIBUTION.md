@@ -23,6 +23,10 @@ Adapted means: imports rewritten to relative paths, shadcn colour names kept
 | src/vendor/spell-ui/copy-button.tsx | Spell UI | registry/spell-ui/copy-button.tsx |
 | src/vendor/spell-ui/animated-checkbox.tsx | Spell UI | registry/spell-ui/animated-checkbox.tsx (controlled/readOnly added) |
 | src/vendor/cult-ui/rolling-number.tsx | Cult UI | apps/www/registry/default/ui/rolling-number.tsx (reduced-motion jump added) |
+| src/vendor/spell-ui/kbd.tsx | Spell UI | registry/spell-ui/kbd.tsx |
+| src/vendor/uselayouts/discrete-tabs.tsx | uselayouts | registry/default/example/discrete-tabs.tsx |
+| src/vendor/uselayouts/inline-edit.tsx | uselayouts | registry/default/example/inline-edit.tsx |
+| src/vendor/uselayouts/smooth-dropdown.tsx | uselayouts | registry/default/example/smooth-dropdown.tsx |
 
 ## MIT licence text
 
