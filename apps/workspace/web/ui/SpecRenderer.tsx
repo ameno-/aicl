@@ -1,7 +1,8 @@
-import { Component, useCallback, useMemo, useRef, type MouseEvent, type ReactNode } from 'react';
+import { Component, useCallback, useEffect, useMemo, useRef, type MouseEvent, type ReactNode } from 'react';
 import { THEME_PRESETS, resolveTheme, type ScreenSpec, type UiNode } from '../../shared/ui-spec.ts';
 import { NodeBody, isObj, layoutStyle } from './nodes.tsx';
 import { themeVars } from './theme.ts';
+import { LiveComposer, useRun } from './run.tsx';
 import './ui.css';
 
 export interface SpecRendererProps {
@@ -24,12 +25,28 @@ class NodeBoundary extends Component<{ children: ReactNode; reset: unknown }, { 
   }
 }
 
-function Node({ node, selectedId, depth }: { node: UiNode; selectedId: string | undefined; depth: number }) {
-  if (!isObj(node)) return null;
+function Node(props: { node: UiNode; selectedId: string | undefined; depth: number }) {
+  return isObj(props.node) ? <NodeInner {...props} /> : null;
+}
+
+function NodeInner({ node, selectedId, depth }: { node: UiNode; selectedId: string | undefined; depth: number }) {
   const id = typeof node.id === 'string' && node.id ? node.id : `auto-${depth}`;
   const type = typeof node.type === 'string' ? node.type : 'unknown';
   const container = type === 'row' || type === 'column';
-  const kids = container && Array.isArray(node.children) && depth < 40 ? node.children : [];
+  const run = useRun();
+  let kids: UiNode[] = container && Array.isArray(node.children) && depth < 40 ? node.children : [];
+  const live = run !== null && id === run.threadId;
+  if (live) {
+    const keep = kids.filter((k) => isObj(k) && (run.keepIds.includes(k.id) || (run.thread.length === 0 && k.type === 'emptyState')));
+    kids = run.thread.length > 0 ? [...run.thread, ...keep] : keep;
+  }
+  const sentinel = useRef<HTMLDivElement>(null);
+  const tail = live ? run.thread : null;
+  useEffect(() => {
+    const el = sentinel.current?.parentElement;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [tail]);
+  const liveComposer = run !== null && type === 'composer' && id === run.composerId;
   return (
     <div
       className="aicl-ui-node"
@@ -39,11 +56,16 @@ function Node({ node, selectedId, depth }: { node: UiNode; selectedId: string | 
       style={depth === 0 ? { ...layoutStyle(node), width: "100%", height: "100%" } : layoutStyle(node)}
     >
       <NodeBoundary reset={node}>
+        {liveComposer ? (
+          <LiveComposer props={isObj(node.props) ? node.props : {}} run={run} />
+        ) : (
         <NodeBody node={node}>
           {kids.map((child, i) => (
             <Node key={isObj(child) && typeof child.id === 'string' ? child.id : i} node={child} selectedId={selectedId} depth={depth + 1} />
           ))}
         </NodeBody>
+        )}
+        {live ? <div ref={sentinel} aria-hidden="true" /> : null}
       </NodeBoundary>
     </div>
   );
