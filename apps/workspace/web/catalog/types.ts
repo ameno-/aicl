@@ -10,6 +10,10 @@ export interface ComponentRendererProps {
   props: Record<string, unknown>;
   width: number;
   height: number;
+  /** tldraw id of the hosting shape (for selection and self-updates). */
+  shapeId?: string;
+  /** Replace this shape's component props (e.g. a screen switching theme). */
+  onPropsChange?: (next: Record<string, unknown>) => void;
 }
 
 export type ComponentRenderer = ComponentType<ComponentRendererProps>;

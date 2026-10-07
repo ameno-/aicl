@@ -18,6 +18,8 @@ import {
   type ScratchResult,
   type UpdateShape,
 } from '../shared/scratch.ts';
+import { addImage, viewShapes } from './executor-image.ts';
+import { uiGet, uiSet } from './ui/executor-ui.ts';
 
 const GAP = 80;
 const DEFAULT_W = 200;
@@ -28,7 +30,7 @@ export async function execute(editor: Editor, op: ScratchOp): Promise<ScratchRes
     case 'read':
       return { op: 'read', shapes: read(editor) };
     case 'view':
-      return { op: 'view', png: await view(editor) };
+      return { op: 'view', png: op.ids?.length ? await viewShapes(editor, op.ids) : await view(editor) };
     case 'add': {
       const ids = add(editor, op.shapes);
       editor.zoomToFit({ animation: { duration: 240 } });
@@ -46,6 +48,10 @@ export async function execute(editor: Editor, op: ScratchOp): Promise<ScratchRes
       editor.deleteShapes(ids);
       return { op: 'clear', ids: ids.map(shortId) };
     }
+    case 'ui_get':
+      return { op: 'ui_get', spec: uiGet(editor, op.id) };
+    case 'ui_set':
+      return { op: 'ui_set', ids: [uiSet(editor, op.id, op.spec)] };
   }
 }
 
@@ -87,6 +93,13 @@ function add(editor: Editor, shapes: AddShape[]): string[] {
 
       if (shape.kind === 'arrow') {
         addArrow(editor, id, shape);
+        created.push(shortId(id));
+        continue;
+      }
+
+      if (shape.kind === 'image') {
+        addImage(editor, id, shape, { x: shape.x ?? cursorX, y: shape.y ?? cursorY });
+        if (shape.x === undefined) cursorX += (shape.w ?? 640) + GAP;
         created.push(shortId(id));
         continue;
       }

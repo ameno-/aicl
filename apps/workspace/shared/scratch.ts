@@ -15,7 +15,7 @@ export type Color = (typeof COLORS)[number];
 export const FILLS = ['none', 'semi', 'solid', 'pattern'] as const;
 export type Fill = (typeof FILLS)[number];
 
-export type ShapeKind = 'text' | 'rect' | 'ellipse' | 'note' | 'arrow' | 'component' | 'other';
+export type ShapeKind = 'text' | 'rect' | 'ellipse' | 'note' | 'arrow' | 'component' | 'image' | 'other';
 
 /** An arrow end: another shape's id, or a free point. */
 export type Endpoint = string | { x: number; y: number };
@@ -23,6 +23,9 @@ export type Endpoint = string | { x: number; y: number };
 export interface AddShape {
   kind: Exclude<ShapeKind, 'other'>;
   id?: string;
+  /** kind "image": a URL, `/api/file?…` path, or a corpus reference ("Devin web Aug 2026 (1)/… 83.png"). */
+  src?: string;
+  alt?: string;
   x?: number;
   y?: number;
   w?: number;
@@ -56,11 +59,16 @@ export interface UpdateShape {
 
 export type ScratchOp =
   | { op: 'read' }
-  | { op: 'view' }
+  /** `ids` renders only those shapes (e.g. one screenshot or one screen); omitted → whole canvas. */
+  | { op: 'view'; ids?: string[] }
   | { op: 'add'; shapes: AddShape[] }
   | { op: 'update'; shapes: UpdateShape[] }
   | { op: 'delete'; ids: string[] }
-  | { op: 'clear' };
+  | { op: 'clear' }
+  /** Read the ScreenSpec stored on a screen shape (aicl-component, component "screen"). */
+  | { op: 'ui_get'; id: string }
+  /** Replace a screen shape's ScreenSpec (already normalised/patched by the server). */
+  | { op: 'ui_set'; id: string; spec: unknown };
 
 /** What the agent reads back. Coordinates are page space, rounded. */
 export interface ShapeSummary {
@@ -85,7 +93,8 @@ export interface ShapeSummary {
 export type ScratchResult =
   | { op: 'read'; shapes: ShapeSummary[] }
   | { op: 'view'; png: string | null }
-  | { op: 'add' | 'update' | 'delete' | 'clear'; ids: string[] };
+  | { op: 'add' | 'update' | 'delete' | 'clear' | 'ui_set'; ids: string[] }
+  | { op: 'ui_get'; spec: unknown };
 
 /** Agent-facing ids drop tldraw's `shape:` prefix. */
 export const shortId = (id: string): string => (id.startsWith('shape:') ? id.slice(6) : id);
@@ -170,6 +179,12 @@ export function summarize(records: Iterable<unknown>, bounds?: (id: string) => B
       if (typeof p.title === 'string') out.title = p.title;
       if (p.props && typeof p.props === 'object') out.props = p.props as Record<string, unknown>;
     }
+    if (s.type === 'image') {
+      const meta = (s as unknown as { meta?: Record<string, unknown> }).meta ?? {};
+      const alt = typeof p.altText === 'string' && p.altText ? p.altText : typeof meta.alt === 'string' ? meta.alt : '';
+      if (alt) out.text = alt;
+      if (typeof meta.src === 'string') out.title = meta.src;
+    }
     const ends = arrowEnds.get(s.id);
     if (ends?.from) out.from = ends.from;
     if (ends?.to) out.to = ends.to;
@@ -179,6 +194,7 @@ export function summarize(records: Iterable<unknown>, bounds?: (id: string) => B
 
 function kindOf(s: ShapeRecord): ShapeKind {
   if (s.type === COMPONENT_SHAPE_TYPE) return 'component';
+  if (s.type === 'image') return 'image';
   if (s.type === 'text' || s.type === 'note' || s.type === 'arrow') return s.type;
   if (s.type === 'geo') {
     if (s.props.geo === 'rectangle') return 'rect';

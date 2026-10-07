@@ -82,7 +82,15 @@ export class ComponentShapeUtil extends BaseBoxShapeUtil<ComponentShape> {
         >
           {Renderer ? (
             <Boundary reset={props}>
-              <Renderer props={props} width={w} height={Math.max(0, h - 32)} />
+              <Renderer
+                props={props}
+                width={w}
+                height={Math.max(0, h - 32)}
+                shapeId={shape.id}
+                onPropsChange={(next) =>
+                  this.editor.updateShape({ id: shape.id, type: COMPONENT_SHAPE_TYPE, props: { props: next as ComponentShape["props"]["props"] } })
+                }
+              />
             </Boundary>
           ) : (
             <div className="aicl-card__notice">Unknown component “{component}”.</div>

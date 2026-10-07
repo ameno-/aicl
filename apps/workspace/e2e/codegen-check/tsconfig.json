@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
+    "strict": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "types": [],
+    "baseUrl": ".",
+    "paths": {
+      "@aicl/core": ["../../../../packages/core/src/index.ts"],
+      "@aicl/react": ["../../../../packages/react/src/index.ts"],
+      "@aicl/react/markdown": ["../../../../packages/react/src/markdown.tsx"]
+    }
+  },
+  "include": ["out/*.tsx"]
+}

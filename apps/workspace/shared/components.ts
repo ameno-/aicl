@@ -7,6 +7,8 @@
  * one entry here plus one renderer there.
  */
 
+import { SAMPLE_SCREEN } from './ui-spec.ts';
+
 export const COMPONENT_SHAPE_TYPE = 'aicl-component';
 
 export interface ComponentSpec {
@@ -24,6 +26,15 @@ export interface ComponentSpec {
 }
 
 export const COMPONENTS: ComponentSpec[] = [
+  {
+    name: 'screen',
+    title: 'Screen',
+    description:
+      'A whole chat UI design: a device-sized frame rendering a ScreenSpec tree of chat elements with a theme. Prefer the ui_* tools to create and edit screens.',
+    propsHint: 'ScreenSpec { name, frame, theme: { preset, overrides? }, root: UiNode }',
+    defaultSize: { w: 768, h: 512 },
+    sample: SAMPLE_SCREEN as unknown as Record<string, unknown>,
+  },
   {
     name: 'chat',
     title: 'Chat',

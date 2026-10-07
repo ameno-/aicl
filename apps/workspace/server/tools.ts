@@ -26,7 +26,9 @@ export function describeComponents(): string {
 }
 
 const AddShape = Type.Object({
-  kind: literals(['text', 'rect', 'ellipse', 'note', 'arrow', 'component'] as const),
+  kind: literals(['text', 'rect', 'ellipse', 'note', 'arrow', 'component', 'image'] as const),
+  src: Type.Optional(Type.String({ description: 'kind "image": URL, /api/file path, or a reference ref from ref_search.' })),
+  alt: Type.Optional(Type.String({ description: 'kind "image": what the image shows.' })),
   id: Type.Optional(Type.String({ description: 'Stable handle for later edits and arrow binding, e.g. "gateway".' })),
   x: Type.Optional(Type.Number({ description: 'Page x of the top-left corner. Not used by arrows.' })),
   y: Type.Optional(Type.Number()),
@@ -82,10 +84,12 @@ export function createScratchTools(relay: Relay, store: WorkspaceStore) {
     name: 'scratch_view',
     label: 'View scratchpad',
     description:
-      'Render the whole scratchpad to an image so you can see freehand drawing, layout, and overlaps that JSON cannot show.',
-    parameters: Type.Object({}),
-    async execute(_id, _params, signal) {
-      const result = await run({ op: 'view' }, signal);
+      'Render the scratchpad to an image so you can see freehand drawing, layout, images, and overlaps that JSON cannot show. Pass `ids` to render only some shapes.',
+    parameters: Type.Object({
+      ids: Type.Optional(Type.Array(Type.String(), { description: 'Render only these shapes, e.g. one screenshot or one screen' })),
+    }),
+    async execute(_id, params, signal) {
+      const result = await run(params.ids?.length ? { op: 'view', ids: params.ids } : { op: 'view' }, signal);
       if (result.op !== 'view' || !result.png) return text({ empty: true });
       return { content: [{ type: 'image' as const, data: result.png, mimeType: 'image/png' }], details: {} };
     },
@@ -95,7 +99,7 @@ export function createScratchTools(relay: Relay, store: WorkspaceStore) {
     name: 'scratch_add',
     label: 'Draw on scratchpad',
     description:
-      'Add shapes in one batch. Kinds: text, rect, ellipse, note (sticky), arrow, component. Give shapes an id so arrows can bind with from/to; bound arrows follow their shapes when moved. Shapes are created in order, so add boxes before the arrows that connect them. Returns the created ids.\n\n' +
+      'Add shapes in one batch. Kinds: text, rect, ellipse, note (sticky), arrow, component, image (src + alt + w; height follows the aspect ratio). Give shapes an id so arrows can bind with from/to; bound arrows follow their shapes when moved. Shapes are created in order, so add boxes before the arrows that connect them. Returns the created ids.\n\n' +
       'kind "component" places a live component: set `component` to a name below and `props` to its JSON. w/h default to a good size.\n' +
       describeComponents(),
     parameters: Type.Object({ shapes: Type.Array(AddShape, { minItems: 1 }) }),

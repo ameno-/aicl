@@ -10,9 +10,12 @@ import type { Message, StreamEvent } from '@aicl/core';
 import { ChatHandlerError, createChatHandler } from '@aicl/server';
 import { createWorkspaceAgent } from './agent.ts';
 import { createPiEventMapper, type PiEvent } from './pi-mapper.ts';
+import { serveFile, defaultReferencesRoot } from './files.ts';
+import { createReferenceTools } from './references.ts';
 import { createRelay } from './relay.ts';
 import { createWorkspaceStore } from './store.ts';
 import { createScratchTools } from './tools.ts';
+import { createUiTools } from './ui-tools.ts';
 
 const PORT = Number(process.env['AICL_PORT'] ?? '5180');
 const HOST = process.env['AICL_HOST'] ?? '127.0.0.1';
@@ -23,7 +26,7 @@ const store = createWorkspaceStore(WORKSPACE);
 const agent = await createWorkspaceAgent({
   cwd: WORKSPACE,
   model: process.env['AICL_MODEL'],
-  tools: createScratchTools(relay, store),
+  tools: [...createScratchTools(relay, store), ...createUiTools(relay), ...createReferenceTools(relay)],
 });
 
 const lastUserText = (messages: Message[]): string => {
@@ -84,11 +87,28 @@ async function* runPrompt(text: string, signal: AbortSignal): AsyncGenerator<Str
   }
 }
 
+/**
+ * What the user has selected, sent by the dock with every request. Appended to
+ * the prompt for the agent only; the client renders its own text.
+ */
+function canvasContextBlock(body: Record<string, unknown>): string {
+  const ctx = body['canvasContext'] as { selectedShapes?: unknown; uiSelection?: { shapeId?: unknown; nodeId?: unknown } | null } | undefined;
+  if (!ctx || typeof ctx !== 'object') return '';
+  const lines: string[] = [];
+  const shapes = Array.isArray(ctx.selectedShapes) ? ctx.selectedShapes.filter((s): s is string => typeof s === 'string') : [];
+  if (shapes.length) lines.push(`selected: ${shapes.join(', ')}`);
+  const ui = ctx.uiSelection;
+  if (ui && typeof ui.shapeId === 'string' && typeof ui.nodeId === 'string') {
+    lines.push(`ui-selection: screen ${ui.shapeId.replace(/^shape:/, '')}, element ${ui.nodeId}`);
+  }
+  return lines.length ? `\n\n<canvas-context>\n${lines.join('\n')}\n</canvas-context>` : '';
+}
+
 const chat = createChatHandler((req) => {
   const text = lastUserText(req.messages);
   if (!text) throw new ChatHandlerError(400, 'The last message must be user text.', false);
   if (agent.isStreaming) throw new ChatHandlerError(409, 'The agent is still working. Stop it or wait.', true);
-  return runPrompt(text, req.signal);
+  return runPrompt(text + canvasContextBlock(req.body), req.signal);
 });
 
 const readBody = (req: IncomingMessage): Promise<string> =>
@@ -151,6 +171,8 @@ const server = createServer((req, res) => {
         const ok = relay.settle(String(answer.id), answer);
         return json(res, ok ? 200 : 404, { ok });
       }
+      case 'GET /api/file':
+        return serveFile(res, [WORKSPACE, defaultReferencesRoot()], url.searchParams.get('path') ?? '');
       case 'GET /api/scratch':
         return json(res, 200, { snapshot: await store.readScratch() });
       case 'PUT /api/scratch':
