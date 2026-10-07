@@ -1,9 +1,9 @@
 // Runs the agent server and the Vite dev server together; Ctrl-C stops both.
 import { spawn } from 'node:child_process';
 
-// The workspace agent's model for local development: MiniMax M3 (vision, 1M
-// context) through OpenCode Go keeps runs cheap. Override with AICL_MODEL.
-const DEFAULT_MODEL = 'opencode-go/minimax-m3';
+// The workspace agent's model for local development: GPT-6 Luna (cheap, vision,
+// 1M context) through the agent proxy. Override with AICL_MODEL.
+const DEFAULT_MODEL = 'ap-codex/gpt-6-luna';
 const env = { ...process.env, AICL_MODEL: process.env.AICL_MODEL || DEFAULT_MODEL };
 
 const procs = [
