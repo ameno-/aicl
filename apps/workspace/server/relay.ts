@@ -16,6 +16,9 @@ interface Pending {
   timer: NodeJS.Timeout;
 }
 
+/** The page reconnects after ~2.5 missed beats (web/events.ts). */
+export const HEARTBEAT_MS = 5_000;
+
 export class NoCanvasError extends Error {
   constructor() {
     super('The scratchpad is not open in a browser. Ask the user to open the workspace, then retry.');
@@ -39,7 +42,9 @@ export function createRelay(timeoutMs = 15_000) {
       });
       res.write(': connected\n\n');
       clients.push(res);
-      const keepAlive = setInterval(() => res.write(': ping\n\n'), 15_000);
+      // A data frame, not a comment: the page treats silence as a dead connection (a dev proxy can hold
+      // a socket open after the server behind it is gone), and comments never reach EventSource.
+      const keepAlive = setInterval(() => send(res, { type: 'heartbeat' }), HEARTBEAT_MS);
       res.on('close', () => {
         clearInterval(keepAlive);
         clients.splice(clients.indexOf(res), 1);

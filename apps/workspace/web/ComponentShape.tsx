@@ -1,7 +1,7 @@
-import { Component, type ReactNode } from 'react';
 import { BaseBoxShapeUtil, HTMLContainer, Rectangle2d, T, type RecordProps, type TLShape } from 'tldraw';
 import { Box } from 'lucide-react';
 import { COMPONENTS, COMPONENT_SHAPE_TYPE, type ComponentShapeProps } from '../shared/components.ts';
+import { ErrorBoundary } from './ErrorBoundary.tsx';
 import { renderers } from './catalog/index.ts';
 
 declare module 'tldraw' {
@@ -12,21 +12,9 @@ declare module 'tldraw' {
 
 export type ComponentShape = TLShape<typeof COMPONENT_SHAPE_TYPE>;
 
-class Boundary extends Component<{ children: ReactNode; reset: unknown }, { failed: boolean }> {
-  state = { failed: false };
-  static getDerivedStateFromError() {
-    return { failed: true };
-  }
-  componentDidUpdate(prev: { reset: unknown }) {
-    if (prev.reset !== this.props.reset && this.state.failed) this.setState({ failed: false });
-  }
-  render() {
-    return this.state.failed ? (
-      <div className="aicl-card__notice">This component could not be drawn.</div>
-    ) : (
-      this.props.children
-    );
-  }
+/** Test hook: a card with `__aiclThrow` set renders a component that throws, to exercise the boundary. */
+function Thrower(): never {
+  throw new Error('Intentional render failure (__aiclThrow)');
 }
 
 const stop = (e: { stopPropagation: () => void }) => e.stopPropagation();
@@ -81,7 +69,8 @@ export class ComponentShapeUtil extends BaseBoxShapeUtil<ComponentShape> {
           onWheelCapture={stop}
         >
           {Renderer ? (
-            <Boundary reset={props}>
+            <ErrorBoundary label="component" resetKeys={[props]}>
+              {props['__aiclThrow'] === true ? <Thrower /> : null}
               <Renderer
                 props={props}
                 width={w}
@@ -91,7 +80,7 @@ export class ComponentShapeUtil extends BaseBoxShapeUtil<ComponentShape> {
                   this.editor.updateShape({ id: shape.id, type: COMPONENT_SHAPE_TYPE, props: { props: next as ComponentShape["props"]["props"] } })
                 }
               />
-            </Boundary>
+            </ErrorBoundary>
           ) : (
             <div className="aicl-card__notice">Unknown component “{component}”.</div>
           )}

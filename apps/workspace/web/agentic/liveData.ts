@@ -5,7 +5,7 @@
  */
 import { useEffect, useSyncExternalStore } from 'react';
 import type { LivePlan } from '../../shared/agentic.ts';
-import { onServerEvent } from '../events.ts';
+import { onReconnect, onServerEvent } from '../events.ts';
 
 function createStore<T>(initial: T) {
   let value = initial;
@@ -44,6 +44,33 @@ const planRequested = new Set<string>();
 const termRequested = new Set<string>();
 let started = false;
 
+type TerminalReply = { toolCallId?: string; lines: string[]; done: boolean; command?: string; exitCode?: number };
+
+function loadPlan(sessionId: string, replace = false): Promise<void> {
+  return fetch(`/api/sessions/${encodeURIComponent(sessionId)}/plan`)
+    .then((r) => r.json() as Promise<{ plan: LivePlan | null }>)
+    .then(({ plan }) => {
+      if (plan && (replace || !plans.get()[sessionId])) plans.set({ ...plans.get(), [sessionId]: plan });
+    });
+}
+
+function loadTerminal(sessionId: string, wanted: string, replace = false): Promise<void> {
+  return fetch(`/api/sessions/${encodeURIComponent(sessionId)}/terminal/${encodeURIComponent(wanted)}`)
+    .then((r) => r.json() as Promise<TerminalReply>)
+    .then((t) => {
+      const id = t.toolCallId;
+      if (!id) return;
+      const existing = terminals.get()[key(sessionId, id)];
+      if (replace || !existing || (!existing.lines.length && !existing.done)) {
+        terminals.set({
+          ...terminals.get(),
+          [key(sessionId, id)]: { toolCallId: id, command: t.command, lines: t.lines, partial: '', done: t.done, exitCode: t.exitCode },
+        });
+      }
+      if (wanted === 'latest' && !latest.get()[sessionId]) latest.set({ ...latest.get(), [sessionId]: id });
+    });
+}
+
 const key = (sessionId: string, toolCallId: string) => `${sessionId}/${toolCallId}`;
 
 function start(): void {
@@ -74,6 +101,14 @@ function start(): void {
     });
     if (chunk.command !== undefined) latest.set({ ...latest.get(), [chunk.sessionId]: chunk.toolCallId });
   });
+  // Events were missed while the stream was down: refetch every plan and terminal we have shown.
+  onReconnect(() => {
+    for (const id of planRequested) void loadPlan(id, true).catch(() => {});
+    for (const k of termRequested) {
+      const i = k.indexOf('/');
+      void loadTerminal(k.slice(0, i), k.slice(i + 1), true).catch(() => {});
+    }
+  });
 }
 
 export function usePlan(sessionId: string): LivePlan | null {
@@ -81,12 +116,7 @@ export function usePlan(sessionId: string): LivePlan | null {
   useEffect(() => {
     if (planRequested.has(sessionId)) return;
     planRequested.add(sessionId);
-    void fetch(`/api/sessions/${encodeURIComponent(sessionId)}/plan`)
-      .then((r) => r.json() as Promise<{ plan: LivePlan | null }>)
-      .then(({ plan }) => {
-        if (plan && !plans.get()[sessionId]) plans.set({ ...plans.get(), [sessionId]: plan });
-      })
-      .catch(() => planRequested.delete(sessionId));
+    void loadPlan(sessionId).catch(() => planRequested.delete(sessionId));
   }, [sessionId]);
   const all = useSyncExternalStore(plans.subscribe, plans.get, plans.get);
   return all[sessionId] ?? null;
@@ -101,24 +131,7 @@ export function useTerminal(sessionId: string, toolCallId?: string): TerminalSta
     const k = key(sessionId, wanted);
     if (termRequested.has(k)) return;
     termRequested.add(k);
-    void fetch(`/api/sessions/${encodeURIComponent(sessionId)}/terminal/${encodeURIComponent(wanted)}`)
-      .then(
-        (r) =>
-          r.json() as Promise<{ toolCallId?: string; lines: string[]; done: boolean; command?: string; exitCode?: number }>,
-      )
-      .then((t) => {
-        const id = t.toolCallId;
-        if (!id) return;
-        const existing = terminals.get()[key(sessionId, id)];
-        if (!existing || (!existing.lines.length && !existing.done)) {
-          terminals.set({
-            ...terminals.get(),
-            [key(sessionId, id)]: { toolCallId: id, command: t.command, lines: t.lines, partial: '', done: t.done, exitCode: t.exitCode },
-          });
-        }
-        if (wanted === 'latest' && !latest.get()[sessionId]) latest.set({ ...latest.get(), [sessionId]: id });
-      })
-      .catch(() => termRequested.delete(k));
+    void loadTerminal(sessionId, wanted).catch(() => termRequested.delete(k));
   }, [sessionId, wanted]);
   const all = useSyncExternalStore(terminals.subscribe, terminals.get, terminals.get);
   return all[key(sessionId, wanted)] ?? null;
