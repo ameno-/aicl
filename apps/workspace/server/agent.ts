@@ -13,6 +13,8 @@ import {
   SettingsManager,
   type ToolDefinition,
 } from '@earendil-works/pi-coding-agent';
+import { APPLETS_PROMPT } from './applets.ts';
+import { CANVAS_PROMPT } from './canvas-tools.ts';
 
 const SYSTEM_PROMPT = `You are the agent inside an AICL workspace: a web page where the user chats with you beside a shared scratchpad, an infinite tldraw whiteboard. You and the user both draw on it, live.
 
@@ -60,7 +62,8 @@ export async function createWorkspaceAgent(options: AgentOptions) {
     noPromptTemplates: true,
     noThemes: true,
     noContextFiles: true,
-    systemPrompt: SYSTEM_PROMPT,
+    // Feature modules contribute their own guidance (applets, canvas context).
+    systemPrompt: [SYSTEM_PROMPT, APPLETS_PROMPT, CANVAS_PROMPT].filter(Boolean).join('\n\n'),
   });
   await resourceLoader.reload();
 
@@ -81,7 +84,8 @@ export async function createWorkspaceAgent(options: AgentOptions) {
     resourceLoader,
     model,
     thinkingLevel,
-    tools: ['read', 'grep', 'find', 'ls', ...options.tools.map((t) => t.name)],
+    // write/edit let the agent author applets in .aicl/applets (moi-style generative code).
+    tools: ['read', 'grep', 'find', 'ls', 'write', 'edit', ...options.tools.map((t) => t.name)],
     customTools: options.tools,
     sessionManager: SessionManager.inMemory(options.cwd),
   });

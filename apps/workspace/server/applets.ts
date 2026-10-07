@@ -6,6 +6,9 @@ import type { ToolDefinition } from '@earendil-works/pi-coding-agent';
 import type { RouteTable } from './http.ts';
 import type { Relay } from './relay.ts';
 
+/** Appended to the agent's system prompt: how to write and ship applets. B fills it in. */
+export const APPLETS_PROMPT = '';
+
 export interface AppletsModule {
   routes: RouteTable;
   tools: ToolDefinition[];

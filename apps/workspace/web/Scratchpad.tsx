@@ -10,8 +10,8 @@ import {
   type TLUiStylePanelProps,
 } from 'tldraw';
 import 'tldraw/tldraw.css';
-import type { ScratchOp } from '../shared/scratch.ts';
 import { execute } from './executor.ts';
+import { onServerEvent } from './events.ts';
 import { shapeUtils } from './ComponentShape.tsx';
 import { InsertMenu } from './InsertMenu.tsx';
 import { registerCanvasEditor } from './chatStore.ts';
@@ -80,10 +80,8 @@ export function Scratchpad() {
 
   useEffect(() => {
     if (!editor || !loaded) return;
-    const events = new EventSource('/api/events');
-    events.onmessage = async (message) => {
-      const data = JSON.parse(message.data) as { type: string; id: string; op: ScratchOp };
-      if (data.type !== 'scratch-op') return;
+    // The page's one event stream (web/events.ts): a second EventSource would steal relay ops.
+    return onServerEvent('scratch-op', async (data) => {
       let answer;
       try {
         answer = { id: data.id, ok: true, result: await execute(editor, data.op) };
@@ -95,8 +93,7 @@ export function Scratchpad() {
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify(answer),
       });
-    };
-    return () => events.close();
+    });
   }, [editor, loaded]);
 
   return (
