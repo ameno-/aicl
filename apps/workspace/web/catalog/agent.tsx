@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Composer, Transcript } from '@aicl/react';
 import { workspaceRegistry } from '../agentSteps.tsx';
-import { useSessionChat, useSessions } from '../sessionsApi.ts';
+import { TranscriptSession, useSessionChat, useSessions } from '../sessionsApi.ts';
 import type { ComponentRendererProps } from './types.ts';
 import './agent.css';
 
@@ -117,7 +117,9 @@ function Conversation({ sessionId }: { sessionId: string }) {
       {chat.messages.length === 0 ? (
         <div className="aicl-cmp-empty">Message this agent</div>
       ) : (
-        <Transcript messages={chat.messages} status={chat.status} streamingId={chat.streamingId} registry={workspaceRegistry} />
+        <TranscriptSession.Provider value={sessionId}>
+          <Transcript messages={chat.messages} status={chat.status} streamingId={chat.streamingId} registry={workspaceRegistry} />
+        </TranscriptSession.Provider>
       )}
       <div className="aicl-cmp-chat-composer">
         <Composer

@@ -6,7 +6,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Message, ToolCallPart } from '@aicl/core';
 import { PlanChecklist, TerminalOutput, type PartProps, type PlanItem } from '@aicl/react';
-import { useActiveSessionId, useSessionChat } from '../sessionsApi.ts';
+import { useSessionChat, useTranscriptSessionId } from '../sessionsApi.ts';
 import { usePlan, useTerminal, type TerminalState } from './liveData.ts';
 
 /** How many lines a long terminal shows until expanded. */
@@ -97,8 +97,8 @@ const lastPlanCallId = (messages: Message[]): string | undefined => {
 };
 
 export function PlanUpdatePart({ part }: PartProps) {
-  const sessionId = useActiveSessionId();
-  const { messages } = useSessionChat();
+  const sessionId = useTranscriptSessionId();
+  const { messages } = useSessionChat(sessionId);
   if (part.type !== 'tool-call') return null;
   const call = part as ToolCallPart;
   if (lastPlanCallId(messages) !== call.toolCallId) {
@@ -113,7 +113,7 @@ export function PlanUpdatePart({ part }: PartProps) {
 }
 
 export function BashPart({ part }: PartProps) {
-  const sessionId = useActiveSessionId();
+  const sessionId = useTranscriptSessionId();
   const call = part.type === 'tool-call' ? (part as ToolCallPart) : null;
   const state = useTerminal(sessionId, call?.toolCallId);
   if (!call) return null;

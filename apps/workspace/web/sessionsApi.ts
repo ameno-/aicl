@@ -6,7 +6,7 @@
  * events), one ChatController per session (history seeded from
  * GET /api/sessions/:id/messages), and the active-session choice.
  */
-import { useSyncExternalStore } from 'react';
+import { createContext, useContext, useSyncExternalStore } from 'react';
 import { ChatController, createSseTransport, type Message } from '@aicl/core';
 import { MAIN_SESSION_ID, type SessionInfo } from '../shared/runtime.ts';
 import { toasts, useControllerChat, withCanvasContext, type WorkspaceChat } from './chatStore.ts';
@@ -102,6 +102,15 @@ export function setActiveSession(id: string): void {
 export function useActiveSessionId(): string {
   start();
   return useSyncExternalStore(activeId.subscribe, activeId.get, activeId.get);
+}
+
+/** The session a rendered transcript belongs to; absent means the dock's active session. */
+export const TranscriptSession = createContext<string | null>(null);
+
+/** For tool-part renderers: the session of the transcript they sit in. */
+export function useTranscriptSessionId(): string {
+  const active = useActiveSessionId();
+  return useContext(TranscriptSession) ?? active;
 }
 
 /** Creates a session and makes it active; resolves to its id. */
