@@ -17,7 +17,7 @@ type Approval = Extract<HitlRequest, { kind: 'approval' }>;
 
 interface State {
   pending: HitlRequest[];
-  /** Answered requests, kept so cards can show "You chose …" for this page's lifetime. */
+  /** Answered requests (the server keeps the latest), so cards can show "You chose …". */
   resolved: Array<{ request: HitlRequest; answer: HitlAnswer }>;
 }
 
@@ -41,13 +41,18 @@ function start(): void {
     const request = state.pending.find((p) => p.id === e.id);
     set({
       pending: state.pending.filter((p) => p.id !== e.id),
-      resolved: request ? [...state.resolved, { request, answer: e.answer }].slice(-100) : state.resolved,
+      resolved: request ? [...state.resolved, { request, answer: e.answer }].slice(-200) : state.resolved,
     });
   });
   // Requests raised before this page connected.
   void fetch('/api/hitl')
-    .then((r) => r.json() as Promise<{ pending: HitlRequest[] }>)
-    .then((body) => body.pending.forEach(add))
+    .then((r) => r.json() as Promise<{ pending: HitlRequest[]; resolved?: State['resolved'] }>)
+    .then((body) => {
+      const seen = new Set(state.resolved.map((r) => r.request.id));
+      const earlier = (body.resolved ?? []).filter((r) => !seen.has(r.request.id));
+      if (earlier.length) set({ ...state, resolved: [...earlier, ...state.resolved] });
+      body.pending.forEach(add);
+    })
     .catch(() => {});
 }
 

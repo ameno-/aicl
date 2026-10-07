@@ -27,6 +27,17 @@ test('registry: pending, broadcast, and answer resolves the waiting promise', as
   assert.deepEqual(events.map((e) => (e as { type: string }).type), ['hitl', 'hitl-resolved']);
 });
 
+test('registry: answered requests are kept, seeded, and saved', async () => {
+  const saved: unknown[] = [];
+  const earlier = { request: approval('old'), answer: { kind: 'approval' as const, approved: true } };
+  const registry = createRegistry(() => {}, { initial: [earlier], save: (list) => saved.push(list) });
+  const waiting = registry.ask(question());
+  registry.answer('q1', { kind: 'question', optionIds: ['dark'] });
+  await waiting;
+  assert.deepEqual(registry.resolved().map((r) => r.request.id), ['old', 'q1']);
+  assert.equal(saved.length, 1);
+});
+
 test('registry: unknown ids and mismatched kinds are rejected', async () => {
   const registry = createRegistry(() => {});
   const waiting = registry.ask(approval());

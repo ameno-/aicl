@@ -4,6 +4,7 @@
  * CONTRACT: shared/agentic.ts + server/feature.ts.
  */
 import { randomUUID } from 'node:crypto';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { defineTool, type InlineExtension } from '@earendil-works/pi-coding-agent';
 import { Type } from 'typebox';
@@ -79,9 +80,24 @@ interface Waiting {
   detach: () => void;
 }
 
-/** Pending requests and the promises waiting on them. `emit` broadcasts to browsers. */
-export function createRegistry(emit: (event: Extract<ServerEvent, { type: 'hitl' | 'hitl-resolved' }>) => void) {
+export interface ResolvedRequest {
+  request: HitlRequest;
+  answer: HitlAnswer;
+}
+
+/** How many answered requests are kept, so cards can still show the choice after a reload. */
+const RESOLVED_CAP = 200;
+
+/**
+ * Pending requests and the promises waiting on them. `emit` broadcasts to
+ * browsers; `history` seeds and persists the answered ones.
+ */
+export function createRegistry(
+  emit: (event: Extract<ServerEvent, { type: 'hitl' | 'hitl-resolved' }>) => void,
+  history: { initial?: ResolvedRequest[]; save?: (resolved: ResolvedRequest[]) => void } = {},
+) {
   const waiting = new Map<string, Waiting>();
+  let resolved = (history.initial ?? []).slice(-RESOLVED_CAP);
 
   const cancelled = (request: HitlRequest): HitlAnswer =>
     request.kind === 'question' ? { kind: 'question', optionIds: [] } : { kind: 'approval', approved: false, note: 'cancelled' };
@@ -95,7 +111,10 @@ export function createRegistry(emit: (event: Extract<ServerEvent, { type: 'hitl'
           if (!entry) return;
           waiting.delete(request.id);
           entry.detach();
-          emit({ type: 'hitl-resolved', id: request.id, answer: answer ?? cancelled(request) });
+          const final = answer ?? cancelled(request);
+          resolved = [...resolved, { request, answer: final }].slice(-RESOLVED_CAP);
+          history.save?.(resolved);
+          emit({ type: 'hitl-resolved', id: request.id, answer: final });
           resolve(answer);
         };
         const onAbort = () => finish(null);
@@ -113,6 +132,7 @@ export function createRegistry(emit: (event: Extract<ServerEvent, { type: 'hitl'
       return true;
     },
     pending: (): HitlRequest[] => [...waiting.values()].map((w) => w.request),
+    resolved: (): ResolvedRequest[] => resolved,
   };
 }
 
@@ -124,8 +144,28 @@ const PROMPT = `Asking the user:
 - Use ask_user for a real fork the user should decide (which approach, which of a few designs, a preference you cannot infer), not for trivia you can decide yourself. Keep options few (2–4) and concrete, each with a short label. Set allowText when none of the options may fit. After the answer, continue with their choice.
 - bash commands, and write/edit outside .aicl/, pause for the user's approval. Do not ask in chat first; just make the call. If it is declined, respect the note and propose an alternative instead of retrying the same call.`;
 
+function readHistory(file: string): ResolvedRequest[] {
+  try {
+    const list = JSON.parse(readFileSync(file, 'utf8')) as unknown;
+    return Array.isArray(list) ? (list as ResolvedRequest[]) : [];
+  } catch {
+    return [];
+  }
+}
+
 export function createHitl(context: FeatureContext): FeatureModule {
-  const registry = createRegistry((event) => context.relay.broadcast(event));
+  const historyFile = path.join(context.workspace, '.aicl', 'hitl.json');
+  const registry = createRegistry((event) => context.relay.broadcast(event), {
+    initial: readHistory(historyFile),
+    save: (resolved) => {
+      try {
+        mkdirSync(path.dirname(historyFile), { recursive: true });
+        writeFileSync(historyFile, JSON.stringify(resolved));
+      } catch (cause) {
+        console.error('hitl: could not save history', cause);
+      }
+    },
+  });
 
   const askUser = defineTool({
     name: 'ask_user',
@@ -193,7 +233,7 @@ export function createHitl(context: FeatureContext): FeatureModule {
 
   return {
     routes: {
-      'GET /api/hitl': (_req, res) => json(res, 200, { pending: registry.pending() }),
+      'GET /api/hitl': (_req, res) => json(res, 200, { pending: registry.pending(), resolved: registry.resolved() }),
       'POST /api/hitl/:id': async (req, res, { params }) => {
         const body = await readJson<HitlAnswer>(req);
         if (body?.kind !== 'question' && body?.kind !== 'approval') return json(res, 400, { message: 'bad answer' });
