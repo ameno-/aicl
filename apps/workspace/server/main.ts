@@ -20,6 +20,8 @@ import { createApplets } from './applets.ts';
 import { createCanvasTools } from './canvas-tools.ts';
 import { json, matchRoute, readBody, readJson, type RouteTable } from './http.ts';
 import { MAIN_SESSION_ID } from '../shared/runtime.ts';
+import { formatCanvasContext } from '../shared/canvas-context-format.ts';
+import type { CanvasContext } from '../shared/runtime.ts';
 
 const PORT = Number(process.env['AICL_PORT'] ?? '5180');
 const HOST = process.env['AICL_HOST'] ?? '127.0.0.1';
@@ -74,17 +76,12 @@ const lastUserText = (messages: Message[]): string => {
  * the prompt for the agent only; the client renders its own text.
  */
 function canvasContextBlock(body: Record<string, unknown>): string {
-  const staged = Array.isArray(body['context']) ? (body['context'] as Array<{ label?: unknown; text?: unknown }>) : [];
-  const ctx = body['canvasContext'] as { selectedShapes?: unknown; uiSelection?: { shapeId?: unknown; nodeId?: unknown } | null } | undefined;
-  if (!ctx || typeof ctx !== 'object') return '';
   const lines: string[] = [];
-  const shapes = Array.isArray(ctx.selectedShapes) ? ctx.selectedShapes.filter((s): s is string => typeof s === 'string') : [];
-  if (shapes.length) lines.push(`selected: ${shapes.join(', ')}`);
-  const ui = ctx.uiSelection;
-  if (ui && typeof ui.shapeId === 'string' && typeof ui.nodeId === 'string') {
-    lines.push(`ui-selection: screen ${ui.shapeId.replace(/^shape:/, '')}, element ${ui.nodeId}`);
-  }
+  // What the user sees and just did on the canvas (viewport, selection, recent actions, tab).
+  const canvas = formatCanvasContext(body['canvasContext'] as CanvasContext | undefined);
+  if (canvas) lines.push(canvas);
   // Context the user staged with the Add-context chips: sent here so the dock never shows it.
+  const staged = Array.isArray(body['context']) ? (body['context'] as Array<{ label?: unknown; text?: unknown }>) : [];
   for (const item of staged) {
     if (typeof item?.text !== 'string') continue;
     const label = typeof item.label === 'string' ? item.label : 'context';
