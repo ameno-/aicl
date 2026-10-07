@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import type { Editor } from 'tldraw';
 import type { CanvasContext } from '../shared/runtime.ts';
 import { getRoute } from './router.ts';
+import { flushChanges } from './changes.ts';
 import { getNeighbourhood } from './graph.ts';
 import { getUiSelection } from './ui/selection.ts';
 
@@ -44,6 +45,19 @@ const touchedByAgent = (id: string): boolean => {
   const at = agentTouched.get(shortShape(id));
   return at !== undefined && Date.now() - at < AGENT_WINDOW_MS;
 };
+
+/** True while an agent op runs, or for shape `id` just after one touched it (store events arrive a beat late). */
+export function isAgentOrigin(id: string): boolean {
+  return agentDepth > 0 || touchedByAgent(id);
+}
+
+/** True while an agent op runs or just finished (for changes with no single shape, e.g. graph links). */
+export function agentRecently(): boolean {
+  const now = Date.now();
+  if (agentDepth > 0) return true;
+  for (const at of agentTouched.values()) if (now - at < AGENT_WINDOW_MS) return true;
+  return false;
+}
 
 /** The executor wraps agent ops in this so they never appear as user actions. */
 export async function asAgent<T>(run: () => Promise<T>): Promise<T> {
@@ -153,6 +167,7 @@ export function getCanvasEditor(): Editor | null {
 /** Everything sent as `canvasContext` with a prompt. */
 export function getCanvasContext(): CanvasContext {
   const editor = currentEditor();
+  flushChanges(); // so the server's "since your last turn" is current when this request lands
   const ctx: CanvasContext = { selectedShapes: getSelectedShapeIds(), uiSelection: getUiSelection(), route: getRoute() };
   if (editor) {
     trackUserActions(editor);
