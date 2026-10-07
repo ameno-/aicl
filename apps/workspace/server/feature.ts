@@ -22,6 +22,8 @@ export interface FeatureModule {
   prompt?: string;
   /** Pi inline extensions (e.g. a tool_call gate). */
   extensions?: InlineExtension[];
+  /** Extra hidden <canvas-context> text for a session's prompt (e.g. an agent node's role and inputs); '' for none. */
+  contextFor?(sessionId: string): Promise<string>;
   /** Every Pi event of every session. */
   onAgentEvent?(sessionId: string, event: unknown): void;
 }
