@@ -1,6 +1,7 @@
 import type { Message, Part } from '@aicl/core';
 import { RUN_COMPOSER_ID, RUN_THREAD_ID } from '../../shared/agentic.ts';
 import type { UiNode } from '../../shared/ui-spec.ts';
+import type { ProviderKit } from '../../shared/kits.ts';
 
 /** Pure helpers behind a screen's run mode (no React, so they unit-test under node). */
 
@@ -46,12 +47,74 @@ export interface BuildOptions {
   streamingId?: string | undefined;
   busy: boolean;
   label: (part: ToolCall) => string;
+  /** The screen's provider kit: its tool-call style decides how steps group (omitted: one element per step). */
+  kit?: ProviderKit | undefined;
 }
 
 const isToolCall = (p: Part): p is ToolCall => p.type === 'tool-call';
 
 /** Maps session messages onto the screen's own chat element types. */
 export function buildThread(messages: Message[], opts: BuildOptions): UiNode[] {
+  const out = buildRaw(messages, opts);
+  const style = opts.kit?.transcript.toolCalls;
+  return !style || style === 'cards' ? out : foldSteps(out, style);
+}
+
+type Step = { label: string; status: string };
+const propsOf = (n: UiNode) => (n.props ?? {}) as Record<string, unknown>;
+const isStep = (n: UiNode) => n.type === 'toolStep' && !Array.isArray(propsOf(n)['steps']);
+
+/**
+ * Kit-shaped grouping for run mode. Devin and Manus fold a whole turn's reasoning and steps into one
+ * work element ("Worked for 11s", "<Agent> is working"); Lovable and Cofounder fold consecutive steps
+ * into one chip row / timeline (the timeline aggregates "Ran N actions").
+ */
+export function foldSteps(nodes: UiNode[], style: ProviderKit['transcript']['toolCalls']): UiNode[] {
+  const whole = style === 'work-summary' || style === 'step-rows';
+  const out: UiNode[] = [];
+  let group: UiNode | null = null;
+  let seconds = 0;
+  const stepOf = (n: UiNode): Step => ({ label: String(propsOf(n)['label'] ?? 'Step'), status: String(propsOf(n)['status'] ?? 'success') });
+  const add = (n: UiNode) => {
+    if (!group) {
+      group = whole
+        ? { id: `${n.id}-work`, type: 'reasoning', props: { streaming: false, steps: [] as Step[] } }
+        : { id: `${n.id}-steps`, type: 'toolStep', props: { steps: [] as Step[] } };
+      out.push(group);
+    }
+    const p = group.props as Record<string, unknown>;
+    if (n.type === 'reasoning') {
+      const q = propsOf(n);
+      if (q['streaming'] === true) p['streaming'] = true;
+      if (typeof q['text'] === 'string' && q['text'] && !p['text']) p['text'] = q['text'];
+      if (typeof q['durationSec'] === 'number') seconds += q['durationSec'];
+    } else {
+      (p['steps'] as Step[]).push(stepOf(n));
+      if (/^(pending|running)$/.test(stepOf(n).status)) p['streaming'] = true;
+    }
+  };
+  const close = () => {
+    if (group && whole) {
+      const p = group.props as Record<string, unknown>;
+      const steps = p['steps'] as Step[];
+      p['durationSec'] = Math.max(1, seconds || steps.length * 2);
+    }
+    group = null;
+    seconds = 0;
+  };
+  for (const n of nodes) {
+    if (n.type === 'userMessage') close();
+    if (whole ? n.type === 'reasoning' || isStep(n) : isStep(n)) add(n);
+    else {
+      if (!whole) close();
+      out.push(n);
+    }
+  }
+  close();
+  return out;
+}
+
+function buildRaw(messages: Message[], opts: BuildOptions): UiNode[] {
   const out: UiNode[] = [];
   let lastPlan = -1;
   // The agent's plan is the latest plan_update call; it renders once, at that spot.

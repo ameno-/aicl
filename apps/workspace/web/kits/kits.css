@@ -1,0 +1,42 @@
+/*
+ * KitComposer tags the @aicl/fx composer's elements with the stable data-aicl hooks
+ * the e2e suites use (composer, composer-input, composer-submit). The classic
+ * @aicl/react composer styles those same hooks as a grid card, so neutralise them:
+ * the fx composer draws its own card.
+ */
+[data-aicl='composer'][data-kit-composer] {
+  display: block;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+[data-kit-composer] textarea[data-aicl='composer-input'] {
+  margin: 0;
+  padding: 4px;
+}
+
+[data-kit-composer][data-variant='bottom'] textarea[data-aicl='composer-input'] {
+  min-height: 28px;
+  font-size: 0.875rem;
+  line-height: 1.5rem;
+}
+
+[data-kit-composer][data-variant='hero'] textarea[data-aicl='composer-input'] {
+  min-height: 96px;
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+}
+
+[data-kit-composer] [data-aicl='composer-submit'][data-role='stop'] {
+  background: var(--aicl-text);
+  color: var(--aicl-bg);
+}
+
+/* Kits show the action bar persistently under every reply (transcript.md: persistent placement is the observed pattern). */
+[data-aicl='message-actions'][data-kit-actions] {
+  opacity: 1;
+  margin-top: 0;
+}

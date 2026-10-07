@@ -26,6 +26,8 @@ export interface AgentLike {
   subscribe(listener: (event: unknown) => void): () => void;
   prompt(text: string): Promise<void>;
   abort(): Promise<void>;
+  /** Switches the live session's model (persisted in its transcript by Pi). */
+  setModel?(model: never): Promise<void>;
   dispose?(): void;
 }
 
@@ -40,6 +42,8 @@ export interface IndexEntry {
   /** 'auto' once titled from the first message, 'user' once renamed; absent = default title. */
   titleSource?: 'auto' | 'user';
   preview?: string;
+  /** "provider/id" the user picked for this session; absent = the workspace default. */
+  model?: string;
 }
 
 export class SessionError extends Error {
@@ -160,7 +164,9 @@ export interface SessionHubOptions {
   /** `<workspace>/.aicl/sessions`. */
   dir: string;
   /** Builds a Pi session: opens `file` (absolute) when given, otherwise starts a new persisted one in `dir`. */
-  createAgent(file: string | undefined): Promise<AgentLike>;
+  createAgent(file: string | undefined, model?: string): Promise<AgentLike>;
+  /** "provider/id" → the Pi model, or undefined when unknown or without credentials. */
+  resolveModel?(key: string): unknown;
   onChange?(session: SessionInfo): void;
   onRemove?(id: string): void;
   /** Every Pi event from every session's agent (live plans, streaming terminals, …). */
@@ -199,6 +205,7 @@ export async function createSessionHub(options: SessionHubOptions) {
     status: status.get(e.id) ?? 'idle',
     kind: e.kind,
     ...(e.preview ? { preview: e.preview } : {}),
+    ...(e.model ? { model: e.model } : {}),
   });
 
   const persist = (): Promise<void> => {
@@ -234,7 +241,7 @@ export async function createSessionHub(options: SessionHubOptions) {
           () => file,
           () => undefined,
         )
-        .then((existing) => options.createAgent(existing))
+        .then((existing) => options.createAgent(existing, e.model))
         .then((a) => {
           if (a.sessionFile && !e.file) e.file = path.basename(a.sessionFile);
           if (options.onAgentEvent) a.subscribe((event) => options.onAgentEvent!(id, event));
@@ -293,6 +300,24 @@ export async function createSessionHub(options: SessionHubOptions) {
       e.titleSource = 'user';
       await touch(e);
       return info(e);
+    },
+
+    /** Switches a session's model; remembered across reloads. 409 while it is running. */
+    async setModel(id: string, key: string): Promise<SessionInfo> {
+      const e = need(id);
+      if (busy.has(id)) throw new SessionError(409, 'The agent is still working. Wait for it to finish before switching models.');
+      const model = options.resolveModel?.(key);
+      if (!model) throw new SessionError(400, `Unknown or unavailable model "${key}".`);
+      const agent = await agentFor(id);
+      await agent.setModel?.(model as never);
+      e.model = key;
+      await touch(e);
+      return info(e);
+    },
+
+    /** Models chosen by sessions (so the picker keeps showing them). */
+    modelsInUse(): string[] {
+      return [...new Set([...entries.values()].flatMap((e) => (e.model ? [e.model] : [])))];
     },
 
     async remove(id: string): Promise<void> {

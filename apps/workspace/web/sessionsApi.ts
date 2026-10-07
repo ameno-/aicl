@@ -71,6 +71,11 @@ function start(): void {
   onReconnect(() => void load().catch(() => {}));
 }
 
+/** Merges a SessionInfo the app got from an HTTP response (e.g. a model switch) into the list. */
+export function applySessionInfo(session: SessionInfo): void {
+  upsert(session);
+}
+
 export function useSessions(): SessionInfo[] {
   start();
   return useSyncExternalStore(list.subscribe, list.get, list.get);

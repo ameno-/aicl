@@ -17,6 +17,9 @@ import { createNodes } from './nodes.ts';
 import { createGraph } from './graph.ts';
 import { setSessionResolver } from './session-context.ts';
 import { serveFile, defaultReferencesRoot } from './files.ts';
+import { BrowseError, listDir, readText } from './browse.ts';
+import { findModel, listModels } from './models.ts';
+import { serveWeb } from './static.ts';
 import { createReferenceTools } from './references.ts';
 import { createRelay } from './relay.ts';
 import { createWorkspaceStore } from './store.ts';
@@ -36,6 +39,8 @@ process.on('uncaughtException', (error) => console.error('[aicl] uncaught except
 const PORT = Number(process.env['AICL_PORT'] ?? '5180');
 const HOST = process.env['AICL_HOST'] ?? '127.0.0.1';
 const WORKSPACE = path.resolve(process.env['AICL_WORKSPACE'] ?? process.cwd());
+/** `npm start`: also serve the built web app (dist/) with SPA fallback, so one port is the whole product. */
+const WEB_ROOT = process.argv.includes('--serve-web') ? path.resolve(import.meta.dirname, '..', 'dist') : null;
 
 const relay = createRelay();
 const store = createWorkspaceStore(WORKSPACE);
@@ -84,10 +89,12 @@ const factory = await createAgentFactory({
 
 const hub = await createSessionHub({
   dir: SESSIONS_DIR,
-  createAgent: async (file) =>
+  createAgent: async (file, model) =>
     (await factory.createSession(
       file ? SessionManager.open(file, SESSIONS_DIR) : SessionManager.create(WORKSPACE, SESSIONS_DIR),
+      model,
     )) as unknown as AgentLike,
+  resolveModel: (key) => findModel(factory.modelRuntime, key),
   onChange: (session) => relay.broadcast({ type: 'session', session }),
   onRemove: (id) => relay.broadcast({ type: 'session-removed', id }),
   onAgentEvent: (sessionId, event) => {
@@ -144,6 +151,10 @@ const sessionRoutes: RouteTable = {
   },
   'GET /api/sessions/:id/messages': async (_req, res, { params }) =>
     json(res, 200, { messages: await hub.messages(params['id']!) }),
+  'POST /api/sessions/:id/model': async (req, res, { params }) => {
+    const body = await readJson<{ model?: string }>(req);
+    json(res, 200, { session: await hub.setModel(params['id']!, body.model ?? '') });
+  },
   'POST /api/sessions/:id/stop': async (_req, res, { params }) => {
     await hub.stop(params['id']!);
     json(res, 200, { ok: true });
@@ -220,6 +231,20 @@ const server = createServer((req, res) => {
       }
       case 'GET /api/file':
         return serveFile(res, [WORKSPACE, defaultReferencesRoot()], url.searchParams.get('path') ?? '');
+      case 'GET /api/models': {
+        const models = await listModels({
+          runtime: factory.modelRuntime,
+          current: modelLabel,
+          inUse: hub.modelsInUse(),
+          all: url.searchParams.get('all') === '1',
+          extra: (process.env['AICL_MODELS'] ?? '').split(',').map((m) => m.trim()).filter(Boolean),
+        });
+        return json(res, 200, { models, default: modelLabel });
+      }
+      case 'GET /api/files':
+        return json(res, 200, await listDir(WORKSPACE, url.searchParams.get('dir') ?? ''));
+      case 'GET /api/file/text':
+        return json(res, 200, await readText(WORKSPACE, url.searchParams.get('path') ?? ''));
       case 'GET /api/scratch':
         return json(res, 200, { snapshot: await store.readScratch() });
       case 'PUT /api/scratch':
@@ -234,11 +259,12 @@ const server = createServer((req, res) => {
       default: {
         const hit = matchRoute([sessionRoutes, ...featureRoutes], req.method ?? 'GET', url.pathname);
         if (hit) return hit.handler(req, res, { url, params: hit.params });
+        if (WEB_ROOT && !url.pathname.startsWith('/api/') && (await serveWeb(WEB_ROOT, req, res, url.pathname))) return;
         return json(res, 404, { message: 'not found' });
       }
     }
   })().catch((cause: unknown) => {
-    if (cause instanceof SessionError) {
+    if (cause instanceof SessionError || cause instanceof BrowseError) {
       if (!res.headersSent) json(res, cause.status, { message: cause.message });
       return;
     }
@@ -249,5 +275,5 @@ const server = createServer((req, res) => {
 });
 
 server.listen(PORT, HOST, () => {
-  console.log(`aicl workspace server on http://${HOST}:${PORT} · workspace ${WORKSPACE} · model ${modelLabel ?? 'none'}`);
+  console.log(`aicl workspace server on http://${HOST}:${PORT} · workspace ${WORKSPACE} · model ${modelLabel ?? 'none'}${WEB_ROOT ? ` · web ${WEB_ROOT}` : ''}`);
 });

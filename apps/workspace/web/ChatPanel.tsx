@@ -1,9 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
-import { Composer, SuggestionChips, ToastRegion, Transcript } from '@aicl/react';
+import { useEffect, useState } from 'react';
+import { SuggestionChips } from '@aicl/react';
 import { Check, ChevronDown, SquarePen, X } from 'lucide-react';
 import type { SessionInfo } from '../shared/runtime.ts';
-import { workspaceRegistry } from './agentSteps.tsx';
-import { clearCanvasSelection, newWorkspaceChat, screenName, toasts, useSelectedShapeIds, useWorkspaceChat } from './chatStore.ts';
+import type { ProviderKit } from '../shared/kits.ts';
+import { useConversation } from './app/Conversation.tsx';
+import { KitComposer, KitTranscript } from './kits/index.tsx';
+import { clearCanvasSelection, newWorkspaceChat, screenName, useSelectedShapeIds } from './chatStore.ts';
 import { HitlStrip } from './agentic/hitl.tsx';
 import { removePendingContext, setActiveSession, useActiveSessionId, usePendingContext, useSessions } from './sessionsApi.ts';
 import { setUiSelection, useUiSelection } from './ui/selection.ts';
@@ -32,7 +34,7 @@ function StatusDot({ status }: { status: SessionInfo['status'] }) {
 const rowStyle = { display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '6px 8px', border: 0, borderRadius: 6, color: 'inherit', font: 'inherit', cursor: 'pointer', textAlign: 'left' } as const;
 
 /** Title of the active session, with a dropdown to switch or start another. */
-function SessionSwitcher() {
+function SessionSwitcher({ kit }: { kit: ProviderKit }) {
   const sessions = useSessions();
   const activeId = useActiveSessionId();
   const [open, setOpen] = useState(false);
@@ -51,7 +53,7 @@ function SessionSwitcher() {
         type="button"
         aria-haspopup="listbox"
         aria-expanded={open}
-        aria-label="Switch chat"
+        aria-label={`Switch ${kit.vocabulary.sessions.toLowerCase().replace(/s$/, '')}`}
         onClick={() => setOpen((o) => !o)}
         style={{ display: 'flex', alignItems: 'center', gap: 6, maxWidth: '100%', padding: '2px 6px 2px 0', border: 0, background: 'transparent', color: 'inherit', font: 'inherit', fontWeight: 600, cursor: 'pointer' }}
       >
@@ -64,7 +66,7 @@ function SessionSwitcher() {
           <div onClick={() => setOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 19 }} />
           <ul
             role="listbox"
-            aria-label="Chats"
+            aria-label={kit.vocabulary.sessions}
             style={{ position: 'absolute', zIndex: 20, top: '100%', left: 0, minWidth: 240, maxWidth: 320, maxHeight: '60vh', overflowY: 'auto', margin: '4px 0 0', padding: 4, listStyle: 'none', border: '1px solid var(--aicl-border, #e7e7e5)', borderRadius: 10, background: 'var(--aicl-surface, #fff)', boxShadow: '0 8px 24px rgba(0,0,0,.14)' }}
           >
             <li>
@@ -76,7 +78,7 @@ function SessionSwitcher() {
                 }}
                 style={{ ...rowStyle, background: 'transparent' }}
               >
-                <SquarePen size={14} aria-hidden="true" /> New chat
+                <SquarePen size={14} aria-hidden="true" /> {kit.vocabulary.newSession}
               </button>
             </li>
             {sessions.map((s) => (
@@ -108,18 +110,10 @@ function SessionSwitcher() {
 }
 
 /** The chat docked beside the canvas, driven by the workspace's Pi agent. */
-export function ChatPanel() {
+export function ChatPanel({ kit }: { kit: ProviderKit }) {
   const activeSessionId = useActiveSessionId();
-  const chat = useWorkspaceChat();
-  const [model, setModel] = useState<string | null>(null);
-  const [draft, setDraft] = useState('');
-  const inputRef = useRef<HTMLTextAreaElement | null>(null);
-
-  useEffect(() => {
-    void fetch('/api/info')
-      .then((r) => r.json() as Promise<{ model: string | null }>)
-      .then((info) => setModel(info.model));
-  }, []);
+  const { chat, composerProps, retry } = useConversation(activeSessionId, kit);
+  const model = composerProps.model?.value ?? null;
 
   const empty = chat.messages.length === 0;
   const selectedShapes = useSelectedShapeIds();
@@ -135,23 +129,29 @@ export function ChatPanel() {
     <aside className="chat" aria-label="Agent chat">
       <header className="chat-header">
         <div>
-          <SessionSwitcher />
+          <SessionSwitcher kit={kit} />
           <span className="chat-model" title="Pi model">
             {model ?? '…'}
           </span>
         </div>
-        <button type="button" className="icon-button" aria-label="New chat" title="New chat" onClick={newWorkspaceChat}>
+        <button type="button" className="icon-button" aria-label={kit.vocabulary.newSession} title={kit.vocabulary.newSession} onClick={newWorkspaceChat}>
           <SquarePen size={16} aria-hidden="true" />
         </button>
       </header>
-      {empty ? (
-        <div className="chat-empty">
-          <p className="chat-empty-title">What should we sketch?</p>
-          <p className="chat-empty-hint">The agent draws on the canvas beside you, and sees what you draw.</p>
-        </div>
-      ) : (
-        <Transcript messages={chat.messages} status={chat.status} streamingId={chat.streamingId} registry={workspaceRegistry} />
-      )}
+      <KitTranscript
+        kit={kit}
+        sessionId={activeSessionId}
+        messages={chat.messages}
+        status={chat.status}
+        {...(chat.streamingId ? { streamingId: chat.streamingId } : {})}
+        onRetry={retry}
+        empty={
+          <div className="chat-empty">
+            <p className="chat-empty-title">What should we sketch?</p>
+            <p className="chat-empty-hint">The agent draws on the canvas beside you, and sees what you draw.</p>
+          </div>
+        }
+      />
       <div className="chat-composer">
         {chip ? (
           <div className="chat-context" role="status" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, padding: '2px 8px', margin: '0 0 6px', border: '1px solid var(--aicl-border, #e7e7e5)', borderRadius: 999, width: 'fit-content', maxWidth: '100%' }}>
@@ -182,17 +182,8 @@ export function ChatPanel() {
           <SuggestionChips suggestions={STARTERS} behavior="send" onSelect={(s) => void chat.send(s.label)} />
         ) : null}
         <HitlStrip sessionId={activeSessionId} />
-        <Composer
-          status={chat.status}
-          value={draft}
-          onChange={setDraft}
-          inputRef={inputRef}
-          placeholder="Ask the agent to sketch something"
-          onSubmit={(text) => void chat.send(text)}
-          onStop={chat.stop}
-        />
+        <KitComposer {...composerProps} variant="bottom" />
       </div>
-      <ToastRegion queue={toasts} placement="top-center" />
     </aside>
   );
 }
