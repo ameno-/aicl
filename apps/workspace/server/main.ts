@@ -156,7 +156,8 @@ const chat = createChatHandler(async (req) => {
     if (cause instanceof SessionError) throw new ChatHandlerError(cause.status, cause.message, cause.status === 409);
     throw cause;
   }
-  return hub.run(sessionId, text + canvasContextBlock(req.body), req.signal);
+  const extra = (await Promise.all(features.map((f) => f.contextFor?.(sessionId) ?? ''))).join('');
+  return hub.run(sessionId, text + canvasContextBlock(req.body) + extra, req.signal);
 });
 
 async function handleChat(req: IncomingMessage, res: ServerResponse): Promise<void> {
