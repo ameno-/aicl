@@ -68,7 +68,7 @@ await check('agent builds a widget with a server function and pins it to Overvie
   await tab('overview').waitFor();
   if ((await tab('overview').getAttribute('aria-selected')) !== 'true') await tab('overview').click();
   const card = p.locator('[data-applet="notes-stats"]');
-  await card.getByRole('button', { name: /refresh/i }).waitFor({ timeout: 30000 });
+  await card.getByRole('button', { name: /refresh/i }).first().waitFor({ timeout: 30000 });
   await shot('1-overview-widget');
   return `steps: ${steps.slice(-5).join(' | ')}`;
 });
@@ -77,7 +77,7 @@ await check('widget server function reads live data: Refresh picks up file chang
   const card = p.locator('[data-applet="notes-stats"]');
   const before = await card.innerText();
   writeFileSync(path.join(WS, 'notes.md'), readFileSync(path.join(WS, 'notes.md'), 'utf8') + '- added line one\n- added line two\n');
-  await card.getByRole('button', { name: /refresh/i }).click();
+  await card.getByRole('button', { name: /refresh/i }).first().click();
   await p.waitForTimeout(1500);
   const after = await card.innerText();
   if (before === after) throw new Error('nothing changed after refresh');
