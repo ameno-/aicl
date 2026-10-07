@@ -17,6 +17,12 @@ Adapted means: imports rewritten to relative paths, shadcn colour names kept
 <!-- One row per file: | src/vendor/... | project | source path | -->
 | File | Project | Source path |
 |---|---|---|
+| src/vendor/spell-ui/shimmer-text.tsx | Spell UI | registry/spell-ui/shimmer-text.tsx |
+| src/vendor/spell-ui/spinner.tsx | Spell UI | registry/spell-ui/spinner.tsx |
+| src/vendor/spell-ui/bars-spinner.tsx | Spell UI | registry/spell-ui/bars-spinner.tsx (styled-jsx replaced by motion bars) |
+| src/vendor/spell-ui/copy-button.tsx | Spell UI | registry/spell-ui/copy-button.tsx |
+| src/vendor/spell-ui/animated-checkbox.tsx | Spell UI | registry/spell-ui/animated-checkbox.tsx (controlled/readOnly added) |
+| src/vendor/cult-ui/rolling-number.tsx | Cult UI | apps/www/registry/default/ui/rolling-number.tsx (reduced-motion jump added) |
 
 ## MIT licence text
 
