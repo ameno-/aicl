@@ -22,7 +22,7 @@ export interface CommandMenuProps {
   hotkey?: boolean;
 }
 
-/** Subsequence match; returns a score (lower is better) or -1. */
+/** Subsequence match; returns a score (lower is better; prefix matches can go negative) or Infinity for no match. */
 export function fuzzyScore(query: string, text: string): number {
   if (!query) return 0;
   const q = query.toLowerCase();
@@ -32,7 +32,7 @@ export function fuzzyScore(query: string, text: string): number {
   let last = -1;
   for (const ch of q) {
     const at = t.indexOf(ch, ti);
-    if (at < 0) return -1;
+    if (at < 0) return Number.POSITIVE_INFINITY;
     score += at - (last + 1) + (at === 0 ? -2 : 0);
     last = at;
     ti = at + 1;
@@ -74,7 +74,7 @@ export function CommandMenu({ open, onOpenChange, items, placeholder = 'Type a c
   const results = useMemo(() => {
     const scored = items
       .map((item, i) => ({ item, i, s: fuzzyScore(query, item.label) }))
-      .filter((r) => r.s >= 0);
+      .filter((r) => Number.isFinite(r.s));
     if (query) scored.sort((a, b) => a.s - b.s || a.i - b.i);
     return scored.map((r) => r.item);
   }, [items, query]);

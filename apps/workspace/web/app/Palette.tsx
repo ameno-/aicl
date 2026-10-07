@@ -3,8 +3,7 @@
  * ⌘N new session, ⌘/ shortcuts, ⌘, settings, ⌘\ work panel, Esc stops a running turn.
  */
 import { useEffect, useMemo } from 'react';
-import type { CommandItem } from '@aicl/fx';
-import { CommandPaletteView } from './CommandPalette.tsx';
+import { CommandMenu, type CommandItem } from '@aicl/fx';
 import { KIT_IDS, KITS, type ProviderKit } from '../../shared/kits.ts';
 import { setKit } from '../kits/index.tsx';
 import { navigate } from '../router.ts';
@@ -71,6 +70,6 @@ export function CommandPalette({ kit, prefersDark }: { kit: ProviderKit; prefers
     return list;
   }, [kit, prefs, prefersDark, sessions, models, activeId, s]);
 
-  return <CommandPaletteView open={overlay === 'palette'} onOpenChange={(o) => setOverlay(o ? 'palette' : null)} items={items} placeholder={`Search commands, ${kit.vocabulary.sessions.toLowerCase()}, kits, models…`} />;
+  return <CommandMenu hotkey={false} open={overlay === 'palette'} onOpenChange={(o) => setOverlay(o ? 'palette' : null)} items={items} placeholder={`Search commands, ${kit.vocabulary.sessions.toLowerCase()}, kits, models…`} />;
 }
 
