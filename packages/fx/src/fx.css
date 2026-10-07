@@ -1,0 +1,68 @@
+/**
+ * @aicl/fx styles: Tailwind v4 theme + utilities, no preflight.
+ *
+ * Utilities are imported UNLAYERED on purpose. The AICL reset and tldraw's
+ * CSS are unlayered too, and unlayered rules always beat layered ones; layered
+ * utilities would lose to `:where()` resets. Unlayered, a utility (one class)
+ * wins over the zero-specificity reset and ties normal component classes.
+ *
+ * Colours, radii and fonts resolve to AICL tokens, so every vendored
+ * component (written against shadcn names: bg-background, text-muted-foreground,
+ * border-border…) follows the active theme, preset and provider kit.
+ *
+ * The consuming app must run @tailwindcss/vite (or postcss) over this file.
+ */
+@import 'tailwindcss/theme.css';
+@import 'tailwindcss/utilities.css';
+
+@source './';
+
+/* AICL themes switch with data-theme on any ancestor. */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+@theme inline {
+  --color-background: var(--aicl-bg);
+  --color-foreground: var(--aicl-text);
+  --color-card: var(--aicl-surface);
+  --color-card-foreground: var(--aicl-text);
+  --color-popover: var(--aicl-surface-elevated);
+  --color-popover-foreground: var(--aicl-text);
+  --color-primary: var(--aicl-accent);
+  --color-primary-foreground: var(--aicl-accent-fg);
+  --color-secondary: var(--aicl-surface-tint);
+  --color-secondary-foreground: var(--aicl-text);
+  --color-muted: var(--aicl-surface-inset);
+  --color-muted-foreground: var(--aicl-text-muted);
+  --color-accent: var(--aicl-accent-soft);
+  --color-accent-foreground: var(--aicl-text);
+  --color-destructive: var(--aicl-danger);
+  --color-success: var(--aicl-success);
+  --color-warning: var(--aicl-warning);
+  --color-info: var(--aicl-info);
+  --color-border: var(--aicl-border);
+  --color-input: var(--aicl-border-strong);
+  --color-ring: var(--aicl-border-focus);
+  --color-sidebar: var(--aicl-sidebar);
+  --color-faint: var(--aicl-text-faint);
+  --color-terminal: var(--aicl-terminal-bg);
+  --color-terminal-foreground: var(--aicl-terminal-fg);
+
+  --radius-sm: var(--aicl-radius-sm);
+  --radius-md: var(--aicl-radius-md);
+  --radius-lg: var(--aicl-radius-lg);
+  --radius-xl: var(--aicl-radius-xl);
+
+  --font-sans: var(--aicl-font-sans);
+  --font-mono: var(--aicl-font-mono);
+}
+
+/* Vendored components assume a border-box world and a default border colour. */
+:where([data-fx]),
+:where([data-fx]) *,
+:where([data-fx]) *::before,
+:where([data-fx]) *::after {
+  box-sizing: border-box;
+  border-color: var(--aicl-border);
+  border-style: solid;
+  border-width: 0;
+}

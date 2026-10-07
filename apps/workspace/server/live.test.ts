@@ -101,3 +101,26 @@ test('terminal keeps only the last lines', async () => {
   assert.equal(t.lines.at(-1), `l${MAX_TERMINAL_LINES + 49}`);
   assert.equal(t.lines[0], 'l50');
 });
+
+test('terminal output survives a restart; a call still running is closed as interrupted', async () => {
+  const { workspace, live } = await setup();
+  const ev = (id: string, e: object) => live.onAgentEvent!('s1', { toolName: 'bash', toolCallId: id, ...e });
+  const part = (text: string) => ({ content: [{ type: 'text', text }] });
+  ev('done', { type: 'tool_execution_start', args: { command: 'echo a' } });
+  ev('done', { type: 'tool_execution_end', isError: false, result: part('a\nb') });
+  ev('cut', { type: 'tool_execution_start', args: { command: 'sleep 99' } });
+  ev('cut', { type: 'tool_execution_update', partialResult: part('started\nhalf') });
+  await new Promise((resolve) => setTimeout(resolve, 400)); // past the debounce window
+
+  const restarted = createLive({ workspace, relay: { broadcast() {} } } as unknown as FeatureContext);
+  const route = 'GET /api/sessions/:id/terminal/:toolId';
+  const a = await get(restarted, route, { id: 's1', toolId: 'done' });
+  assert.deepEqual(a.lines, ['a', 'b']);
+  assert.equal(a.done, true);
+  assert.equal(a.exitCode, 0);
+  const cut = await get(restarted, route, { id: 's1', toolId: 'cut' });
+  assert.equal(cut.done, true);
+  assert.equal(cut.exitCode, 1);
+  assert.deepEqual(cut.lines.slice(0, 2), ['started', 'half']);
+  assert.equal((await get(restarted, route, { id: 's1', toolId: 'latest' })).toolCallId, 'cut');
+});

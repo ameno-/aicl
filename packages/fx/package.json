@@ -1,0 +1,34 @@
+{
+  "name": "@aicl/fx",
+  "version": "0.0.0",
+  "description": "Animated AI-chat components for AICL: motion, Tailwind utilities on AICL tokens, WebGPU ambience. Source-only; consumed through a bundler.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": ["*.css"],
+  "exports": {
+    ".": "./src/index.ts",
+    "./fx.css": "./src/fx.css"
+  },
+  "files": ["src", "ATTRIBUTION.md"],
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "dependencies": {
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^1.52.0",
+    "motion": "^12.0.0",
+    "shaders": "^4.0.0",
+    "tailwind-merge": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.31",
+    "@types/react-dom": "^18.3.7",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  }
+}

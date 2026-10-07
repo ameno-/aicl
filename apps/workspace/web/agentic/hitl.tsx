@@ -8,7 +8,7 @@ import { useState, useSyncExternalStore, type CSSProperties, type ReactNode } fr
 import type { PartProps } from '@aicl/react';
 import { Check, ChevronRight, CircleHelp, ShieldAlert, X } from 'lucide-react';
 import type { HitlAnswer, HitlRequest } from '../../shared/agentic.ts';
-import { onServerEvent } from '../events.ts';
+import { onReconnect, onServerEvent } from '../events.ts';
 
 type Question = Extract<HitlRequest, { kind: 'question' }>;
 type Approval = Extract<HitlRequest, { kind: 'approval' }>;
@@ -44,16 +44,21 @@ function start(): void {
       resolved: request ? [...state.resolved, { request, answer: e.answer }].slice(-200) : state.resolved,
     });
   });
-  // Requests raised before this page connected.
-  void fetch('/api/hitl')
-    .then((r) => r.json() as Promise<{ pending: HitlRequest[]; resolved?: State['resolved'] }>)
-    .then((body) => {
-      const seen = new Set(state.resolved.map((r) => r.request.id));
-      const earlier = (body.resolved ?? []).filter((r) => !seen.has(r.request.id));
-      if (earlier.length) set({ ...state, resolved: [...earlier, ...state.resolved] });
-      body.pending.forEach(add);
-    })
-    .catch(() => {});
+  // Requests raised before this page connected; again after every reconnect (events were missed).
+  const load = (replace: boolean) =>
+    void fetch('/api/hitl')
+      .then((r) => r.json() as Promise<{ pending: HitlRequest[]; resolved?: State['resolved'] }>)
+      .then((body) => {
+        const seen = new Set(state.resolved.map((r) => r.request.id));
+        const earlier = (body.resolved ?? []).filter((r) => !seen.has(r.request.id));
+        if (earlier.length) set({ ...state, resolved: [...earlier, ...state.resolved] });
+        // After a drop the server is the authority: what it no longer lists was answered meanwhile.
+        if (replace) set({ ...state, pending: state.pending.filter((p) => body.pending.some((b) => b.id === p.id)) });
+        body.pending.forEach(add);
+      })
+      .catch(() => {});
+  load(false);
+  onReconnect(() => load(true));
 }
 
 function useHitl(): State {

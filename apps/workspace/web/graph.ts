@@ -4,7 +4,10 @@
  */
 import type { Editor } from 'tldraw';
 import type { CanvasGraph } from '../shared/agentic.ts';
+import { diffGraphs } from '../shared/canvas-changes.ts';
 import { buildGraph, neighbourhood } from '../shared/canvas-graph.ts';
+import { agentRecently } from './canvasContext.ts';
+import { recordChanges, startChangeTracker } from './changes.ts';
 
 const REBUILD_MS = 150;
 
@@ -19,11 +22,14 @@ function rebuild(editor: Editor): CanvasGraph {
     ...editor.getCurrentPageShapes(),
     ...editor.store.allRecords().filter((r) => r.typeName === 'binding'),
   ];
+  const before = graph;
   graph = buildGraph(records, (id) => {
     const b = editor.getShapePageBounds(id as never);
     return b ? { x: b.x, y: b.y, w: b.w, h: b.h } : undefined;
   });
   dirty = false;
+  // Links that appeared/disappeared since the last build (only while tracking this editor).
+  if (before && tracked === editor) recordChanges(diffGraphs(before, graph, agentRecently() ? 'agent' : 'user'));
   return graph;
 }
 
@@ -48,9 +54,11 @@ export function startGraphTracker(editor: Editor): () => void {
     }, REBUILD_MS);
   };
   const stop = editor.store.listen(schedule, { scope: 'document' });
+  const stopChanges = startChangeTracker(editor);
   schedule();
   return () => {
     stop();
+    stopChanges();
     clearTimeout(timer);
     if (tracked === editor) {
       tracked = null;

@@ -15,7 +15,7 @@ import { richTextToPlain } from './scratch.ts';
 
 type Bounds = GraphNode['bounds'];
 
-interface ShapeRec {
+export interface ShapeRec {
   typeName: 'shape';
   id: string;
   type: string;
@@ -43,7 +43,7 @@ function clip(text: string): string {
 
 const str = (v: unknown): string | undefined => (typeof v === 'string' && v ? v : undefined);
 
-function nodeKind(s: ShapeRec): { kind: GraphNodeKind; component?: string } {
+export function nodeKind(s: ShapeRec): { kind: GraphNodeKind; component?: string } {
   if (s.type === 'aicl-component') {
     const component = str(s.props['component']);
     if (component === 'screen') return { kind: 'screen', component };
@@ -54,7 +54,7 @@ function nodeKind(s: ShapeRec): { kind: GraphNodeKind; component?: string } {
   return { kind: 'shape' };
 }
 
-function labelOf(s: ShapeRec): string {
+export function labelOf(s: ShapeRec): string {
   const p = s.props;
   const inner = (p['props'] && typeof p['props'] === 'object' ? p['props'] : {}) as Record<string, unknown>;
   if (s.type === 'aicl-component') return clip(str(p['title']) ?? str(inner['name']) ?? str(inner['title']) ?? str(p['component']) ?? '');
@@ -65,7 +65,7 @@ function labelOf(s: ShapeRec): string {
   return '';
 }
 
-function stateOf(s: ShapeRec): Record<string, unknown> | undefined {
+export function stateOf(s: ShapeRec): Record<string, unknown> | undefined {
   if (s.type !== 'aicl-component') return undefined;
   const component = str(s.props['component']);
   const inner = (s.props['props'] && typeof s.props['props'] === 'object' ? s.props['props'] : {}) as Record<string, unknown>;

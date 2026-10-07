@@ -1,0 +1,3 @@
+/* Tailwind for the workspace: @aicl/fx theme + utilities, scanning the app's own sources too. */
+@import '@aicl/fx/fx.css';
+@source './';

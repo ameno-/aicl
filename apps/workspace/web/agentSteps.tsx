@@ -2,6 +2,7 @@ import type { ComponentType } from 'react';
 import { createRendererRegistry, type ToolCallPart } from '@aicl/core';
 import { ToolCallDisclosure, UnknownPart, type PartProps } from '@aicl/react';
 import { MarkdownTextPart } from '@aicl/react/markdown';
+import { ErrorBoundary } from './ErrorBoundary.tsx';
 import { toolRenderers } from './agentic/toolRenderers.tsx';
 
 const count = (args: unknown, key: string) => {
@@ -93,7 +94,7 @@ export function describe(part: ToolCallPart): string {
   }
 }
 
-export function AgentStep(props: PartProps) {
+function AgentStepInner(props: PartProps) {
   if (props.part.type !== 'tool-call') return null;
   // Wave 2: some tools render as live components (questions, plans, terminals).
   const Live = toolRenderers[props.part.name];
@@ -101,8 +102,27 @@ export function AgentStep(props: PartProps) {
   return <ToolCallDisclosure {...props} part={{ ...props.part, name: describe(props.part) }} />;
 }
 
+/** A tool renderer that throws takes down its own step, never the transcript. */
+export function AgentStep(props: PartProps) {
+  const part = props.part;
+  return (
+    <ErrorBoundary label="message part" resetKeys={[part.type === 'tool-call' ? part.status : part]}>
+      <AgentStepInner {...props} />
+    </ErrorBoundary>
+  );
+}
+
+function SafeText(props: PartProps) {
+  const Text = MarkdownTextPart as ComponentType<PartProps>;
+  return (
+    <ErrorBoundary label="message part">
+      <Text {...props} />
+    </ErrorBoundary>
+  );
+}
+
 /** Only overrides: PartRenderer falls back to the defaults for every other type. */
 export const workspaceRegistry = createRendererRegistry<ComponentType<PartProps>>(
-  { text: MarkdownTextPart as ComponentType<PartProps>, 'tool-call': AgentStep },
+  { text: SafeText, 'tool-call': AgentStep },
   UnknownPart,
 );
