@@ -9,6 +9,7 @@ import type { ProviderKit } from '../../shared/kits.ts';
 import { HitlStrip } from '../agentic/hitl.tsx';
 import { usePlan } from '../agentic/liveData.ts';
 import { useWorkspaceConfig } from '../applets/index.tsx';
+import { openFilePicker } from '../files/index.ts';
 import { KitComposer, KitTranscript } from '../kits/index.tsx';
 import { useSessionChat } from '../sessionsApi.ts';
 import { Hero } from './Hero.tsx';
@@ -53,6 +54,8 @@ export function useConversation(sessionId: string, kit: ProviderKit) {
     ...(progress ? { progress } : {}),
     chips,
     ...(modelSlot ? { model: modelSlot } : {}),
+    // Paperclip: pick workspace files to attach as context (⌘P too).
+    onAttach: openFilePicker,
   };
   return { chat, status, draft, setDraft, composerProps, retry };
 }

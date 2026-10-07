@@ -6,6 +6,7 @@ import { ConnectionBanner } from '../ConnectionBanner.tsx';
 import { Scratchpad } from '../Scratchpad.tsx';
 import { toasts } from '../chatStore.ts';
 import { KitScope, useKit } from '../kits/index.tsx';
+import { FilePickerHost } from '../files/index.ts';
 import { CommandPalette, useAppHotkeys } from '../app/Palette.tsx';
 import { SettingsDialog, ShortcutsDialog } from '../app/Settings.tsx';
 import { themeVars } from '../ui/theme.ts';
@@ -139,6 +140,7 @@ function ShellBody({ kit, prefersDark }: { kit: ReturnType<typeof withTheme>; pr
         </div>
       </div>
       <CommandPalette kit={kit} prefersDark={prefersDark} />
+      <FilePickerHost />
       <SettingsDialog kit={kit} />
       <ShortcutsDialog />
       <ToastRegion queue={toasts} placement="top-center" />

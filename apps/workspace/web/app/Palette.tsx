@@ -1,6 +1,6 @@
 /**
  * The command menu (⌘K) and the app's global shortcuts:
- * ⌘K is CommandMenu's own hotkey. ⌘N new session, ⌘/ shortcuts, ⌘, settings, ⌘\ work panel, Esc stops a running turn.
+ * ⌘K is CommandMenu's own hotkey. ⌘P open file, ⌘N new session, ⌘/ shortcuts, ⌘, settings, ⌘\ work panel, Esc stops a running turn.
  */
 import { useEffect, useMemo } from 'react';
 import { CommandMenu, type CommandItem } from '@aicl/fx';
@@ -13,6 +13,7 @@ import { useModels, setSessionModel } from './models.ts';
 import { getOverlay, setOverlay, useOverlay } from './overlays.ts';
 import { getPrefs, setPrefs, toggledTheme, usePrefs } from './prefs.ts';
 import { openSession, startSession } from './Sessions.tsx';
+import { openFilePicker } from '../files/index.ts';
 import { WORKFLOWS } from '../swarm/workflows.ts';
 
 /** Global keyboard handling; renders nothing. */
@@ -27,6 +28,9 @@ export function useAppHotkeys(kit: ProviderKit): void {
       if (mod && e.key === 'n' && !e.shiftKey) {
         e.preventDefault();
         void startSession();
+      } else if (mod && e.key === 'p' && !e.shiftKey) {
+        e.preventDefault();
+        openFilePicker();
       } else if (mod && e.key === '/') {
         e.preventDefault();
         setOverlay(getOverlay() === 'shortcuts' ? null : 'shortcuts');
@@ -57,6 +61,7 @@ export function CommandPalette({ kit, prefersDark }: { kit: ProviderKit; prefers
   const items = useMemo<CommandItem[]>(() => {
     const list: CommandItem[] = [
       { id: 'new', group: 'Actions', label: kit.vocabulary.newSession, shortcut: ['cmd', 'N'], onSelect: () => void startSession() },
+      { id: 'open-file', group: 'Actions', label: 'Open file…', shortcut: ['cmd', 'P'], onSelect: openFilePicker },
       { id: 'panel', group: 'Actions', label: prefs.workPanelOpen ? 'Hide work panel' : 'Show work panel', shortcut: ['cmd', '\\'], onSelect: () => setPrefs({ workPanelOpen: !prefs.workPanelOpen }) },
       { id: 'sidebar', group: 'Actions', label: prefs.sidebarCollapsed ? 'Show sidebar' : 'Hide sidebar', onSelect: () => setPrefs({ sidebarCollapsed: !prefs.sidebarCollapsed }) },
       { id: 'theme', group: 'Actions', label: 'Toggle light/dark theme', onSelect: () => setPrefs({ theme: toggledTheme(kit, prefs.theme, prefersDark) }) },
