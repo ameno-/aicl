@@ -10,10 +10,12 @@
     "dev": "node scripts/dev.mjs",
     "server": "node --experimental-strip-types --no-warnings server/main.ts",
     "web": "vite",
+    "start": "node --experimental-strip-types --no-warnings server/main.ts --serve-web",
     "build": "vite build",
     "typecheck": "tsc -p tsconfig.json",
     "test": "node --experimental-strip-types --no-warnings --test server/*.test.ts",
-    "e2e": "node e2e/canvas.mjs"
+    "e2e": "node e2e/canvas.mjs",
+    "e2e:app": "node e2e/app.mjs"
   },
   "dependencies": {
     "@aicl/core": "file:../../packages/core",

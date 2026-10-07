@@ -24,6 +24,16 @@ export interface SessionInfo {
   preview?: string;
   /** 'chat' for normal conversations; 'node' for agents living on the canvas (wave 2). */
   kind: 'chat' | 'node';
+  /** "provider/id" chosen for this session with POST /api/sessions/:id/model; absent = the workspace default. */
+  model?: string;
+}
+
+/** One entry of GET /api/models → { models: ModelOption[], default: string | null }. */
+export interface ModelOption {
+  /** "provider/id". */
+  id: string;
+  label: string;
+  provider: string;
 }
 
 /** The conversation everything uses when no session is chosen. */
@@ -37,6 +47,10 @@ export const MAIN_SESSION_ID = 'main';
  *   DELETE /api/sessions/:id                → { ok: true }                  (main cannot be deleted)
  *   GET    /api/sessions/:id/messages       → { messages: Message[] }       (@aicl/core shape, for reload)
  *   POST   /api/sessions/:id/stop           → { ok: true }
+ *   GET    /api/models[?all=1]              → { models: ModelOption[], default: string | null }
+ *   POST   /api/sessions/:id/model { model } → { session: SessionInfo }     (409 while the session is running)
+ *   GET    /api/files?dir=<rel>             → { dir, entries: [{ name, path, dir: boolean, size? }] }  (workspace only)
+ *   GET    /api/file/text?path=<rel>        → { path, text, truncated }     (workspace only, text files)
  *   POST   /api/chat { messages, sessionId?, canvasContext? }  → SSE StreamEvents (sessionId defaults to MAIN)
  *   GET    /api/info                        → { workspace, model, busy }    (busy = any session running)
  */
