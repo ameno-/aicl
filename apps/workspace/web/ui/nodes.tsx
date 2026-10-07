@@ -1,25 +1,26 @@
-import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react';
-import type { Attachment, Message, ReasoningPart, SessionMeta, ToastState, ToolCallPart } from '@aicl/core';
+import { createContext, useContext, useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react';
+import type { Attachment, Message, SessionMeta, ToastState } from '@aicl/core';
 import { createRendererRegistry } from '@aicl/core';
 import {
   ArtifactCard,
   AttachmentChip,
   CodeBlock,
   Composer,
-  MessageItem,
-  PlanChecklist,
-  ReasoningDisclosure,
   SessionList,
   SidebarNav,
   SuggestionChips,
   TerminalOutput,
   Toast,
-  ToolCallDisclosure,
   type PartProps,
   type PlanItem,
   type SidebarNavItem,
 } from '@aicl/react';
 import { MarkdownTextPart } from '@aicl/react/markdown';
+import { AnimatedPlan } from '@aicl/fx';
+import { kitForPreset, type ProviderKit } from '../../shared/kits.ts';
+import { KitComposer } from '../kits/composer.tsx';
+import { AssistantHeader, AssistantText, KitActions, KitRenderContext, ScreenReasoning, ScreenStep, UserTurn, WorkGroup } from '../kits/parts.tsx';
+import type { WorkItem } from '../kits/model.ts';
 import type { ComponentType } from 'react';
 import {
   Bell,
@@ -62,7 +63,7 @@ import {
   Ellipsis,
   type LucideIcon,
 } from 'lucide-react';
-import type { UiNode } from '../../shared/ui-spec.ts';
+import type { ThemePresetName, UiNode } from '../../shared/ui-spec.ts';
 import { SCALE } from './theme.ts';
 
 /* ── value helpers: unknown JSON in, safe values out ──────────────── */
@@ -214,6 +215,12 @@ export function layoutStyle(node: UiNode): CSSProperties {
   return style;
 }
 
+/* ── provider kit of the screen ───────────────────────────────────── */
+
+/** The screen's theme preset (set by SpecRenderer); chat elements render in that preset's provider kit. */
+export const PresetContext = createContext<ThemePresetName>('default');
+export const useScreenKit = (): ProviderKit => kitForPreset(useContext(PresetContext));
+
 /* ── shared message plumbing ──────────────────────────────────────── */
 
 const mdRegistry = createRendererRegistry<ComponentType<PartProps>>({
@@ -345,49 +352,78 @@ function Header({ props }: NodeProps) {
 
 function UserMessage({ props }: NodeProps) {
   const text = str(props['text']);
+  const kit = useScreenKit();
   if (!text) return <Quiet>Empty message</Quiet>;
   return (
-    <div className="aicl-ui-message" data-ui-role="user">
-      <MessageItem message={textMessage('user', text)} />
+    <div className="aicl-ui-message" data-ui-role="user" data-kit={kit.id}>
+      <UserTurn kit={kit}>{text}</UserTurn>
     </div>
   );
 }
 
 function AssistantMessage({ props }: NodeProps) {
   const text = str(props['text']);
+  const kit = useScreenKit();
   if (!text) return <Quiet>Empty reply</Quiet>;
+  const message = textMessage('assistant', text);
   return (
-    <div className="aicl-ui-message" data-ui-role="assistant" data-ui-actions={props['actions'] === true ? 'on' : 'off'}>
-      <MessageItem message={textMessage('assistant', text)} registry={mdRegistry} />
+    <div className="aicl-ui-message" data-ui-role="assistant" data-ui-actions={props['actions'] === true ? 'on' : 'off'} data-kit={kit.id}>
+      <KitRenderContext.Provider value={{ kit, sessionId: 'screen' }}>
+        <div className="flex flex-col gap-2">
+          {kit.transcript.assistantHeader ? <AssistantHeader kit={kit} /> : null}
+          <AssistantText text={text} streaming={false} />
+          {props['actions'] === true ? <KitActions kit={kit} message={message} /> : null}
+        </div>
+      </KitRenderContext.Provider>
     </div>
   );
 }
 
+const STEP_STATUS = ['pending', 'running', 'success', 'error', 'cancelled'] as const;
+
+/** Steps carried by a folded run-mode element ({ label, status }[]) as work items. */
+function stepItems(raw: unknown, reasoningText?: string): WorkItem[] {
+  const items: WorkItem[] = [];
+  if (reasoningText) items.push({ kind: 'reasoning', part: { type: 'reasoning', text: reasoningText, durationMs: 1000 }, index: 0 });
+  arr(raw).forEach((s, i) => {
+    const o = isObj(s) ? s : {};
+    items.push({
+      kind: 'tool',
+      index: i + 1,
+      part: { type: 'tool-call', toolCallId: `ui-step-${i}`, name: str(o['label']) ?? 'Step', args: {}, status: oneOf(o['status'], STEP_STATUS) ?? 'success' },
+    });
+  });
+  return items;
+}
+
 function Reasoning({ props }: NodeProps) {
+  const kit = useScreenKit();
   const sec = num(props['durationSec']);
   const text = str(props['text']);
   const streaming = props['streaming'] === true;
-  const part: ReasoningPart = {
-    type: 'reasoning',
-    text: text ?? '',
-    ...(sec !== undefined && !streaming ? { durationMs: sec * 1000 } : {}),
-  };
-  return <ReasoningDisclosure part={part} streaming={streaming} />;
+  // A folded turn (run mode): the kit's own work group, with the steps inside.
+  if (Array.isArray(props['steps'])) {
+    return (
+      <KitRenderContext.Provider value={{ kit, sessionId: 'screen' }}>
+        <WorkGroup items={stepItems(props['steps'], text)} active={streaming} fallbackSeconds={sec ?? 1} />
+      </KitRenderContext.Provider>
+    );
+  }
+  return <ScreenReasoning kit={kit} text={text} durationSec={sec} streaming={streaming} />;
 }
 
-const TOOL_STATUS = ['pending', 'running', 'success', 'error', 'cancelled'] as const;
-
 function ToolStep({ props }: NodeProps) {
-  const part: ToolCallPart = {
-    type: 'tool-call',
-    toolCallId: 'ui-step',
-    name: str(props['label']) ?? 'Step',
-    args: {},
-    argsText: '',
-    status: oneOf(props['status'], TOOL_STATUS) ?? 'success',
-  };
-  const message: Message = { id: 'ui-step', role: 'assistant', parts: [part] };
-  return <ToolCallDisclosure part={part} message={message} index={0} streaming={false} />;
+  const kit = useScreenKit();
+  if (Array.isArray(props['steps'])) {
+    const items = stepItems(props['steps']);
+    const active = items.some((i) => i.kind === 'tool' && (i.part.status === 'running' || i.part.status === 'pending'));
+    return (
+      <KitRenderContext.Provider value={{ kit, sessionId: 'screen' }}>
+        <WorkGroup items={items} active={active} fallbackSeconds={1} />
+      </KitRenderContext.Provider>
+    );
+  }
+  return <ScreenStep kit={kit} label={str(props['label']) ?? 'Step'} status={oneOf(props['status'], STEP_STATUS) ?? 'success'} />;
 }
 
 const PLAN_STATUS = ['pending', 'running', 'done', 'error'] as const;
@@ -400,7 +436,7 @@ function Plan({ props }: NodeProps) {
     return [{ id: `s${i}`, label, status: oneOf(o['status'], PLAN_STATUS) ?? 'pending' }];
   });
   if (items.length === 0) return <Quiet>No steps</Quiet>;
-  return <PlanChecklist items={items} {...(str(props['title']) ? { title: str(props['title']) as string } : {})} />;
+  return <AnimatedPlan steps={items} title={str(props['title']) ?? 'Plan'} />;
 }
 
 const KINDS = ['code', 'document', 'diff', 'preview', 'terminal', 'table', 'chart'] as const;
@@ -443,6 +479,7 @@ function StatusLine({ props }: NodeProps) {
 }
 
 function ComposerNode({ props }: NodeProps) {
+  const kit = useScreenKit();
   const initial = str(props['value']) ?? '';
   const [draft, setDraft] = useState(initial);
   useEffect(() => setDraft(initial), [initial]);
@@ -451,16 +488,29 @@ function ComposerNode({ props }: NodeProps) {
   const hero = props['variant'] === 'hero';
   const streaming = props['state'] === 'streaming';
   return (
-    <div className="aicl-ui-composer" data-ui-variant={hero ? 'hero' : 'docked'}>
-      <Composer
-        status={streaming ? 'streaming' : 'idle'}
+    <div className="aicl-ui-composer" data-ui-variant={hero ? 'hero' : 'docked'} data-kit={kit.id}>
+      {chips.length ? (
+        <div className="mb-2 flex flex-wrap gap-1.5">
+          {chips.map((label, i) => (
+            <button
+              key={`${label}-${i}`}
+              type="button"
+              onClick={() => setDraft(label)}
+              className="rounded-full border border-border bg-card px-3 py-1 text-xs text-muted-foreground hover:text-foreground"
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      ) : null}
+      <KitComposer
+        kit={kit}
         value={draft}
         onChange={setDraft}
-        placeholder={str(props['placeholder']) ?? 'Message'}
-        placement={hero ? 'hero' : 'docked'}
-        suggestions={chips}
-        onSelectSuggestion={(label) => setDraft(label)}
         onSubmit={() => setDraft('')}
+        status={streaming ? 'streaming' : 'ready'}
+        variant={hero ? 'hero' : 'bottom'}
+        placeholder={str(props['placeholder']) ?? 'Message'}
         {...(props['attach'] === true ? { onAttach: () => undefined } : {})}
       />
       {model ? <div className="aicl-ui-composer-model">{model}</div> : null}

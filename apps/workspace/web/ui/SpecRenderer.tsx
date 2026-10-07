@@ -1,7 +1,7 @@
 import { Component, useCallback, useEffect, useMemo, useRef, type MouseEvent, type ReactNode } from 'react';
 import { ErrorBoundary } from '../ErrorBoundary.tsx';
 import { THEME_PRESETS, resolveTheme, type ScreenSpec, type UiNode } from '../../shared/ui-spec.ts';
-import { NodeBody, isObj, layoutStyle } from './nodes.tsx';
+import { NodeBody, PresetContext, isObj, layoutStyle } from './nodes.tsx';
 import { themeVars } from './theme.ts';
 import { LiveComposer, useRun } from './run.tsx';
 import './ui.css';
@@ -82,6 +82,7 @@ function SpecRendererInner({ spec, mode, selectedId, onSelect }: SpecRendererPro
     return resolveTheme({ ...theme, preset: THEME_PRESETS[theme.preset] ? theme.preset : 'default' });
   }, [spec?.theme]);
   const vars = useMemo(() => themeVars(tokens), [tokens]);
+  const preset = isObj(spec?.theme) && THEME_PRESETS[spec.theme.preset] ? spec.theme.preset : 'default';
 
   const innermost = (target: EventTarget | null) =>
     target instanceof Element ? target.closest('[data-ui-id]') : null;
@@ -123,7 +124,9 @@ function SpecRendererInner({ spec, mode, selectedId, onSelect }: SpecRendererPro
       onPointerLeave={() => setHover(null)}
     >
       {root ? (
-        <Node node={root} selectedId={selectedId} depth={0} />
+        <PresetContext.Provider value={preset}>
+          <Node node={root} selectedId={selectedId} depth={0} />
+        </PresetContext.Provider>
       ) : (
         <div className="aicl-ui-quiet">This screen has no content yet</div>
       )}
