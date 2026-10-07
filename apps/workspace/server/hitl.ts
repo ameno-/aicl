@@ -153,6 +153,20 @@ function readHistory(file: string): ResolvedRequest[] {
   }
 }
 
+/**
+ * Lets other modules (surfaces) gate their own tools with an approval card.
+ * Set by createHitl; false (declined) until it exists.
+ */
+let approvalAsker: ((req: { sessionId: string; tool: string; summary: string; input?: unknown; toolCallId?: string }, signal?: AbortSignal) => Promise<{ approved: boolean; note?: string }>) | null = null;
+
+export async function askApproval(
+  req: { sessionId: string; tool: string; summary: string; input?: unknown; toolCallId?: string },
+  signal?: AbortSignal,
+): Promise<{ approved: boolean; note?: string }> {
+  if (!approvalAsker) return { approved: false, note: 'approvals are unavailable' };
+  return approvalAsker(req, signal);
+}
+
 export function createHitl(context: FeatureContext): FeatureModule {
   const historyFile = path.join(context.workspace, '.aicl', 'hitl.json');
   const registry = createRegistry((event) => context.relay.broadcast(event), {
@@ -166,6 +180,24 @@ export function createHitl(context: FeatureContext): FeatureModule {
       }
     },
   });
+
+  approvalAsker = async (req, signal) => {
+    const answer = await registry.ask(
+      {
+        kind: 'approval',
+        id: randomUUID(),
+        sessionId: req.sessionId,
+        ...(req.toolCallId ? { toolCallId: req.toolCallId } : {}),
+        tool: req.tool,
+        summary: req.summary,
+        input: req.input ?? {},
+        createdAt: Date.now(),
+      },
+      signal,
+    );
+    if (answer?.kind === 'approval') return { approved: answer.approved, ...(answer.note?.trim() ? { note: answer.note.trim() } : {}) };
+    return { approved: false, note: 'the turn was cancelled' };
+  };
 
   const askUser = defineTool({
     name: 'ask_user',
