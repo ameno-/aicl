@@ -9,7 +9,13 @@ import type { Message } from '@aicl/core';
 import { ChatHandlerError, createChatHandler } from '@aicl/server';
 import { SessionManager } from '@earendil-works/pi-coding-agent';
 import { createAgentFactory } from './agent.ts';
-import { createSessionHub, SessionError, type AgentLike } from './sessions.ts';
+import { createSessionHub, SessionError, type AgentLike, type SessionHub } from './sessions.ts';
+import type { FeatureContext, FeatureModule } from './feature.ts';
+import { createHitl } from './hitl.ts';
+import { createLive } from './live.ts';
+import { createNodes } from './nodes.ts';
+import { createGraph } from './graph.ts';
+import { setSessionResolver } from './session-context.ts';
 import { serveFile, defaultReferencesRoot } from './files.ts';
 import { createReferenceTools } from './references.ts';
 import { createRelay } from './relay.ts';
@@ -31,6 +37,25 @@ const relay = createRelay();
 const store = createWorkspaceStore(WORKSPACE);
 const applets = createApplets({ workspace: WORKSPACE, relay });
 const canvasTools = createCanvasTools({ relay });
+
+// Wave 2 feature modules (shared/agentic.ts). The hub exists only after the
+// agent factory, so they reach it lazily.
+let hubRef: SessionHub | null = null;
+const featureContext: FeatureContext = {
+  workspace: WORKSPACE,
+  relay,
+  hub: () => {
+    if (!hubRef) throw new Error('session hub not ready');
+    return hubRef;
+  },
+};
+const features: FeatureModule[] = [
+  createHitl(featureContext),
+  createLive(featureContext),
+  createNodes(featureContext),
+  createGraph(featureContext),
+];
+
 function allTools() {
   return [
     ...createScratchTools(relay, store),
@@ -38,16 +63,19 @@ function allTools() {
     ...createReferenceTools(relay),
     ...applets.tools,
     ...canvasTools.tools,
+    ...features.flatMap((f) => f.tools),
   ];
 }
 
 /** Feature modules' endpoints, tried after the core routes below. */
-const featureRoutes: RouteTable[] = [applets.routes, canvasTools.routes(allTools())];
+const featureRoutes: RouteTable[] = [applets.routes, canvasTools.routes(allTools()), ...features.map((f) => f.routes)];
 const SESSIONS_DIR = path.join(WORKSPACE, '.aicl', 'sessions');
 const factory = await createAgentFactory({
   cwd: WORKSPACE,
   model: process.env['AICL_MODEL'],
   tools: allTools(),
+  prompts: features.map((f) => f.prompt ?? ''),
+  extensions: features.flatMap((f) => f.extensions ?? []),
 });
 
 const hub = await createSessionHub({
@@ -58,7 +86,12 @@ const hub = await createSessionHub({
     )) as unknown as AgentLike,
   onChange: (session) => relay.broadcast({ type: 'session', session }),
   onRemove: (id) => relay.broadcast({ type: 'session-removed', id }),
+  onAgentEvent: (sessionId, event) => {
+    for (const f of features) f.onAgentEvent?.(sessionId, event);
+  },
 });
+hubRef = hub;
+setSessionResolver((file) => hub.idForFile(file));
 // Load main now so a missing model or key fails at startup, as before.
 const modelLabel = await hub.modelLabel();
 

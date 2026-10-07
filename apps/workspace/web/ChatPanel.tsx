@@ -4,6 +4,7 @@ import { Check, ChevronDown, SquarePen, X } from 'lucide-react';
 import type { SessionInfo } from '../shared/runtime.ts';
 import { workspaceRegistry } from './agentSteps.tsx';
 import { clearCanvasSelection, newWorkspaceChat, screenName, toasts, useSelectedShapeIds, useWorkspaceChat } from './chatStore.ts';
+import { HitlStrip } from './agentic/hitl.tsx';
 import { removePendingContext, setActiveSession, useActiveSessionId, usePendingContext, useSessions } from './sessionsApi.ts';
 import { setUiSelection, useUiSelection } from './ui/selection.ts';
 
@@ -108,6 +109,7 @@ function SessionSwitcher() {
 
 /** The chat docked beside the canvas, driven by the workspace's Pi agent. */
 export function ChatPanel() {
+  const activeSessionId = useActiveSessionId();
   const chat = useWorkspaceChat();
   const [model, setModel] = useState<string | null>(null);
   const [draft, setDraft] = useState('');
@@ -179,6 +181,7 @@ export function ChatPanel() {
         {empty ? (
           <SuggestionChips suggestions={STARTERS} behavior="send" onSelect={(s) => void chat.send(s.label)} />
         ) : null}
+        <HitlStrip sessionId={activeSessionId} />
         <Composer
           status={chat.status}
           value={draft}

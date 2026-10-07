@@ -5,6 +5,7 @@ import { SquarePen } from 'lucide-react';
 import { MAIN_SESSION_ID, type SessionInfo } from '../../shared/runtime.ts';
 import { workspaceRegistry } from '../agentSteps.tsx';
 import { toasts } from '../chatStore.ts';
+import { HitlStrip } from '../agentic/hitl.tsx';
 import { createSession, deleteSession, renameSession, setActiveSession, useActiveSessionId, useSessionChat, useSessions } from '../sessionsApi.ts';
 
 const STARTERS = [
@@ -105,6 +106,7 @@ export function AgentPage({ routeSessionId }: { routeSessionId?: string }) {
           <Transcript messages={chat.messages} status={chat.status} streamingId={chat.streamingId} registry={workspaceRegistry} />
         )}
         <div className="agent-composer">
+          <HitlStrip sessionId={activeId} />
           <Composer
             status={chat.status}
             value={draft}
