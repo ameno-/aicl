@@ -1,59 +1,22 @@
-import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
-import type { Editor } from 'tldraw';
+import { useMemo, useSyncExternalStore } from 'react';
 import { ChatController, createSseTransport, createToastQueue, type ChatState, type Message, type ToastQueue } from '@aicl/core';
 
-import { getUiSelection } from './ui/selection.ts';
+import { getCanvasContext } from './canvasContext.ts';
 
-let canvasEditor: Editor | null = null;
-
-/** The Scratchpad registers its tldraw editor so the chat can see and clear the selection. */
-export function registerCanvasEditor(editor: Editor | null): void {
-  canvasEditor = editor;
-}
-
-const currentEditor = (): Editor | null => canvasEditor ?? (window as unknown as { __aiclEditor?: Editor }).__aiclEditor ?? null;
-
-/** Short ids of the shapes selected on the canvas. */
-export function getSelectedShapeIds(): string[] {
-  const editor = currentEditor();
-  if (!editor) return [];
-  return editor.getSelectedShapeIds().map((id) => (id.startsWith('shape:') ? id.slice(6) : id));
-}
-
-/** Name of the screen shape `shapeId`, if the editor can see it. */
-export function screenName(shapeId: string): string | undefined {
-  const shape = currentEditor()?.getShape((shapeId.startsWith('shape:') ? shapeId : `shape:${shapeId}`) as never) as
-    | { props?: { props?: { name?: unknown } } }
-    | undefined;
-  const name = shape?.props?.props?.name;
-  return typeof name === 'string' ? name : undefined;
-}
-
-/** Selected shape ids, kept current (the editor is not reactive from here, so poll cheaply). */
-export function useSelectedShapeIds(): string[] {
-  const [ids, setIds] = useState<string[]>([]);
-  useEffect(() => {
-    const tick = () => {
-      const next = getSelectedShapeIds();
-      setIds((prev) => (prev.join('|') === next.join('|') ? prev : next));
-    };
-    tick();
-    const timer = setInterval(tick, 300);
-    return () => clearInterval(timer);
-  }, []);
-  return ids;
-}
-
-export function clearCanvasSelection(): void {
-  currentEditor()?.selectNone();
-}
+export {
+  registerCanvasEditor,
+  getSelectedShapeIds,
+  screenName,
+  useSelectedShapeIds,
+  clearCanvasSelection,
+} from './canvasContext.ts';
 
 /** Adds what the user has selected to every chat request body. */
 const withCanvasContext: typeof globalThis.fetch = (input, init) => {
   if (typeof init?.body === 'string') {
     try {
       const body = JSON.parse(init.body) as Record<string, unknown>;
-      body['canvasContext'] = { selectedShapes: getSelectedShapeIds(), uiSelection: getUiSelection() };
+      body['canvasContext'] = getCanvasContext();
       return globalThis.fetch(input, { ...init, body: JSON.stringify(body) });
     } catch {
       // Not JSON: send untouched.

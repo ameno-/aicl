@@ -16,6 +16,9 @@ import { createRelay } from './relay.ts';
 import { createWorkspaceStore } from './store.ts';
 import { createScratchTools } from './tools.ts';
 import { createUiTools } from './ui-tools.ts';
+import { createApplets } from './applets.ts';
+import { createCanvasTools } from './canvas-tools.ts';
+import { matchRoute, type RouteTable } from './http.ts';
 
 const PORT = Number(process.env['AICL_PORT'] ?? '5180');
 const HOST = process.env['AICL_HOST'] ?? '127.0.0.1';
@@ -23,10 +26,25 @@ const WORKSPACE = path.resolve(process.env['AICL_WORKSPACE'] ?? process.cwd());
 
 const relay = createRelay();
 const store = createWorkspaceStore(WORKSPACE);
+const applets = createApplets({ workspace: WORKSPACE, relay });
+const canvasTools = createCanvasTools({ relay });
+function allTools() {
+  return [
+    ...createScratchTools(relay, store),
+    ...createUiTools(relay),
+    ...createReferenceTools(relay),
+    ...applets.tools,
+    ...canvasTools.tools,
+  ];
+}
+
+/** Feature modules' endpoints, tried after the core routes below. */
+const featureRoutes: RouteTable[] = [applets.routes, canvasTools.routes(allTools())];
+
 const agent = await createWorkspaceAgent({
   cwd: WORKSPACE,
   model: process.env['AICL_MODEL'],
-  tools: [...createScratchTools(relay, store), ...createUiTools(relay), ...createReferenceTools(relay)],
+  tools: allTools(),
 });
 
 const lastUserText = (messages: Message[]): string => {
@@ -184,8 +202,11 @@ const server = createServer((req, res) => {
           model: agent.model ? `${agent.model.provider}/${agent.model.id}` : null,
           busy: agent.isStreaming,
         });
-      default:
+      default: {
+        const hit = matchRoute(featureRoutes, req.method ?? 'GET', url.pathname);
+        if (hit) return hit.handler(req, res, { url, params: hit.params });
         return json(res, 404, { message: 'not found' });
+      }
     }
   })().catch((cause: unknown) => {
     console.error(cause);
