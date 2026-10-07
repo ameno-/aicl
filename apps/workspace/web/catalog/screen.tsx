@@ -1,4 +1,7 @@
 import { useState } from 'react';
+import { createSession } from '../sessionsApi.ts';
+import { RunProvider } from '../ui/run.tsx';
+import { readRunSessionId, withRunSessionId } from '../ui/run-thread.ts';
 import {
   FRAME_SIZES,
   THEME_PRESETS,
@@ -37,7 +40,10 @@ function readSpec(raw: Record<string, unknown>): ScreenSpec {
 export function ScreenRenderer({ props, width, height, shapeId, onPropsChange }: ComponentRendererProps) {
   const spec = readSpec(props);
   const [mode, setMode] = useState<'select' | 'interact'>('select');
+  const [run, setRun] = useState(false);
+  const [binding, setBinding] = useState(false);
   const [copied, setCopied] = useState(false);
+  const runSessionId = readRunSessionId(spec.root);
   const selection = useUiSelection();
   const selectedId = shapeId && selection?.shapeId === shapeId ? selection.nodeId : undefined;
 
@@ -49,6 +55,21 @@ export function ScreenRenderer({ props, width, height, shapeId, onPropsChange }:
   const scale = Math.min(stageW / size.w, stageH / size.h);
   const offX = Math.max(0, (stageW - size.w * scale) / 2);
   const offY = Math.max(0, (stageH - size.h * scale) / 2);
+
+  const startRun = async () => {
+    if (runSessionId) return setRun(true);
+    if (binding) return;
+    setBinding(true);
+    try {
+      const id = await createSession({ title: spec.name, kind: 'node' });
+      update(withRunSessionId(spec, id));
+      setRun(true);
+    } catch {
+      /* session service unavailable: stay in design */
+    } finally {
+      setBinding(false);
+    }
+  };
 
   const copy = async () => {
     try {
@@ -63,7 +84,7 @@ export function ScreenRenderer({ props, width, height, shapeId, onPropsChange }:
   return (
     <div
       className="aicl-screen"
-      data-ui-selected-node={selectedId ?? ''}
+      data-ui-selected-node={run ? '' : (selectedId ?? '')}
       data-ui-selected-shape={selection?.shapeId ?? ''}
     >
       <div className="aicl-screen-bar" onWheel={(e) => e.stopPropagation()}>
@@ -105,12 +126,23 @@ export function ScreenRenderer({ props, width, height, shapeId, onPropsChange }:
           {tokens.mode === 'dark' ? 'Dark' : 'Light'}
         </button>
         <span className="aicl-screen-sep" />
-        <button type="button" aria-pressed={mode === 'select'} onClick={() => setMode('select')}>
-          Select
+        <button type="button" aria-pressed={!run} onClick={() => setRun(false)}>
+          Design
         </button>
-        <button type="button" aria-pressed={mode === 'interact'} onClick={() => setMode('interact')}>
-          Interact
+        <button type="button" aria-pressed={run} disabled={binding} onClick={() => void startRun()}>
+          Run
         </button>
+        <span className="aicl-screen-sep" />
+        {run ? null : (
+          <>
+            <button type="button" aria-pressed={mode === 'select'} onClick={() => setMode('select')}>
+              Select
+            </button>
+            <button type="button" aria-pressed={mode === 'interact'} onClick={() => setMode('interact')}>
+              Interact
+            </button>
+          </>
+        )}
         <button type="button" onClick={() => void copy()}>
           {copied ? 'Copied' : 'Copy code'}
         </button>
@@ -124,14 +156,20 @@ export function ScreenRenderer({ props, width, height, shapeId, onPropsChange }:
             transform: `translate(${offX}px, ${offY}px) scale(${scale})`,
           }}
         >
-          <SpecRenderer
-            spec={spec}
-            mode={mode}
-            selectedId={selectedId}
-            onSelect={(nodeId) => {
-              if (shapeId) setUiSelection({ shapeId, nodeId });
-            }}
-          />
+          {run && runSessionId ? (
+            <RunProvider sessionId={runSessionId} spec={spec}>
+              <SpecRenderer spec={spec} mode="interact" selectedId={undefined} />
+            </RunProvider>
+          ) : (
+            <SpecRenderer
+              spec={spec}
+              mode={mode}
+              selectedId={selectedId}
+              onSelect={(nodeId) => {
+                if (shapeId) setUiSelection({ shapeId, nodeId });
+              }}
+            />
+          )}
         </div>
       </div>
     </div>
