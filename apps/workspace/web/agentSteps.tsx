@@ -2,6 +2,7 @@ import type { ComponentType } from 'react';
 import { createRendererRegistry, type ToolCallPart } from '@aicl/core';
 import { ToolCallDisclosure, UnknownPart, type PartProps } from '@aicl/react';
 import { MarkdownTextPart } from '@aicl/react/markdown';
+import { toolRenderers } from './agentic/toolRenderers.tsx';
 
 const count = (args: unknown, key: string) => {
   const list = (args as Record<string, unknown> | undefined)?.[key];
@@ -94,6 +95,9 @@ export function describe(part: ToolCallPart): string {
 
 export function AgentStep(props: PartProps) {
   if (props.part.type !== 'tool-call') return null;
+  // Wave 2: some tools render as live components (questions, plans, terminals).
+  const Live = toolRenderers[props.part.name];
+  if (Live) return <Live {...props} />;
   return <ToolCallDisclosure {...props} part={{ ...props.part, name: describe(props.part) }} />;
 }
 

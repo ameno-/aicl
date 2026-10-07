@@ -163,6 +163,8 @@ export interface SessionHubOptions {
   createAgent(file: string | undefined): Promise<AgentLike>;
   onChange?(session: SessionInfo): void;
   onRemove?(id: string): void;
+  /** Every Pi event from every session's agent (live plans, streaming terminals, …). */
+  onAgentEvent?(sessionId: string, event: unknown): void;
   now?(): number;
 }
 
@@ -235,6 +237,7 @@ export async function createSessionHub(options: SessionHubOptions) {
         .then((existing) => options.createAgent(existing))
         .then((a) => {
           if (a.sessionFile && !e.file) e.file = path.basename(a.sessionFile);
+          if (options.onAgentEvent) a.subscribe((event) => options.onAgentEvent!(id, event));
           return a;
         });
       agents.set(id, agent);
@@ -257,6 +260,14 @@ export async function createSessionHub(options: SessionHubOptions) {
     },
 
     agent: agentFor,
+
+    /** Which session owns a Pi session file (tools get the file from ctx.sessionManager). */
+    idForFile(file: string | undefined): string | undefined {
+      if (!file) return undefined;
+      const base = path.basename(file);
+      for (const e of entries.values()) if (e.file === base) return e.id;
+      return undefined;
+    },
 
     async create(input: { title?: string; kind?: SessionInfo['kind'] } = {}): Promise<SessionInfo> {
       const t = now();

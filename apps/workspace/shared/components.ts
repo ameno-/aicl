@@ -27,6 +27,39 @@ export interface ComponentSpec {
 
 export const COMPONENTS: ComponentSpec[] = [
   {
+    name: 'agent',
+    title: 'Agent',
+    description:
+      'An independent agent living on the canvas, with its own conversation and standing role. Arrows into it are its inputs; agent_send talks to it.',
+    propsHint: '{ name: string; role?: string; sessionId?: string }',
+    defaultSize: { w: 380, h: 460 },
+    sample: { name: 'Researcher', role: 'Find facts and cite sources. Keep answers short.' },
+  },
+  {
+    name: 'live-plan',
+    title: 'Live plan',
+    description: "An agent's own todo list, updating live as it works (follows plan_update of a session).",
+    propsHint: '{ sessionId?: string }',
+    defaultSize: { w: 340, h: 240 },
+    sample: {},
+  },
+  {
+    name: 'live-terminal',
+    title: 'Live terminal',
+    description: 'Shell output streaming live from an agent (a session’s latest command, or one tool call).',
+    propsHint: '{ sessionId?: string; toolCallId?: string }',
+    defaultSize: { w: 480, h: 260 },
+    sample: {},
+  },
+  {
+    name: 'question',
+    title: 'Question',
+    description: 'A pending question from an agent; clicking an option answers it and the agent continues.',
+    propsHint: '{ requestId?: string }',
+    defaultSize: { w: 360, h: 220 },
+    sample: {},
+  },
+  {
     name: 'screen',
     title: 'Screen',
     description:

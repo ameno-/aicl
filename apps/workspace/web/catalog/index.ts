@@ -12,6 +12,10 @@ import {
   TerminalRenderer,
   TranscriptRenderer,
 } from './renderers.tsx';
+import { AgentRenderer } from './agent.tsx';
+import { LivePlanRenderer } from './live-plan.tsx';
+import { LiveTerminalRenderer } from './live-terminal.tsx';
+import { QuestionRenderer } from './question.tsx';
 
 /**
  * Renderers keyed by catalog name (shared/components.ts). The shape falls back
@@ -28,4 +32,9 @@ export const renderers: Record<string, ComponentRenderer> = {
   metric: MetricRenderer,
   screen: ScreenRenderer,
   applet: AppletRenderer,
+  // Wave 2 (shared/agentic.ts)
+  agent: AgentRenderer,
+  'live-plan': LivePlanRenderer,
+  'live-terminal': LiveTerminalRenderer,
+  question: QuestionRenderer,
 };

@@ -11,6 +11,7 @@ import {
   resolveCliModel,
   SessionManager,
   SettingsManager,
+  type InlineExtension,
   type ToolDefinition,
 } from '@earendil-works/pi-coding-agent';
 import { APPLETS_PROMPT } from './applets.ts';
@@ -44,6 +45,10 @@ export interface AgentOptions {
   /** "provider/model[:thinking]", e.g. "anthropic/claude-fable-5:medium". Defaults to the Pi settings default. */
   model?: string;
   tools: ToolDefinition[];
+  /** Extra system-prompt fragments from feature modules. */
+  prompts?: string[];
+  /** Pi inline extensions from feature modules (e.g. the approval gate). */
+  extensions?: InlineExtension[];
 }
 
 export async function createAgentFactory(options: AgentOptions) {
@@ -63,7 +68,8 @@ export async function createAgentFactory(options: AgentOptions) {
     noThemes: true,
     noContextFiles: true,
     // Feature modules contribute their own guidance (applets, canvas context).
-    systemPrompt: [SYSTEM_PROMPT, APPLETS_PROMPT, CANVAS_PROMPT].filter(Boolean).join('\n\n'),
+    systemPrompt: [SYSTEM_PROMPT, APPLETS_PROMPT, CANVAS_PROMPT, ...(options.prompts ?? [])].filter(Boolean).join('\n\n'),
+    extensionFactories: options.extensions ?? [],
   });
   await resourceLoader.reload();
 
@@ -88,7 +94,8 @@ export async function createAgentFactory(options: AgentOptions) {
         model,
         thinkingLevel,
         // write/edit let the agent author applets in .aicl/applets (moi-style generative code).
-        tools: ['read', 'grep', 'find', 'ls', 'write', 'edit', ...options.tools.map((t) => t.name)],
+        // bash runs commands (gated by approval, streamed to live terminals).
+        tools: ['read', 'grep', 'find', 'ls', 'write', 'edit', 'bash', ...options.tools.map((t) => t.name)],
         customTools: options.tools,
         sessionManager,
       });

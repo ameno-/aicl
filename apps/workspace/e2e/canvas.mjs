@@ -5,6 +5,10 @@
 // throwaway folder, then: `npm run e2e -- --clears-canvas`.
 import { chromium } from 'playwright-core';
 
+// Targets the dev servers on 5180/5181; E2E_API / E2E_WEB point it at another instance.
+const API = process.env.E2E_API ?? 'http://127.0.0.1:5180';
+const WEB = process.env.E2E_WEB ?? 'http://localhost:5181';
+
 if (!process.argv.includes('--clears-canvas')) {
   console.error('Refusing to run: this test clears the canvas. Use a throwaway AICL_WORKSPACE and pass --clears-canvas.');
   process.exit(2);
@@ -29,7 +33,7 @@ const check = async (name, fn) => {
 };
 const cards = () => p.locator('.aicl-card');
 
-await p.goto('http://localhost:5181/');
+await p.goto(`${WEB}/`);
 await p.waitForTimeout(3000); // let Vite finish any dependency re-optimisation reload
 await p.reload();
 await p.waitForFunction(() => window.__aiclEditor, null, { timeout: 30000 });

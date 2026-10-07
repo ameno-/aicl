@@ -3,6 +3,10 @@
 // AICL_WORKSPACE and run `node e2e/design.mjs --clears-canvas`.
 import { chromium } from 'playwright-core';
 
+// Targets the dev servers on 5180/5181; E2E_API / E2E_WEB point it at another instance.
+const API = process.env.E2E_API ?? 'http://127.0.0.1:5180';
+const WEB = process.env.E2E_WEB ?? 'http://localhost:5181';
+
 if (!process.argv.includes('--clears-canvas')) {
   console.error('Refusing to run: this test clears the canvas. Use a throwaway AICL_WORKSPACE and pass --clears-canvas.');
   process.exit(2);
@@ -11,7 +15,7 @@ if (!process.argv.includes('--clears-canvas')) {
 const SHOTS = process.argv.find((a) => a.startsWith('--shots='))?.slice(8);
 const b = await chromium.launch();
 const ctx = await b.newContext({ viewport: { width: 1680, height: 1050 } });
-await ctx.grantPermissions(['clipboard-read', 'clipboard-write'], { origin: 'http://localhost:5181' });
+await ctx.grantPermissions(['clipboard-read', 'clipboard-write'], { origin: WEB });
 const p = await ctx.newPage();
 const errors = [];
 p.on('pageerror', (e) => errors.push(e.message));
@@ -48,7 +52,7 @@ async function ask(text) {
   return steps;
 }
 
-await p.goto('http://localhost:5181/');
+await p.goto(`${WEB}/`);
 await p.waitForTimeout(3000);
 await p.reload();
 await p.waitForFunction(() => window.__aiclEditor, null, { timeout: 30000 });

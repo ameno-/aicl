@@ -10,6 +10,7 @@
  */
 
 import type { Message } from '@aicl/core';
+import type { GraphEdge, GraphNode, HitlAnswer, HitlRequest, LivePlan, TerminalChunk } from './agentic.ts';
 
 /* ── Sessions (A) ─────────────────────────────────────────────────── */
 
@@ -168,6 +169,8 @@ export interface CanvasContext {
   recentActions?: string[];
   /** Which workspace tab the user is on. */
   route?: WorkspaceRoute;
+  /** What is near, inside, and connected to the selection (canvas graph, wave 2). */
+  neighbourhood?: { nodes: GraphNode[]; edges: GraphEdge[] };
 }
 
 /* ── Server events (all) ──────────────────────────────────────────── */
@@ -178,4 +181,8 @@ export type ServerEvent =
   | { type: 'session-removed'; id: string }
   | { type: 'applet'; applet: AppletInfo }
   | { type: 'applet-removed'; id: string }
-  | { type: 'navigate'; address: WorkspaceAddress };
+  | { type: 'navigate'; address: WorkspaceAddress }
+  | { type: 'hitl'; request: HitlRequest }
+  | { type: 'hitl-resolved'; id: string; answer: HitlAnswer }
+  | { type: 'plan'; plan: LivePlan }
+  | { type: 'terminal'; chunk: TerminalChunk };

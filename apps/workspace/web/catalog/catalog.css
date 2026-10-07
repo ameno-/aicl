@@ -157,3 +157,48 @@
   padding-left: 0;
   padding-right: 0;
 }
+
+/* live work (plan + terminal) */
+.aicl-live-quiet {
+  color: var(--aicl-text-faint);
+  font-size: var(--aicl-text-sm);
+}
+.aicl-live-terminal-cmd {
+  font-family: var(--aicl-font-mono);
+  font-size: var(--aicl-text-xs);
+  color: var(--aicl-text-muted);
+  margin-bottom: 4px;
+  overflow-wrap: anywhere;
+}
+.aicl-live-terminal-more,
+.aicl-live-terminal-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--aicl-text-faint);
+  font-size: var(--aicl-text-xs);
+  margin: 4px 0;
+}
+.aicl-live-terminal-foot button {
+  all: unset;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.aicl-live-terminal-foot [data-exit='fail'] {
+  color: #c0392b;
+}
+.aicl-cmp-live-terminal {
+  display: flex;
+  flex-direction: column;
+}
+.aicl-cmp-live-terminal .aicl-live-terminal {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1;
+}
+.aicl-cmp-live-terminal [data-aicl='terminal-output'] {
+  flex: 1;
+  max-height: none;
+  min-height: 0;
+}

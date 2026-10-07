@@ -6,6 +6,10 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { chromium } from 'playwright-core';
 
+// Targets the dev servers on 5180/5181; E2E_API / E2E_WEB point it at another instance.
+const API = process.env.E2E_API ?? 'http://127.0.0.1:5180';
+const WEB = process.env.E2E_WEB ?? 'http://localhost:5181';
+
 if (!process.argv.includes('--scratch-workspace')) {
   console.error('Refusing to run: this test writes applets into the server workspace. Use a throwaway AICL_WORKSPACE and pass --scratch-workspace.');
   process.exit(2);
@@ -13,7 +17,7 @@ if (!process.argv.includes('--scratch-workspace')) {
 const SHOTS = process.argv.find((a) => a.startsWith('--shots='))?.slice(8);
 const here = path.dirname(new URL(import.meta.url).pathname);
 
-const info = await (await fetch('http://127.0.0.1:5180/api/info')).json();
+const info = await (await fetch(`${API}/api/info`)).json();
 const WS = info.workspace;
 
 const b = await chromium.launch();
@@ -46,7 +50,7 @@ async function ask(text) {
   return c.locator('[data-aicl=tool-call]').allTextContents();
 }
 
-await p.goto('http://localhost:5181/');
+await p.goto(`${WEB}/`);
 await p.waitForTimeout(3000);
 await p.reload();
 await p.waitForFunction(() => window.__aiclEditor, null, { timeout: 30000 });
@@ -109,7 +113,7 @@ await check('sessions: a second chat is independent and both persist', async () 
   await p.locator('button:visible', { hasText: 'New chat' }).first().click();
   await p.waitForTimeout(500);
   await ask('Reply with exactly: second chat');
-  const res = await (await fetch('http://127.0.0.1:5180/api/sessions')).json();
+  const res = await (await fetch(`${API}/api/sessions`)).json();
   if (res.sessions.length < 2) throw new Error(`${res.sessions.length} sessions`);
   await shot('3-agent-tab');
   return res.sessions.map((s) => s.title).join(' | ');
@@ -117,7 +121,7 @@ await check('sessions: a second chat is independent and both persist', async () 
 
 await check('external agent CLI drives the open canvas', async () => {
   await tab('canvas').click();
-  const cli = (args) => execFileSync('node', [path.join(here, '../bin/aicl.mjs'), '--url', 'http://127.0.0.1:5180', ...args], { encoding: 'utf8' });
+  const cli = (args) => execFileSync('node', [path.join(here, '../bin/aicl.mjs'), '--url', API, ...args], { encoding: 'utf8' });
   const tools = cli(['tools']);
   if (!/canvas_arrange/.test(tools)) throw new Error('canvas_arrange missing from CLI tool list');
   cli(['add', JSON.stringify([{ kind: 'note', id: 'cli-a', text: 'from the CLI', x: 0, y: 900 }, { kind: 'note', id: 'cli-b', text: 'external agent', x: 400, y: 1100 }])]);

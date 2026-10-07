@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import type { Editor } from 'tldraw';
 import type { CanvasContext } from '../shared/runtime.ts';
 import { getRoute } from './router.ts';
+import { getNeighbourhood } from './graph.ts';
 import { getUiSelection } from './ui/selection.ts';
 
 let canvasEditor: Editor | null = null;
@@ -159,5 +160,8 @@ export function getCanvasContext(): CanvasContext {
     ctx.viewport = { x: Math.round(v.x), y: Math.round(v.y), w: Math.round(v.w), h: Math.round(v.h) };
   }
   ctx.recentActions = actions.map((a) => a.text);
+  const focus = [...ctx.selectedShapes, ...(ctx.uiSelection ? [ctx.uiSelection.shapeId.replace(/^shape:/, '')] : [])];
+  const around = getNeighbourhood([...new Set(focus)]);
+  if (around) ctx.neighbourhood = around;
   return ctx;
 }

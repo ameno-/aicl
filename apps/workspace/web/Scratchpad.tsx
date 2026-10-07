@@ -15,6 +15,7 @@ import { onServerEvent } from './events.ts';
 import { shapeUtils } from './ComponentShape.tsx';
 import { InsertMenu } from './InsertMenu.tsx';
 import { registerCanvasEditor } from './chatStore.ts';
+import { startGraphTracker } from './graph.ts';
 
 const SAVE_DEBOUNCE_MS = 400;
 
@@ -105,6 +106,7 @@ export function Scratchpad() {
           setEditor(mounted);
           // The chat sends the current canvas selection with every prompt.
           registerCanvasEditor(mounted);
+          startGraphTracker(mounted);
           // Dev-only handle for browser tests and console debugging.
           if ((import.meta as { env?: { DEV?: boolean } }).env?.DEV) {
             (window as unknown as { __aiclEditor?: Editor }).__aiclEditor = mounted;
