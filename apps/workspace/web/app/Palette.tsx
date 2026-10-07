@@ -1,6 +1,6 @@
 /**
  * The command menu (⌘K) and the app's global shortcuts:
- * ⌘N new session, ⌘/ shortcuts, ⌘, settings, ⌘\ work panel, Esc stops a running turn.
+ * ⌘K is CommandMenu's own hotkey. ⌘N new session, ⌘/ shortcuts, ⌘, settings, ⌘\ work panel, Esc stops a running turn.
  */
 import { useEffect, useMemo } from 'react';
 import { CommandMenu, type CommandItem } from '@aicl/fx';
@@ -70,6 +70,6 @@ export function CommandPalette({ kit, prefersDark }: { kit: ProviderKit; prefers
     return list;
   }, [kit, prefs, prefersDark, sessions, models, activeId, s]);
 
-  return <CommandMenu hotkey={false} open={overlay === 'palette'} onOpenChange={(o) => setOverlay(o ? 'palette' : null)} items={items} placeholder={`Search commands, ${kit.vocabulary.sessions.toLowerCase()}, kits, models…`} />;
+  return <CommandMenu open={overlay === 'palette'} onOpenChange={(o) => setOverlay(o ? 'palette' : null)} items={items} placeholder={`Search commands, ${kit.vocabulary.sessions.toLowerCase()}, kits, models…`} />;
 }
 

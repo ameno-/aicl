@@ -147,7 +147,10 @@ for (const kit of KITS) {
       await panel.getByRole('tab', { name: 'Files' }).click();
       await panel.locator('[data-entry="notes.md"]').waitFor({ timeout: 10000 });
       await panel.locator('[data-entry="notes.md"]').click();
-      await panel.locator('[data-pane=file-content]').getByText('ship the app').waitFor({ timeout: 10000 });
+      // Whatever notes.md says, its last line shows in the viewer.
+      const { text: notes } = await (await fetch(`${API}/api/file/text?path=notes.md`)).json();
+      const line = notes.trim().split('\n').pop().replace(/^[-#\s]+/, '').slice(0, 40);
+      await panel.locator('[data-pane=file-content]').getByText(line).first().waitFor({ timeout: 10000 });
     } else if (kit.panel === 'computer') {
       // Scrub back to the bash step: its terminal output is there.
       const range = panel.getByRole('slider', { name: 'Step' });
