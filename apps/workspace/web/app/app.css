@@ -881,3 +881,15 @@
   width: 0;
   min-width: 0;
 }
+
+/* Surface-backed work-panel panes (web/app/SurfacePanes.tsx) */
+.wp-surface-pane { display: flex; flex-direction: column; height: 100%; min-height: 0; }
+.wp-surface-body { flex: 1; min-height: 0; display: flex; }
+.wp-switch { display: flex; align-items: center; gap: 4px; padding: 6px 8px; border-bottom: 1px solid var(--aicl-border); overflow-x: auto; flex-shrink: 0; }
+.wp-switch:empty { display: none; }
+.wp-switch-item { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: var(--aicl-radius-sm); font-size: 12px; color: var(--aicl-text-muted); white-space: nowrap; cursor: pointer; }
+.wp-switch-item:hover { background: var(--aicl-surface-tint); color: var(--aicl-text); }
+.wp-switch-item[data-active] { background: var(--aicl-accent-soft); color: var(--aicl-text); }
+.wp-switch > .wp-switch-item:last-child { margin-left: auto; }
+.wp-url-form { display: flex; gap: 6px; margin-top: 8px; width: min(320px, 100%); }
+.wp-url { flex: 1; min-width: 0; padding: 4px 8px; border: 1px solid var(--aicl-border); border-radius: var(--aicl-radius-sm); background: var(--aicl-surface); color: var(--aicl-text); font-size: 12px; }

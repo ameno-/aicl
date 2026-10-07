@@ -95,7 +95,7 @@ export interface ProviderKit {
     grouping: 'recency' | 'flat';
     workPanel: WorkPanel;
     /** Tabs of the work panel, in order (meaningful for 'tabs' / 'computer'). */
-    workTabs: Array<'plan' | 'terminal' | 'preview' | 'files' | 'browser'>;
+    workTabs: Array<'plan' | 'terminal' | 'preview' | 'files' | 'browser' | 'changes'>;
   };
 
   motion: {
@@ -120,7 +120,7 @@ export const KITS: Record<KitId, ProviderKit> = {
     vocabulary: { sessions: 'Chats', newSession: 'New chat', agent: 'Agent', placeholder: 'Ask the agent anything…', heroTitle: 'What should we build?' },
     transcript: { user: 'bubble', timestamps: 'none', assistantHeader: false, actions: ['copy', 'thumbs', 'retry'], reasoning: 'inline', toolCalls: 'cards', streaming: 'words', thinking: 'shimmer' },
     composer: { modes: [], contextChips: false, integrations: [], progressChip: false, attachLabel: '', hero: true },
-    layout: { nav: 'sidebar', grouping: 'recency', workPanel: 'tabs', workTabs: ['plan', 'terminal', 'files'] },
+    layout: { nav: 'sidebar', grouping: 'recency', workPanel: 'tabs', workTabs: ['plan', 'terminal', 'changes', 'files', 'browser'] },
     motion: { personality: 'crisp', spring: { stiffness: 420, damping: 34 } },
     ambient: ['#18181b', '#6366f1', '#ec4899'],
   },
@@ -136,7 +136,7 @@ export const KITS: Record<KitId, ProviderKit> = {
     transcript: { user: 'row', timestamps: 'header', assistantHeader: false, actions: ['thumbs', 'copy', 'share'], reasoning: 'in-work', toolCalls: 'work-summary', streaming: 'none', thinking: 'bars' },
     composer: { modes: ['Normal', 'Fast', 'Deep'], contextChips: true, integrations: [], progressChip: false, attachLabel: '', hero: true },
     // agent-execution.md: editor/terminal/preview tabs; terminal_output is mostly Devin.
-    layout: { nav: 'sidebar', grouping: 'recency', workPanel: 'tabs', workTabs: ['terminal', 'files', 'preview', 'plan'] },
+    layout: { nav: 'sidebar', grouping: 'recency', workPanel: 'tabs', workTabs: ['terminal', 'changes', 'files', 'browser', 'preview', 'plan'] },
     motion: { personality: 'crisp', spring: { stiffness: 520, damping: 40 } },
     ambient: null,
   },
@@ -167,7 +167,7 @@ export const KITS: Record<KitId, ProviderKit> = {
     // transcript.md: "Thought for 24s" reasoning, revert/copy/more actions; agent-execution.md: tool_call_collapsed.
     transcript: { user: 'bubble', timestamps: 'none', assistantHeader: false, actions: ['revert', 'copy', 'more'], reasoning: 'thought-for', toolCalls: 'collapsed', streaming: 'words', thinking: 'shimmer' },
     composer: { modes: [], contextChips: false, integrations: [], progressChip: false, attachLabel: 'Attach', hero: true },
-    layout: { nav: 'sidebar', grouping: 'flat', workPanel: 'preview', workTabs: ['preview', 'files', 'terminal'] },
+    layout: { nav: 'sidebar', grouping: 'flat', workPanel: 'preview', workTabs: ['preview', 'browser', 'changes', 'files', 'terminal'] },
     motion: { personality: 'expressive', spring: { stiffness: 300, damping: 22 } },
     ambient: ['#151515', '#e14a8b', '#7c3aed'],
   },
@@ -182,7 +182,7 @@ export const KITS: Record<KitId, ProviderKit> = {
     // agent-execution.md: step_timeline (Cofounder 9/10), aggregate "Ran 2 actions", "Requires Approval" badges.
     transcript: { user: 'bubble', timestamps: 'none', assistantHeader: true, actions: ['copy'], reasoning: 'inline', toolCalls: 'timeline', streaming: 'blur', thinking: 'shimmer' },
     composer: { modes: [], contextChips: false, integrations: [], progressChip: false, attachLabel: '', hero: true },
-    layout: { nav: 'topbar', grouping: 'flat', workPanel: 'board', workTabs: ['plan', 'files'] },
+    layout: { nav: 'topbar', grouping: 'flat', workPanel: 'board', workTabs: ['plan', 'changes', 'files'] },
     motion: { personality: 'calm', spring: { stiffness: 180, damping: 28 } },
     ambient: ['#e9e8e3', '#cfc8b8', '#f7f4ee'],
   },

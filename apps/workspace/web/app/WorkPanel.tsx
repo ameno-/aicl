@@ -10,12 +10,13 @@ import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointer
 import { AnimatePresence, motion } from 'motion/react';
 import { AnimatedPlan, LiveTerminal, SegmentedTabs, type PlanStep } from '@aicl/fx';
 import type { ToolCallPart } from '@aicl/core';
-import { Check, ChevronLeft, FileText, Folder, Globe, ListChecks, Loader, Monitor, Terminal as TerminalIcon, TriangleAlert, X } from 'lucide-react';
+import { Check, ChevronLeft, FileText, Folder, GitCompare, Globe, ListChecks, Loader, Monitor, Terminal as TerminalIcon, TriangleAlert, X } from 'lucide-react';
 import type { ProviderKit } from '../../shared/kits.ts';
 import { usePlan, useTerminal } from '../agentic/liveData.ts';
 import { AppletHost, useApplets } from '../applets/index.tsx';
 import { useSessionChat } from '../sessionsApi.ts';
 import { setPrefs, usePrefs } from './prefs.ts';
+import { BrowserPane, ChangesPane, TerminalsPane } from './SurfacePanes.tsx';
 
 type TabId = ProviderKit['layout']['workTabs'][number];
 
@@ -25,6 +26,7 @@ const TAB_META: Record<TabId, { label: string; icon: ReactNode }> = {
   files: { label: 'Files', icon: <Folder size={14} aria-hidden="true" /> },
   preview: { label: 'Preview', icon: <Monitor size={14} aria-hidden="true" /> },
   browser: { label: 'Browser', icon: <Globe size={14} aria-hidden="true" /> },
+  changes: { label: 'Changes', icon: <GitCompare size={14} aria-hidden="true" /> },
 };
 
 const MIN_WIDTH = 320;
@@ -390,7 +392,11 @@ export function WorkPanel({ kit, sessionId, busy, visible }: { kit: ProviderKit;
     type === 'computer' ? (
       <ComputerPane sessionId={sessionId} kit={kit} />
     ) : tab === 'terminal' ? (
-      <TerminalPane sessionId={sessionId} />
+      <TerminalsPane sessionId={sessionId} />
+    ) : tab === 'browser' ? (
+      <BrowserPane sessionId={sessionId} />
+    ) : tab === 'changes' ? (
+      <ChangesPane sessionId={sessionId} />
     ) : tab === 'files' ? (
       <FilesPane refreshKey={`${filesTick}:${steps.length}`} />
     ) : tab === 'plan' ? (
