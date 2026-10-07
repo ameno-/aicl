@@ -1,5 +1,6 @@
 import './catalog.css';
 import type { ComponentRenderer } from './types.ts';
+import { ScreenRenderer } from './screen.tsx';
 import {
   ArtifactRenderer,
   ChatRenderer,
@@ -24,4 +25,5 @@ export const renderers: Record<string, ComponentRenderer> = {
   transcript: TranscriptRenderer,
   table: TableRenderer,
   metric: MetricRenderer,
+  screen: ScreenRenderer,
 };

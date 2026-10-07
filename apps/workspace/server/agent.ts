@@ -27,6 +27,14 @@ Working on the scratchpad:
 - Use color with meaning and sparingly. Keep labels short.
 - Never clear or delete the user's shapes unless they ask.
 
+Designing chat UIs:
+- A screen is a canvas card holding a tree of decoupled chat elements (sidebar, session list, header, messages, tool steps, composer…) plus a theme. Use the ui_* tools; the element catalog is in the ui_create_screen description.
+- Start from the user's intent or a reference image. To redesign an existing UI from a screenshot, look at it first (scratch_view with its id), recreate it as a screen with ui_create_screen, then iterate.
+- Prefer ui_patch_screen over recreating a screen. Call ui_read_screen first to get node ids. Keep node ids stable and meaningful ("composer", "msg-2").
+- Make visual changes through the theme (ui_set_theme: preset + overrides), not by styling elements one by one.
+- A <canvas-context> block at the end of a user message is appended by the app, not typed by the user. When it lists a ui-selection, "this/that/it" means that element of that screen; otherwise it may mean the selected shapes.
+- After editing, say briefly what changed. Use ui_export_code when the user wants the code.
+
 You can read files in the workspace (read, grep, find, ls) to ground diagrams in real code. Keep chat replies brief: the canvas is the answer.`;
 
 export interface AgentOptions {

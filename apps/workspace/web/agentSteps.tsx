@@ -16,8 +16,11 @@ export function describe(part: ToolCallPart): string {
   switch (part.name) {
     case 'scratch_read':
       return done ? 'Read the canvas' : 'Reading the canvas';
-    case 'scratch_view':
+    case 'scratch_view': {
+      const n = count(args, 'ids');
+      if (n) return `${done ? 'Looked closely at' : 'Looking closely at'} ${n === 1 ? 'one element' : plural(n, 'element')}`;
       return done ? 'Looked at the canvas' : 'Looking at the canvas';
+    }
     case 'scratch_add': {
       // Say what was made: "Placed 3 components and 1 arrow", not "Drew 4 shapes".
       const shapes = Array.isArray(args?.['shapes']) ? (args!['shapes'] as Array<{ kind?: string }>) : [];
@@ -39,6 +42,26 @@ export function describe(part: ToolCallPart): string {
       return done ? `Deleted ${plural(count(args, 'ids'), 'shape')}` : 'Deleting shapes';
     case 'scratch_clear':
       return done ? 'Cleared the canvas' : 'Clearing the canvas';
+    case 'ref_search': {
+      const q = [args?.['product'], args?.['archetype'], args?.['component'], args?.['text']].filter(Boolean).join(' ');
+      return `${done ? 'Searched' : 'Searching'} references${q ? ` for ${String(q)}` : ''}`;
+    }
+    case 'ref_place':
+      return done ? 'Placed a reference screenshot' : 'Placing a reference screenshot';
+    case 'ui_create_screen':
+      return done ? `Created screen ${String(args?.['name'] ?? '')}`.trim() : 'Creating a screen';
+    case 'ui_read_screen':
+      return done ? 'Read screen' : 'Reading screen';
+    case 'ui_patch_screen': {
+      const n = count(args, 'ops');
+      return done ? `Edited screen${n ? ` · ${plural(n, 'change')}` : ''}` : 'Editing screen';
+    }
+    case 'ui_set_theme':
+      return done ? 'Restyled screen' : 'Restyling screen';
+    case 'ui_export_code':
+      return done ? 'Exported code' : 'Exporting code';
+    case 'ui_list_screens':
+      return done ? 'Listed screens' : 'Listing screens';
     case 'read':
       return `${done ? 'Read' : 'Reading'} ${String(args?.['path'] ?? 'a file')}`;
     case 'grep':

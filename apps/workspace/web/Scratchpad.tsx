@@ -1,12 +1,34 @@
 import { useEffect, useState } from 'react';
-import { getSnapshot, loadSnapshot, Tldraw, type Editor } from 'tldraw';
+import {
+  DefaultStylePanel,
+  getSnapshot,
+  loadSnapshot,
+  Tldraw,
+  useEditor,
+  useValue,
+  type Editor,
+  type TLUiStylePanelProps,
+} from 'tldraw';
 import 'tldraw/tldraw.css';
 import type { ScratchOp } from '../shared/scratch.ts';
 import { execute } from './executor.ts';
 import { shapeUtils } from './ComponentShape.tsx';
 import { InsertMenu } from './InsertMenu.tsx';
+import { registerCanvasEditor } from './chatStore.ts';
 
 const SAVE_DEBOUNCE_MS = 400;
+
+/**
+ * The style panel appears only while something is selected (as a design
+ * tool's inspector does), so it never sits on top of a screen's toolbar.
+ */
+function SelectionStylePanel(props: TLUiStylePanelProps) {
+  const editor = useEditor();
+  const hasSelection = useValue('has selection', () => editor.getSelectedShapeIds().length > 0, [editor]);
+  return hasSelection ? <DefaultStylePanel {...props} /> : null;
+}
+
+const uiComponents = { StylePanel: SelectionStylePanel };
 
 /**
  * The shared canvas. Loads the workspace snapshot, saves every document
@@ -14,6 +36,7 @@ const SAVE_DEBOUNCE_MS = 400;
  */
 export function Scratchpad() {
   const [editor, setEditor] = useState<Editor | null>(null);
+  useEffect(() => () => registerCanvasEditor(null), []);
   const [loaded, setLoaded] = useState(false);
 
   // Load once, then start saving. Saving before the load lands would write an
@@ -80,8 +103,11 @@ export function Scratchpad() {
     <div className="scratchpad" data-loaded={loaded || undefined}>
       <Tldraw
         shapeUtils={shapeUtils}
+        components={uiComponents}
         onMount={(mounted) => {
           setEditor(mounted);
+          // The chat sends the current canvas selection with every prompt.
+          registerCanvasEditor(mounted);
           // Dev-only handle for browser tests and console debugging.
           if ((import.meta as { env?: { DEV?: boolean } }).env?.DEV) {
             (window as unknown as { __aiclEditor?: Editor }).__aiclEditor = mounted;
