@@ -8,7 +8,9 @@
  */
 import { defineTool, type ToolDefinition } from '@earendil-works/pi-coding-agent';
 import { Type } from 'typebox';
+import { GATED_TOOLS } from '../shared/agentic.ts';
 import { ARRANGE_MODES } from '../shared/scratch.ts';
+import { requestApproval, summarizeCall } from './hitl.ts';
 import { json, readJson, type RouteTable } from './http.ts';
 import type { Relay } from './relay.ts';
 
@@ -84,6 +86,11 @@ export function toolRoutes(allTools: ToolDefinition[], relay?: Pick<Relay, 'broa
         body = await readJson<{ params?: unknown }>(req);
       } catch {
         return json(res, 400, { error: 'Body must be JSON: {"params": {...}}.' });
+      }
+      // Safety: Pi gates these in its tool_call hook, which HTTP callers never pass through. Ask here too, as the main session.
+      if ((GATED_TOOLS as readonly string[]).includes(tool.name)) {
+        const answer = await requestApproval({ tool: tool.name, summary: summarizeCall(tool.name, body.params), input: body.params ?? {} });
+        if (!answer.approved) return json(res, 200, { error: `The user declined: ${answer.note?.trim() || 'no reason given'}` });
       }
       try {
         const result = await (tool.execute as unknown as Execute)(`http-${Date.now()}`, body.params ?? {});

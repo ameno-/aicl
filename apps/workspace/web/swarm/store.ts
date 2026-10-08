@@ -40,6 +40,25 @@ export function useNow(active: boolean): number {
 }
 
 /**
+ * The server snapshot reports a tool call without a result as an error. In a
+ * session that is still running, the trailing unanswered calls (an agent_wait,
+ * a long bash) are simply in flight: show them as running.
+ */
+export function markUnfinished(messages: Message[]): Message[] {
+  const last = messages[messages.length - 1];
+  if (last?.role !== 'assistant') return messages;
+  const parts = [...last.parts];
+  let changed = false;
+  for (let i = parts.length - 1; i >= 0; i--) {
+    const part = parts[i]!;
+    if (part.type !== 'tool-call' || part.status !== 'error') break;
+    parts[i] = { ...part, status: 'running' } as typeof part;
+    changed = true;
+  }
+  return changed ? [...messages.slice(0, -1), { ...last, parts }] : messages;
+}
+
+/**
  * A session's transcript read from the server (sessions run by agents never
  * stream into the page): reloaded when `version` changes and every 1.5s while `live`.
  */
@@ -56,7 +75,7 @@ export function useServerMessages(sessionId: string | undefined, live: boolean, 
     const load = () =>
       void fetch(`/api/sessions/${encodeURIComponent(sessionId)}/messages`)
         .then((r) => (r.ok ? (r.json() as Promise<{ messages: Message[] }>) : null))
-        .then((b) => b && alive && current.current === sessionId && setMessages(b.messages))
+        .then((b) => b && alive && current.current === sessionId && setMessages(live ? markUnfinished(b.messages) : b.messages))
         .catch(() => {});
     load();
     const t = live ? setInterval(load, 1500) : undefined;

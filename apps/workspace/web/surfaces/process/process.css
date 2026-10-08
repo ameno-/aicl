@@ -1,0 +1,18 @@
+.proc { display: flex; flex-direction: column; width: 100%; height: 100%; min-height: 0; background: var(--aicl-terminal-bg); color: var(--aicl-terminal-fg); }
+.proc-head { display: flex; align-items: center; gap: 8px; flex: none; padding: 4px 6px 4px 10px; font-size: 12px; background: color-mix(in oklab, var(--aicl-terminal-bg) 88%, white); user-select: none; }
+.proc-dot { width: 8px; height: 8px; border-radius: 50%; flex: none; background: var(--aicl-tool-pending); }
+.proc-dot[data-status='running'] { background: var(--aicl-success); }
+.proc-dot[data-status='error'] { background: var(--aicl-danger); }
+.proc-name { font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.proc-state { font-family: var(--aicl-font-mono); font-size: 11px; opacity: 0.75; white-space: nowrap; }
+.proc-spacer { flex: 1; }
+.proc-btn { display: inline-flex; align-items: center; gap: 4px; height: 22px; padding: 0 7px; border: 0; border-radius: 5px; background: transparent; color: inherit; font: inherit; cursor: pointer; flex: none; }
+.proc-btn:hover:not(:disabled) { background: color-mix(in oklab, var(--aicl-terminal-fg) 14%, transparent); }
+.proc-btn:disabled { opacity: 0.4; cursor: default; }
+.proc-icon { padding: 0; width: 22px; justify-content: center; }
+.proc[data-variant='card'] .proc-btn span { display: none; }
+.proc-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; flex: none; padding: 4px 10px; font-size: 11px; }
+.proc-cmd { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; opacity: 0.8; font-family: var(--aicl-font-mono); }
+.proc-port { padding: 1px 8px; border: 1px solid color-mix(in oklab, var(--aicl-terminal-fg) 30%, transparent); border-radius: 999px; background: transparent; color: inherit; font-family: var(--aicl-font-mono); font-size: 11px; cursor: pointer; }
+.proc-port:hover { background: color-mix(in oklab, var(--aicl-terminal-fg) 14%, transparent); }
+.proc-log { flex: 1; min-height: 0; margin: 0; padding: 6px 10px; overflow: auto; font-family: var(--aicl-font-mono); font-size: 12px; line-height: 1.45; white-space: pre-wrap; word-break: break-all; }

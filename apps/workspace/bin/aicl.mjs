@@ -16,6 +16,11 @@ const HELP = `aicl [--url URL] [--json] <command>
   add '<json shapes>'         scratch_add: JSON array of shapes (or {"shapes": [...]})
   screens                     list screen shapes (component "screen")
   open <address>              navigate the user (aicl:/canvas, aicl:/overview, ...)
+  surface list                open surfaces (terminals, browsers, processes, files, diffs)
+  surface open <kind> [arg]   terminal [title] | browser <url> | file <path[:line]> | diff [target]
+  surface close <kind> <id>   close one
+  process start '<cmd>' [--name N] [--cwd D]   run a dev server/watcher in the background (needs approval in the UI)
+  process list | stop <id> | logs <id> [--lines N]
 
 URL defaults to $AICL_URL or http://127.0.0.1:5180.`;
 
@@ -23,7 +28,7 @@ URL defaults to $AICL_URL or http://127.0.0.1:5180.`;
 export function parseArgs(argv) {
   const flags = { json: false, help: false };
   const positional = [];
-  const valued = new Set(['url', 'out', 'ids']);
+  const valued = new Set(['url', 'out', 'ids', 'name', 'cwd', 'lines']);
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     if (arg.startsWith('--')) {
@@ -64,6 +69,21 @@ export function plan(command, args, flags) {
     }
     case 'screens':
       return { tool: 'scratch_read', params: {}, filter: 'screens' };
+    case 'process': {
+      const [sub, ...rest] = args;
+      if (sub === 'start') {
+        if (!rest.length) throw new Error("usage: aicl process start '<command>' [--name N] [--cwd D]");
+        return { tool: 'process_start', params: { command: rest.join(' '), ...(flags.name ? { name: flags.name } : {}), ...(flags.cwd ? { cwd: flags.cwd } : {}) } };
+      }
+      if (sub === 'list') return { tool: 'process_list', params: {} };
+      if (sub === 'stop' || sub === 'logs') {
+        if (!rest[0]) throw new Error(`usage: aicl process ${sub} <id>${sub === 'logs' ? ' [--lines N]' : ''}`);
+        return sub === 'stop'
+          ? { tool: 'process_stop', params: { id: rest[0] } }
+          : { tool: 'process_logs', params: { id: rest[0], ...(flags.lines ? { lines: Number(flags.lines) } : {}) } };
+      }
+      throw new Error('usage: aicl process start|list|stop|logs');
+    }
     default:
       return undefined;
   }
@@ -94,6 +114,48 @@ function compact(shape) {
   return bits.join(' ');
 }
 
+/** What `aicl surface open <kind> …` posts: [path, body]. Pure, for testing. */
+export function surfaceOpenRequest(kind, arg) {
+  switch (kind) {
+    case 'terminal':
+      return ['/api/surfaces/terminal', arg ? { title: arg } : {}];
+    case 'browser':
+      if (!arg) throw new Error('usage: aicl surface open browser <url>');
+      return ['/api/surfaces/browser', { url: arg }];
+    case 'file': {
+      if (!arg) throw new Error('usage: aicl surface open file <path[:line]>');
+      const m = /^(.*):(\d+)$/.exec(arg);
+      return ['/api/surfaces/file/open', m ? { path: m[1], line: Number(m[2]) } : { path: arg }];
+    }
+    case 'diff':
+      return ['/api/surfaces/diff', arg ? { target: arg } : {}];
+    default:
+      throw new Error(`Cannot open a "${kind}" surface from here (terminal, browser, file, diff). Start processes with: aicl process start.`);
+  }
+}
+
+async function surfaceCommand(base, args, out) {
+  const [sub, kind, arg] = args;
+  if (sub === 'list') {
+    const { surfaces = [] } = await request(base, 'GET', '/api/surfaces');
+    return out(surfaces.length ? surfaces.map((s) => `${s.kind}/${s.id}  ${s.title}${s.summary ? ` — ${s.summary}` : ''}  [${s.status}]`).join('\n') : '(no open surfaces)');
+  }
+  if (sub === 'open') {
+    if (!kind) throw new Error('usage: aicl surface open <kind> [arg]');
+    const [path, body] = surfaceOpenRequest(kind, arg);
+    const res = await request(base, 'POST', path, body);
+    if (res.message || res.error) throw new Error(res.message ?? res.error);
+    return out(res.surface ? `opened ${res.surface.kind}/${res.surface.id}` : 'opened');
+  }
+  if (sub === 'close') {
+    if (!kind || !arg) throw new Error('usage: aicl surface close <kind> <id>');
+    const res = await request(base, 'DELETE', `/api/surfaces/${encodeURIComponent(kind)}/${encodeURIComponent(arg)}`);
+    if (res.message) throw new Error(res.message);
+    return out(`closed ${kind}/${arg}`);
+  }
+  throw new Error('usage: aicl surface list|open|close');
+}
+
 export async function main(argv, out = (s) => console.log(s)) {
   const { flags, command, args } = parseArgs(argv);
   if (flags.help || !command) return out(HELP);
@@ -115,6 +177,8 @@ export async function main(argv, out = (s) => console.log(s)) {
     if (res.error) throw new Error(res.error);
     return out(`opened ${args[0]}`);
   }
+
+  if (command === 'surface') return surfaceCommand(base, args, out);
 
   const step = plan(command, args, flags);
   if (!step) throw new Error(`Unknown command "${command}". Run aicl --help.`);

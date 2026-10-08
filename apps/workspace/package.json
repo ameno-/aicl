@@ -3,7 +3,8 @@
   "private": true,
   "type": "module",
   "bin": {
-    "aicl": "bin/aicl.mjs"
+    "aicl": "bin/aicl.mjs",
+    "aicl-mcp": "bin/aicl-mcp.mjs"
   },
   "description": "Generative canvas workspace: a Pi agent and a person share a scratchpad beside the chat.",
   "scripts": {
@@ -39,6 +40,7 @@
     "@codemirror/view": "^6.43.14",
     "@earendil-works/pi-coding-agent": "0.84.2",
     "@lezer/highlight": "^1.2.5",
+    "@modelcontextprotocol/sdk": "^1.32.1",
     "@pierre/diffs": "^1.5.2",
     "@pierre/trees": "^1.0.0-beta.6",
     "@types/rbush": "^4.0.0",

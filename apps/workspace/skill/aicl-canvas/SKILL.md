@@ -31,3 +31,21 @@ Run it as `node <repo>/apps/workspace/bin/aicl.mjs` (or `aicl` if linked). Serve
 - Add boxes before the arrows that bind to them. Arrow `from`/`to` are shape ids.
 - Short, stable ids ("gateway", "s1"); ids you pass are returned in results.
 - Tool failures come back as `aicl: <message>` with exit code 1; fix the input and retry.
+
+## Surfaces, processes and MCP
+
+The workspace also has live **surfaces**: terminals, a browser, files, diffs and background processes. They are shared with the user, who watches and can take over.
+
+- `aicl surface list` shows what is open; `aicl surface open terminal|browser <url>|file <path[:line]>|diff [target]`; `aicl surface close <kind> <id>`.
+- Dev servers and watchers: `aicl process start 'npm run dev' --name web` (not a shell `&`, not `terminal_run`, which waits for the end). It needs the user's approval in the AICL window and returns the detected port. Then `aicl surface open browser http://localhost:<port>`. `aicl process list|logs <id> [--lines N]|stop <id>`.
+- Gated tools (`terminal_run`, `process_start`, git commits...) always wait for the user's approval in the AICL UI, from the CLI and from MCP alike. A decline comes back as an error; do not retry the same call.
+
+### MCP (Claude Code, Pi, any MCP client)
+
+`bin/aicl-mcp.mjs` is a stdio MCP server that exposes every tool above as an MCP tool and every open surface as a resource (`aicl://surface/<kind>/<id>`: its state plus terminal or process output). It needs the workspace running.
+
+```bash
+claude mcp add aicl -- node <repo>/apps/workspace/bin/aicl-mcp.mjs --url http://127.0.0.1:5180
+```
+
+Or in `.mcp.json`: `{"mcpServers":{"aicl":{"command":"node","args":["<repo>/apps/workspace/bin/aicl-mcp.mjs","--url","http://127.0.0.1:5180"]}}}`. `--url` defaults to `$AICL_URL` or `http://127.0.0.1:5180`.

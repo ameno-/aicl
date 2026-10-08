@@ -66,9 +66,9 @@ export function layoutRun(root: SessionInfo, sessions: SessionInfo[], create: bo
       id: box,
       ...(isRoot ? {} : { sessionId: id }),
       name: isRoot ? clip(root.title || 'Main', 40) : clip(s.title, 40),
-      ...(!isRoot && s.role ? { role: s.role } : {}),
+      // The task rides on the card's role line: arrow labels collide when siblings sit side by side.
+      ...(!isRoot && (s.role || s.task) ? { role: clip([s.role, s.task].filter(Boolean).join(' — '), 100) } : {}),
       ...(parentBox ? { parent: parentBox } : {}),
-      ...(!isRoot && s.task ? { label: clip(s.task, 28) } : {}),
       status: isRoot ? 'idle' : statusOf(s),
       x: left + (span - w) / 2,
       y: 0, // set below, once depths are known
