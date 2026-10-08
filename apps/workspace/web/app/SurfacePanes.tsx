@@ -7,6 +7,7 @@ import { useState, type FormEvent, type ReactNode } from 'react';
 import { GitCompare, Globe, Pin, Plus } from 'lucide-react';
 import type { SurfaceInfo, SurfaceKind } from '../../shared/surfaces.ts';
 import { SurfaceView, useSurfaces } from '../surfaces/index.tsx';
+import { useTerminal } from '../agentic/liveData.ts';
 import { TerminalPane } from './WorkPanel.tsx';
 
 const post = (url: string, body: unknown) =>
@@ -49,8 +50,11 @@ function PinButton({ info }: { info: SurfaceInfo }) {
 /** "Agent commands" (the bash stream) plus every live terminal; a + opens a new one. */
 export function TerminalsPane({ sessionId }: { sessionId: string }) {
   const terminals = pick(useSurfaces('terminal'), sessionId);
+  const bash = useTerminal(sessionId);
   const [choice, setChoice] = useState<string | null>(null);
-  const current = choice === 'bash' ? null : (terminals.find((t) => t.id === choice) ?? (choice === null ? terminals[0] : undefined));
+  // Default to this session's own activity: its bash commands if it ran any, else its terminal. Never another session's.
+  const fallback = bash ? undefined : terminals.find((t) => t.sessionId === sessionId);
+  const current = choice === 'bash' ? null : (terminals.find((t) => t.id === choice) ?? (choice === null ? fallback : undefined));
   const open = async () => {
     const { surface } = await post('/api/surfaces/terminal', {});
     if (surface) setChoice(surface.id);
