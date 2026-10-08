@@ -94,6 +94,10 @@ await check('bash waits for approval, then streams into a live terminal', async 
     await p.waitForTimeout(250);
   }
   await ready(dock());
+  // The timeline folds a finished step; open it again to read the output and exit status.
+  const step = dock().locator('[data-aicl=tool-call][data-name=bash]').last().locator('button').first();
+  if ((await step.getAttribute('aria-expanded')) === 'false') await step.click();
+  await term.waitFor({ timeout: 5000 });
   const text = (await term.textContent()) ?? '';
   if (!/tick 3/.test(text)) throw new Error(`terminal: ${text.slice(0, 80)}`);
   if (seen.size < 3) throw new Error(`output did not stream (tick counts seen: ${[...seen]})`);
