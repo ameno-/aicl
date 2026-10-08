@@ -1,4 +1,4 @@
-.gd { --gd-add: color-mix(in srgb, #2da44e 16%, transparent); --gd-del: color-mix(in srgb, #cf222e 16%, transparent); font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; overflow: auto; flex: 1; min-height: 0; outline: none; color: var(--aicl-text, inherit); }
+.gd { font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; overflow: auto; flex: 1; min-height: 0; outline: none; color: var(--aicl-text, inherit); }
 .gd-files { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px; position: sticky; top: 0; background: var(--aicl-surface, canvas); z-index: 2; border-bottom: 1px solid var(--aicl-border, #8884); }
 .gd[data-compact] .gd-files { display: none; }
 .gd-chip { display: inline-flex; gap: 6px; padding: 2px 8px; border: 1px solid var(--aicl-border, #8884); border-radius: 999px; color: inherit; text-decoration: none; font-size: 11px; }
@@ -7,23 +7,8 @@
 .gd-file-head { display: flex; align-items: center; gap: 8px; padding: 6px 8px; background: color-mix(in srgb, currentColor 5%, transparent); font-weight: 600; }
 .gd-path { color: inherit; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
 .gd-badge { font-size: 10px; padding: 0 6px; border-radius: 999px; border: 1px solid var(--aicl-border, #8886); font-weight: 400; }
-.gd-hunk { border-top: 1px solid var(--aicl-border, #8883); }
-.gd-hunk[data-current] { box-shadow: inset 3px 0 0 var(--aicl-accent, #0969da); }
 .gd-hunk-head { display: flex; align-items: center; gap: 6px; padding: 3px 8px; background: color-mix(in srgb, #0969da 10%, transparent); color: var(--aicl-text-muted, inherit); }
 .gd-hunk-head code { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.gd-spacer { flex: 1; }
-.gd-line { display: flex; position: relative; min-width: max-content; }
-.gd-line[data-type='add'] { background: var(--gd-add); } .gd-line[data-type='del'] { background: var(--gd-del); }
-.gd-line[data-type='empty'] { background: color-mix(in srgb, currentColor 4%, transparent); }
-.gd-no { width: 44px; flex: none; text-align: right; padding-right: 8px; color: var(--aicl-text-muted, #888); user-select: none; }
-.gd-mark { width: 14px; flex: none; user-select: none; }
-.gd-code { white-space: pre; flex: 1; padding-right: 12px; }
-.gd-plus { position: absolute; left: 0; width: 16px; height: 16px; line-height: 14px; padding: 0; border: 0; border-radius: 3px; background: var(--aicl-accent, #0969da); color: #fff; cursor: pointer; opacity: 0; }
-.gd-line:hover .gd-plus, .gd-plus:focus { opacity: 1; }
-.gd-pair { display: grid; grid-template-columns: 1fr 1fr; }
-.gd-pair .gd-line:first-child { border-right: 1px solid var(--aicl-border, #8883); }
-.gd-fold { display: block; width: 100%; text-align: left; padding: 2px 62px; border: 0; background: color-mix(in srgb, currentColor 6%, transparent); color: var(--aicl-text-muted, inherit); cursor: pointer; font: inherit; }
-.gd-thread-row { padding: 6px 12px 6px 62px; font-family: system-ui, sans-serif; font-size: 12px; background: color-mix(in srgb, #bf8700 8%, transparent); }
 .gd-comment { padding: 4px 0; } .gd-comment + .gd-comment { border-top: 1px solid var(--aicl-border, #8883); }
 .gd-comment[data-draft] { border-left: 3px solid #bf8700; padding-left: 8px; }
 .gd-comment-head { display: flex; gap: 8px; align-items: center; } .gd-comment-body { white-space: pre-wrap; }
@@ -44,3 +29,9 @@
 .gd-check i[data-b='pass'] { background: #2da44e; } .gd-check i[data-b='fail'] { background: #cf222e; } .gd-check i[data-b='pending'] { background: #bf8700; }
 .gd-submit { padding: 8px; border-top: 1px solid var(--aicl-border, #8884); font: 12px system-ui, sans-serif; display: flex; flex-direction: column; gap: 6px; }
 .gd-submit textarea { width: 100%; min-height: 48px; font: inherit; box-sizing: border-box; }
+.gd-file[data-current] { box-shadow: inset 3px 0 0 var(--aicl-accent, #0969da); }
+.gd-hunks { display: flex; flex-direction: column; }
+.gd-hunk-actions { display: inline-flex; gap: 4px; margin-left: auto; flex: none; }
+/* Lines are drawn by @pierre/diffs in its own shadow root; comments live in its annotation rows. */
+.gd-pierre { --diffs-font-family: ui-monospace, SFMono-Regular, Menlo, monospace; --diffs-font-size: 12px; }
+.gd-pierre .gd-thread, .gd-pierre .gd-composer { padding: 6px 12px; font-family: system-ui, sans-serif; font-size: 12px; background: color-mix(in srgb, #bf8700 8%, transparent); }

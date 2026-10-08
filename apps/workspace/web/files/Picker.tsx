@@ -171,7 +171,7 @@ function Picker({ onClose }: { onClose(): void }) {
                 <div className="fp-empty">No matching files.</div>
               )
             ) : (
-              <Tree onOpen={setPicked} />
+              <Tree onOpen={setPicked} search={false} />
             )}
           </div>
           <div className="fp-preview" aria-label="Preview">

@@ -1,5 +1,12 @@
-/** The shared diff renderer: file list, unified / side-by-side, collapsed context, per-hunk actions, inline comments. */
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+/**
+ * The shared diff renderer: file chips, per-file headers and hunk actions
+ * (stage / discard / open in Hunk), with the lines themselves drawn by
+ * @pierre/diffs (https://diffs.com — Shiki highlighting, split or stacked,
+ * annotations). Review comments are Pierre line annotations; selecting a line
+ * opens a draft composer there.
+ */
+import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { PatchDiff, type DiffLineAnnotation, type SelectedLineRange } from '@pierre/diffs/react';
 import type { DiffFile, DiffHunk, DiffLine, ReviewComment } from '../../../shared/git.ts';
 import { surfaceAddress } from '../../../shared/surfaces.ts';
 import './diff.css';
@@ -27,41 +34,35 @@ export interface DiffViewProps {
   compact?: boolean;
 }
 
-const COLLAPSE_OVER = 8;
-const KEEP = 3;
+/** What a Pierre annotation carries here: a thread of comments, or the composer for a new one. */
+type Note = { kind: 'thread'; comments: InlineComment[] } | { kind: 'compose' };
 
-type Row = { kind: 'line'; line: DiffLine } | { kind: 'fold'; key: string; lines: DiffLine[] };
+const THEMES = { dark: 'pierre-dark', light: 'pierre-light' } as const;
 
-/** Fold runs of more than COLLAPSE_OVER context lines, keeping KEEP at each edge. */
-function rowsOf(hunk: DiffHunk, expanded: Set<string>, hunkKey: string): Row[] {
-  const rows: Row[] = [];
-  let run: DiffLine[] = [];
-  const flush = (atStart: boolean, atEnd: boolean) => {
-    if (!run.length) return;
-    const head = atStart ? 0 : KEEP;
-    const tail = atEnd ? 0 : KEEP;
-    const key = `${hunkKey}:${rows.length}`;
-    if (run.length > COLLAPSE_OVER && !expanded.has(key) && run.length > head + tail + 1) {
-      run.slice(0, head).forEach((line) => rows.push({ kind: 'line', line }));
-      rows.push({ kind: 'fold', key, lines: run.slice(head, run.length - tail) });
-      run.slice(run.length - tail).forEach((line) => rows.push({ kind: 'line', line }));
-    } else run.forEach((line) => rows.push({ kind: 'line', line }));
-    run = [];
-  };
-  hunk.lines.forEach((line) => {
-    if (line.type === 'context') run.push(line);
-    else {
-      flush(rows.length === 0, false);
-      rows.push({ kind: 'line', line });
+/** One file's unified patch text, rebuilt from the parsed header and hunks. */
+export function patchOf(file: DiffFile): string {
+  const out = [file.header.replace(/\n+$/, '')];
+  for (const h of file.hunks) {
+    out.push(h.header);
+    for (const l of h.lines) {
+      out.push(`${l.type === 'add' ? '+' : l.type === 'del' ? '-' : ' '}${l.content}`);
+      if (l.noNewline) out.push('\\ No newline at end of file');
     }
-  });
-  flush(rows.length === 0, true);
-  return rows;
+  }
+  return `${out.join('\n')}\n`;
 }
 
-const sideOf = (l: DiffLine): 'LEFT' | 'RIGHT' => (l.type === 'del' ? 'LEFT' : 'RIGHT');
-const lineNo = (l: DiffLine) => (l.type === 'del' ? l.oldLine : l.newLine);
-const mark = (l: DiffLine) => (l.type === 'add' ? '+' : l.type === 'del' ? '-' : ' ');
+const sideName = (side: 'LEFT' | 'RIGHT') => (side === 'LEFT' ? 'deletions' : 'additions');
+
+/** The parsed line a comment on (side, number) refers to. */
+function findLine(file: DiffFile, side: 'LEFT' | 'RIGHT', n: number): DiffLine | undefined {
+  for (const h of file.hunks) {
+    for (const l of h.lines) {
+      if (side === 'LEFT' ? l.type !== 'add' && l.oldLine === n : l.type !== 'del' && l.newLine === n) return l;
+    }
+  }
+  return undefined;
+}
 
 function CommentThread({ comments, onDelete }: { comments: InlineComment[]; onDelete?: ((id: string) => void) | undefined }) {
   return (
@@ -101,130 +102,89 @@ function Composer({ onSubmit, onCancel }: { onSubmit(body: string): void; onCanc
   );
 }
 
-function HunkView({ file, hunk, index, props, fileKey }: { file: DiffFile; hunk: DiffHunk; index: number; props: DiffViewProps; fileKey: string }) {
-  const [expanded, setExpanded] = useState<Set<string>>(new Set());
-  const [composing, setComposing] = useState<string | null>(null);
-  const hunkKey = `${fileKey}#${index}`;
-  const rows = useMemo(() => rowsOf(hunk, expanded, hunkKey), [hunk, expanded, hunkKey]);
-  const forLine = (l: DiffLine) => props.comments.filter((c) => c.path === file.path && c.side === sideOf(l) && c.line === lineNo(l));
-  const lineKey = (l: DiffLine) => `${sideOf(l)}${lineNo(l)}`;
+function FileBody({ file, props, themeType }: { file: DiffFile; props: DiffViewProps; themeType: 'light' | 'dark' }) {
+  const [composing, setComposing] = useState<{ side: 'LEFT' | 'RIGHT'; line: number } | null>(null);
+  const patch = useMemo(() => patchOf(file), [file]);
 
-  const expand = (key: string) => setExpanded((s) => new Set(s).add(key));
-  const threads = (l: DiffLine): ReactNode => {
-    const list = forLine(l);
-    const open = composing === lineKey(l);
-    if (!list.length && !open) return null;
-    return (
-      <div className="gd-thread-row">
-        {list.length ? <CommentThread comments={list} onDelete={props.onDeleteDraft} /> : null}
-        {open ? (
-          <Composer
-            onCancel={() => setComposing(null)}
-            onSubmit={(body) => {
-              setComposing(null);
-              void props.onAddComment?.(file, l, sideOf(l), body);
-            }}
-          />
-        ) : null}
-      </div>
-    );
-  };
-  const gutter = (l: DiffLine) =>
-    props.onAddComment && lineNo(l) !== undefined ? (
-      <button className="gd-plus" aria-label="Add comment" title="Draft a comment on this line" onClick={() => setComposing(lineKey(l))}>
-        +
-      </button>
-    ) : null;
-
-  // Side-by-side: pair consecutive del/add runs.
-  const pairs = useMemo(() => {
-    const out: Array<{ left?: DiffLine; right?: DiffLine; fold?: Extract<Row, { kind: 'fold' }> }> = [];
-    let dels: DiffLine[] = [];
-    let adds: DiffLine[] = [];
-    const flush = () => {
-      for (let i = 0; i < Math.max(dels.length, adds.length); i++) out.push({ ...(dels[i] ? { left: dels[i]! } : {}), ...(adds[i] ? { right: adds[i]! } : {}) });
-      dels = [];
-      adds = [];
-    };
-    for (const r of rows) {
-      if (r.kind === 'fold') {
-        flush();
-        out.push({ fold: r });
-      } else if (r.line.type === 'del') dels.push(r.line);
-      else if (r.line.type === 'add') adds.push(r.line);
-      else {
-        flush();
-        out.push({ left: r.line, right: r.line });
-      }
+  const annotations = useMemo(() => {
+    const threads = new Map<string, InlineComment[]>();
+    for (const c of props.comments) {
+      if (c.path !== file.path || c.line == null) continue;
+      const key = `${c.side}:${c.line}`;
+      threads.set(key, [...(threads.get(key) ?? []), c]);
     }
-    flush();
-    return out;
-  }, [rows]);
+    const list: DiffLineAnnotation<Note>[] = [...threads].map(([key, comments]) => {
+      const [side, line] = key.split(':') as ['LEFT' | 'RIGHT', string];
+      return { side: sideName(side), lineNumber: Number(line), metadata: { kind: 'thread', comments } };
+    });
+    if (composing) list.push({ side: sideName(composing.side), lineNumber: composing.line, metadata: { kind: 'compose' } });
+    return list;
+  }, [props.comments, file.path, composing]);
+
+  const options = useMemo(
+    () => ({
+      theme: THEMES,
+      themeType,
+      diffStyle: props.split ? ('split' as const) : ('unified' as const),
+      disableFileHeader: true,
+      overflow: 'scroll' as const,
+      enableLineSelection: Boolean(props.onAddComment),
+      onLineSelectionEnd: (range: SelectedLineRange | null) => {
+        if (!range) return;
+        const side = range.endSide ?? range.side;
+        setComposing({ side: side === 'deletions' ? 'LEFT' : 'RIGHT', line: range.end });
+      },
+    }),
+    [themeType, props.split, props.onAddComment],
+  );
 
   return (
-    <div className="gd-hunk" data-hunk data-hunk-key={hunkKey} tabIndex={-1}>
-      <div className="gd-hunk-head">
-        <code>{hunk.header}</code>
-        <span className="gd-spacer" />
-        {props.onOpenInHunk ? (
-          <button className="gd-btn gd-btn-ghost" onClick={() => props.onOpenInHunk?.(file, index)} title="Open this hunk in Hunk">
-            Open in Hunk
-          </button>
-        ) : null}
-        {props.hunkActions?.map((a) => (
-          <button key={a.label} className={`gd-btn${a.danger ? ' gd-btn-danger' : ''}`} title={a.title} onClick={() => a.run(file, hunk, index)}>
-            {a.label}
-          </button>
-        ))}
-      </div>
-      {!props.split ? (
-        <div className="gd-lines">
-          {rows.map((r, i) =>
-            r.kind === 'fold' ? (
-              <button key={i} className="gd-fold" onClick={() => expand(r.key)}>
-                ⋯ {r.lines.length} unchanged lines
+    <div className="gd-pierre">
+      <PatchDiff<Note>
+        patch={patch}
+        options={options}
+        lineAnnotations={annotations}
+        renderAnnotation={(a) =>
+          a.metadata.kind === 'thread' ? (
+            <CommentThread comments={a.metadata.comments} onDelete={props.onDeleteDraft} />
+          ) : (
+            <Composer
+              onCancel={() => setComposing(null)}
+              onSubmit={(body) => {
+                const at = composing;
+                setComposing(null);
+                const line = at && findLine(file, at.side, at.line);
+                if (at && line) void props.onAddComment?.(file, line, at.side, body);
+              }}
+            />
+          )
+        }
+      />
+    </div>
+  );
+}
+
+function HunkBar({ file, props }: { file: DiffFile; props: DiffViewProps }) {
+  if (!props.hunkActions?.length && !props.onOpenInHunk) return null;
+  return (
+    <div className="gd-hunks">
+      {file.hunks.map((h, i) => (
+        <div key={h.header + i} className="gd-hunk-head" data-hunk>
+          <code className="gd-hunk-title">{h.header}</code>
+          <span className="gd-hunk-actions">
+            {props.onOpenInHunk ? (
+              <button className="gd-btn gd-btn-ghost" onClick={() => props.onOpenInHunk?.(file, i)} title="Open this hunk in Hunk">
+                Hunk
               </button>
-            ) : (
-              <div key={i}>
-                <div className="gd-line" data-type={r.line.type}>
-                  <span className="gd-no">{r.line.oldLine ?? ''}</span>
-                  <span className="gd-no">{r.line.newLine ?? ''}</span>
-                  {gutter(r.line)}
-                  <span className="gd-mark">{mark(r.line)}</span>
-                  <span className="gd-code">{r.line.content || ' '}</span>
-                </div>
-                {threads(r.line)}
-              </div>
-            ),
-          )}
-        </div>
-      ) : (
-        <div className="gd-lines gd-split">
-          {pairs.map((p, i) =>
-            p.fold ? (
-              <button key={i} className="gd-fold" onClick={() => expand(p.fold!.key)}>
-                ⋯ {p.fold.lines.length} unchanged lines
+            ) : null}
+            {props.hunkActions?.map((a) => (
+              <button key={a.label} className={`gd-btn${a.danger ? ' gd-btn-danger' : ''}`} title={a.title} onClick={() => a.run(file, h, i)}>
+                {a.label}
               </button>
-            ) : (
-              <div key={i}>
-                <div className="gd-pair">
-                  {(['left', 'right'] as const).map((side) => {
-                    const l = p[side];
-                    return (
-                      <div key={side} className="gd-line" data-type={l ? (l.type === 'context' ? 'context' : l.type) : 'empty'}>
-                        <span className="gd-no">{l ? (side === 'left' ? l.oldLine : l.newLine) : ''}</span>
-                        {l && !(side === 'left' && l.type === 'context') ? gutter(l) : null}
-                        <span className="gd-code">{l ? l.content || ' ' : ''}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-                {[p.left, p.right].map((l, k) => (l && !(k === 0 && l === p.right) ? <div key={k}>{threads(l)}</div> : null))}
-              </div>
-            ),
-          )}
+            ))}
+          </span>
         </div>
-      )}
+      ))}
     </div>
   );
 }
@@ -234,33 +194,47 @@ export function DiffView(props: DiffViewProps) {
   const root = useRef<HTMLDivElement>(null);
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
   const [current, setCurrent] = useState(0);
+  const [themeType, setThemeType] = useState<'light' | 'dark'>('light');
 
-  const hunks = useCallback(() => [...(root.current?.querySelectorAll<HTMLElement>('[data-hunk]') ?? [])], []);
+  // Follow the kit / app theme the diff sits in (data-theme on an ancestor).
+  useLayoutEffect(() => {
+    const host = root.current?.closest('[data-theme]');
+    const read = () => setThemeType(host?.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');
+    read();
+    if (!host) return;
+    const watch = new MutationObserver(read);
+    watch.observe(host, { attributes: true, attributeFilter: ['data-theme'] });
+    return () => watch.disconnect();
+  }, []);
+
+  // j / k move between files (Pierre draws lines inside a shadow root).
   const go = useCallback(
     (delta: number) => {
-      const list = hunks();
+      const list = [...(root.current?.querySelectorAll<HTMLElement>('.gd-file') ?? [])];
       if (!list.length) return;
       const next = Math.max(0, Math.min(list.length - 1, current + delta));
       setCurrent(next);
-      list.forEach((h, i) => h.toggleAttribute('data-current', i === next));
       list[next]?.scrollIntoView({ block: 'nearest' });
     },
-    [current, hunks],
+    [current],
   );
-  useEffect(() => {
-    hunks().forEach((h, i) => h.toggleAttribute('data-current', i === current));
-  });
-
   const onKeyDown = (e: React.KeyboardEvent) => {
     const t = e.target as HTMLElement;
     if (t.tagName === 'TEXTAREA' || t.tagName === 'INPUT' || e.metaKey || e.ctrlKey) return;
     if (e.key === 'j') go(1);
     else if (e.key === 'k') go(-1);
   };
+  const toggle = (path: string) =>
+    setCollapsed((s) => {
+      const n = new Set(s);
+      if (n.has(path)) n.delete(path);
+      else n.add(path);
+      return n;
+    });
 
   if (!files.length) return <div className="surface-empty">No changes.</div>;
   return (
-    <div className="gd" ref={root} tabIndex={0} onKeyDown={onKeyDown} data-compact={props.compact ? 'true' : undefined} aria-label="Diff (j/k to move between hunks)">
+    <div className="gd" ref={root} tabIndex={0} onKeyDown={onKeyDown} data-compact={props.compact ? 'true' : undefined} aria-label="Diff (j/k to move between files)">
       <div className="gd-files">
         {files.map((f) => (
           <a key={f.path} href={`#gd-${encodeURIComponent(f.path)}`} className="gd-chip" onClick={() => setCollapsed((s) => { const n = new Set(s); n.delete(f.path); return n; })}>
@@ -270,13 +244,12 @@ export function DiffView(props: DiffViewProps) {
           </a>
         ))}
       </div>
-      {files.map((f) => {
-        const fileKey = f.path;
+      {files.map((f, i) => {
         const folded = collapsed.has(f.path);
         return (
-          <section key={f.path} id={`gd-${encodeURIComponent(f.path)}`} className="gd-file">
+          <section key={f.path} id={`gd-${encodeURIComponent(f.path)}`} className="gd-file" data-current={i === current || undefined}>
             <header className="gd-file-head">
-              <button className="gd-link" aria-label={folded ? 'Expand file' : 'Collapse file'} onClick={() => setCollapsed((s) => { const n = new Set(s); n.has(f.path) ? n.delete(f.path) : n.add(f.path); return n; })}>
+              <button className="gd-link" aria-label={folded ? 'Expand file' : 'Collapse file'} onClick={() => toggle(f.path)}>
                 {folded ? '▸' : '▾'}
               </button>
               <a className="gd-path" href={surfaceAddress({ kind: 'file', id: f.path })} title="Open file">
@@ -291,7 +264,10 @@ export function DiffView(props: DiffViewProps) {
             ) : f.hunks.length === 0 ? (
               <div className="surface-empty">{f.status === 'renamed' ? 'Renamed without changes' : 'No textual changes'}</div>
             ) : (
-              f.hunks.map((h, i) => <HunkView key={h.header + i} file={f} hunk={h} index={i} props={props} fileKey={fileKey} />)
+              <>
+                <HunkBar file={f} props={props} />
+                <FileBody file={f} props={props} themeType={themeType} />
+              </>
             )}
           </section>
         );

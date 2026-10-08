@@ -10,13 +10,6 @@ export interface FileDoc {
   lines: number;
 }
 
-export interface TreeEntry {
-  name: string;
-  path: string;
-  dir: boolean;
-  size?: number;
-}
-
 export interface LineRange {
   startLine: number;
   endLine: number;
@@ -43,9 +36,6 @@ const post = (body: unknown): RequestInit => ({
   headers: { 'content-type': 'application/json' },
   body: JSON.stringify(body),
 });
-
-export const listTree = (dir: string, dotfiles: boolean) =>
-  request<{ dir: string; entries: TreeEntry[] }>(`/api/surfaces/files/tree?dir=${encodeURIComponent(dir)}${dotfiles ? '&dotfiles=1' : ''}`);
 
 export const searchFiles = (q: string) =>
   request<{ paths: string[] }>(`/api/surfaces/files/search?q=${encodeURIComponent(q)}`).then((r) => r.paths);

@@ -20,15 +20,8 @@
 .fv-banner > span { flex: 1; }
 .fv-banner--warn { color: var(--aicl-warning); }
 
-/* Tree */
-.ft { font-size: 12.5px; color: var(--aicl-text); outline: none; overflow: auto; }
-.ft-row { display: flex; align-items: center; gap: 5px; height: 24px; padding-right: 8px; cursor: pointer; white-space: nowrap; border-radius: 4px; }
-.ft-row:hover { background: var(--aicl-surface-tint); }
-.ft-row[aria-selected='true'] { background: var(--aicl-accent-soft); }
-.ft:focus-visible .ft-row[aria-selected='true'] { outline: 1px solid var(--aicl-ring); outline-offset: -1px; }
-.ft-row svg { flex: none; color: var(--aicl-text-muted); }
-.ft-name { overflow: hidden; text-overflow: ellipsis; }
-.ft-empty { padding: 4px 8px; color: var(--aicl-text-faint); }
+/* Tree (@pierre/trees draws rows in its shadow root) */
+.files-tree { display: block; height: 100%; min-height: 0; font-size: 12.5px; }
 
 /* Picker */
 .fp-backdrop { position: fixed; inset: 0; z-index: 3000; display: flex; justify-content: center; align-items: flex-start; padding-top: 10vh; background: var(--aicl-overlay); }

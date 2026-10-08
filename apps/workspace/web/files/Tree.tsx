@@ -1,133 +1,81 @@
-/** Workspace file tree: lazy directories, keyboard navigation (↑ ↓ expand with → collapse with ← Enter opens). */
-import { ChevronDown, ChevronRight, File, Folder } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState, type KeyboardEvent } from 'react';
-import { listTree, type TreeEntry } from './api.ts';
+/**
+ * Workspace file tree, drawn by @pierre/trees (https://trees.software):
+ * path-first, virtualized, with built-in search, keyboard navigation and git
+ * status markers. Selecting a file opens it.
+ */
+import { useEffect, useRef, type CSSProperties } from 'react';
+import { FileTree, useFileTree } from '@pierre/trees/react';
+import type { GitStatus, GitStatusEntry } from '@pierre/trees';
+import type { GitStatus as RepoStatus, GitStatusFile } from '../../shared/git.ts';
 import './files.css';
 
 export interface TreeProps {
-  /** Called when a file is activated (click or Enter). */
+  /** Called when a file is activated (selected). */
   onOpen(path: string): void;
-  /** Reload everything when this changes (e.g. after the agent edits files). */
+  /** Reload paths and git status when this changes (e.g. after the agent edits files). */
   refreshKey?: unknown;
-  dotfiles?: boolean;
+  /** The tree's own filter box; off when the host already has a search (the ⌘P picker). */
+  search?: boolean;
   className?: string;
 }
 
-interface Row {
-  entry: TreeEntry;
-  depth: number;
+/** The tree's own CSS variables, mapped onto AICL tokens so it follows the kit. */
+const THEME = {
+  '--trees-fg-override': 'var(--aicl-text)',
+  '--trees-bg-override': 'transparent',
+  '--trees-border-color-override': 'var(--aicl-border)',
+  '--trees-selected-bg-override': 'var(--aicl-accent-soft)',
+  height: '100%',
+} as CSSProperties;
+
+function statusOf(f: GitStatusFile): GitStatus {
+  const code = f.index !== ' ' && f.index !== '?' ? f.index : f.worktree;
+  if (code === '?') return 'untracked';
+  if (code === 'A') return 'added';
+  if (code === 'D') return 'deleted';
+  if (code === 'R') return 'renamed';
+  return 'modified';
 }
 
-export function Tree({ onOpen, refreshKey, dotfiles = false, className }: TreeProps) {
-  const [children, setChildren] = useState<Record<string, TreeEntry[]>>({});
-  const [expanded, setExpanded] = useState<Set<string>>(new Set());
-  const [cursor, setCursor] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+async function loadGitStatus(): Promise<GitStatusEntry[]> {
+  try {
+    const s = (await (await fetch('/api/git/status')).json()) as RepoStatus;
+    if (!s.repo) return [];
+    const seen = new Map<string, GitStatus>();
+    for (const f of [...s.untracked, ...s.unstaged, ...s.staged]) seen.set(f.path, statusOf(f));
+    return [...seen].map(([path, status]) => ({ path, status }));
+  } catch {
+    return [];
+  }
+}
 
-  const load = useCallback(
-    (dir: string) =>
-      listTree(dir, dotfiles)
-        .then((r) => setChildren((c) => ({ ...c, [dir]: r.entries })))
-        .catch((e: unknown) => setError(e instanceof Error ? e.message : 'could not list files')),
-    [dotfiles],
-  );
+export function Tree({ onOpen, refreshKey, search = true, className }: TreeProps) {
+  const open = useRef(onOpen);
+  open.current = onOpen;
+  const { model } = useFileTree({
+    paths: [],
+    search,
+    flattenEmptyDirectories: true,
+    onSelectionChange: (selected) => {
+      const path = selected[selected.length - 1];
+      // Directories end with "/"; selecting one just expands it.
+      if (path && !path.endsWith('/')) open.current(path);
+    },
+  });
 
   useEffect(() => {
-    setError(null);
-    void load('');
-    for (const dir of expanded) void load(dir);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- reload on toggle/refresh only
-  }, [load, refreshKey]);
-
-  const rows = useMemo(() => {
-    const out: Row[] = [];
-    const walk = (dir: string, depth: number) => {
-      for (const entry of children[dir] ?? []) {
-        out.push({ entry, depth });
-        if (entry.dir && expanded.has(entry.path)) walk(entry.path, depth + 1);
-      }
+    let live = true;
+    void Promise.all([fetch('/api/surfaces/files/paths').then((r) => r.json() as Promise<{ paths: string[] }>), loadGitStatus()])
+      .then(([{ paths }, git]) => {
+        if (!live) return;
+        model.resetPaths(paths);
+        model.setGitStatus(git);
+      })
+      .catch(() => {});
+    return () => {
+      live = false;
     };
-    walk('', 0);
-    return out;
-  }, [children, expanded]);
+  }, [model, refreshKey]);
 
-  const toggle = (dir: string, open: boolean) => {
-    setExpanded((prev) => {
-      const next = new Set(prev);
-      if (open) next.add(dir);
-      else next.delete(dir);
-      return next;
-    });
-    if (open && !children[dir]) void load(dir);
-  };
-
-  const activate = (entry: TreeEntry) => {
-    setCursor(entry.path);
-    if (entry.dir) toggle(entry.path, !expanded.has(entry.path));
-    else onOpen(entry.path);
-  };
-
-  const onKeyDown = (e: KeyboardEvent) => {
-    if (!rows.length) return;
-    const i = Math.max(0, rows.findIndex((r) => r.entry.path === cursor));
-    const row = rows[i]!;
-    const move = (to: number) => {
-      e.preventDefault();
-      setCursor(rows[Math.min(rows.length - 1, Math.max(0, to))]!.entry.path);
-    };
-    switch (e.key) {
-      case 'ArrowDown':
-        return move(cursor ? i + 1 : 0);
-      case 'ArrowUp':
-        return move(i - 1);
-      case 'Home':
-        return move(0);
-      case 'End':
-        return move(rows.length - 1);
-      case 'ArrowRight':
-        e.preventDefault();
-        if (row.entry.dir) {
-          if (!expanded.has(row.entry.path)) toggle(row.entry.path, true);
-          else move(i + 1);
-        }
-        return;
-      case 'ArrowLeft': {
-        e.preventDefault();
-        if (row.entry.dir && expanded.has(row.entry.path)) return toggle(row.entry.path, false);
-        const parent = row.entry.path.includes('/') ? row.entry.path.slice(0, row.entry.path.lastIndexOf('/')) : null;
-        if (parent) setCursor(parent);
-        return;
-      }
-      case 'Enter':
-      case ' ':
-        e.preventDefault();
-        return activate(row.entry);
-    }
-  };
-
-  return (
-    <div className={`ft ${className ?? ''}`} role="tree" tabIndex={0} onKeyDown={onKeyDown} aria-label="Workspace files">
-      {error && <div className="ft-empty">{error}</div>}
-      {!error && !rows.length && children[''] && <div className="ft-empty">No files.</div>}
-      {rows.map(({ entry, depth }) => {
-        const open = entry.dir && expanded.has(entry.path);
-        return (
-          <div
-            key={entry.path}
-            role="treeitem"
-            aria-selected={cursor === entry.path}
-            aria-expanded={entry.dir ? open : undefined}
-            className="ft-row"
-            style={{ paddingLeft: 6 + depth * 14 }}
-            data-path={entry.path}
-            onClick={() => activate(entry)}
-          >
-            {entry.dir ? open ? <ChevronDown size={13} aria-hidden /> : <ChevronRight size={13} aria-hidden /> : <span style={{ width: 13 }} />}
-            {entry.dir ? <Folder size={13} aria-hidden /> : <File size={13} aria-hidden />}
-            <span className="ft-name">{entry.name}</span>
-          </div>
-        );
-      })}
-    </div>
-  );
+  return <FileTree model={model} className={className ? `files-tree ${className}` : 'files-tree'} style={THEME} />;
 }

@@ -10,6 +10,7 @@
  *
  *   GET  /api/surfaces/files/tree?dir=&dotfiles=1   lazy directory listing
  *   GET  /api/surfaces/files/search?q=              fuzzy quick-open
+ *   GET  /api/surfaces/files/paths                  every indexed path (path-first trees)
  *   GET  /api/surfaces/file/read?path=              { doc }
  *   POST /api/surfaces/file/open {path, line?}      opens/focuses the surface
  *   POST /api/surfaces/file/save {path, text, baseHash}   409 {doc} on conflict
@@ -25,7 +26,7 @@ import { json, readJson } from '../http.ts';
 import { sessionIdFromToolContext } from '../session-context.ts';
 import type { SurfaceContext } from './context.ts';
 import { readDoc, saveDoc, SaveConflict, type FileDoc } from './files/docs.ts';
-import { createPathIndex, searchPaths } from './files/search.ts';
+import { createPathIndex, MAX_INDEXED, searchPaths } from './files/search.ts';
 
 const PROMPT = `# Files
 - Open files you discuss with file_open {path, line?} so the user sees them next to the chat. When you explain or point at specific code, call file_reveal {path, startLine, endLine} to highlight that range (1-based, inclusive).
@@ -136,6 +137,11 @@ export function createFilesSurface(context: SurfaceContext): FeatureModule {
     routes: {
       'GET /api/surfaces/files/tree': async (_req, res, { url }) =>
         json(res, 200, await listDir(workspace, dirOf(url), { tree: { dotfiles: url.searchParams.get('dotfiles') === '1' } })),
+      // Every indexed path, for path-first trees (@pierre/trees). Capped at MAX_INDEXED.
+      'GET /api/surfaces/files/paths': async (_req, res) => {
+        const paths = await index.get();
+        json(res, 200, { paths, truncated: paths.length >= MAX_INDEXED });
+      },
       'GET /api/surfaces/files/search': async (_req, res, { url }) =>
         json(res, 200, { paths: searchPaths(await index.get(), url.searchParams.get('q') ?? '', 50) }),
       'GET /api/surfaces/file/read': async (_req, res, { url }) => json(res, 200, { doc: await readDoc(workspace, pathOf(url)) }),

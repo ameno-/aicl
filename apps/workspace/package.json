@@ -38,6 +38,8 @@
     "@codemirror/view": "^6.43.14",
     "@earendil-works/pi-coding-agent": "0.84.2",
     "@lezer/highlight": "^1.2.5",
+    "@pierre/diffs": "^1.5.2",
+    "@pierre/trees": "^1.0.0-beta.6",
     "@types/rbush": "^4.0.0",
     "@types/ws": "^8.18.2",
     "lucide-react": "^1.52.0",
