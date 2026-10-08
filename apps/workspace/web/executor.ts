@@ -23,13 +23,17 @@ import { asAgent } from './canvasContext.ts';
 import { addImage, viewShapes } from './executor-image.ts';
 import { uiGet, uiSet } from './ui/executor-ui.ts';
 import { applySwarmRun } from './swarm/canvas.ts';
+import { applyWorkframe, findSurfaceCard } from './workspace/frames.ts';
+import { noteAgentTouch } from './workspace/presence.ts';
 
 const GAP = 80;
 const DEFAULT_W = 200;
 const DEFAULT_H = 120;
 
-export function execute(editor: Editor, op: ScratchOp): Promise<ScratchResult> {
-  return asAgent(() => run(editor, op));
+export async function execute(editor: Editor, op: ScratchOp): Promise<ScratchResult> {
+  const result = await asAgent(() => run(editor, op));
+  noteAgentTouch(result);
+  return result;
 }
 
 async function run(editor: Editor, op: ScratchOp): Promise<ScratchResult> {
@@ -65,6 +69,8 @@ async function run(editor: Editor, op: ScratchOp): Promise<ScratchResult> {
       return { op: 'focus', ids: focus(editor, op.ids, op.bounds) };
     case 'swarm':
       return { op: 'swarm', ids: applySwarmRun(editor, op.run) };
+    case 'workframe':
+      return applyWorkframe(editor, op);
   }
 }
 
@@ -121,6 +127,16 @@ function add(editor: Editor, shapes: AddShape[]): string[] {
         const spec = componentSpec(shape.component ?? '');
         if (!spec) {
           throw new Error(`Unknown component "${shape.component}". Valid components: ${COMPONENT_NAMES.join(', ')}.`);
+        }
+        // A surface already has a card (e.g. the session's work frame placed it): never add a twin.
+        if (spec.name === 'surface') {
+          const kind = shape.props?.['kind'];
+          const sid = shape.props?.['id'];
+          const twin = typeof kind === 'string' && typeof sid === 'string' ? findSurfaceCard(editor, kind, sid) : undefined;
+          if (twin) {
+            created.push(shortId(twin.id));
+            continue;
+          }
         }
         const cw = shape.w ?? spec.defaultSize.w;
         const cx = shape.x ?? cursorX;

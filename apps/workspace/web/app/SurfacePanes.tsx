@@ -5,21 +5,17 @@
  */
 import { useState, type FormEvent, type ReactNode } from 'react';
 import { GitCompare, Globe, Pin, Plus } from 'lucide-react';
-import type { SurfaceInfo, SurfaceKind } from '../../shared/surfaces.ts';
+import { MAIN_SESSION_ID } from '../../shared/runtime.ts';
+import type { SurfaceInfo } from '../../shared/surfaces.ts';
 import { SurfaceView, useSurfaces } from '../surfaces/index.tsx';
 import { useTerminal } from '../agentic/liveData.ts';
+import { getCanvasEditor } from '../canvasContext.ts';
+import { useSessions } from '../sessionsApi.ts';
+import { pinSurface } from '../workspace/frames.ts';
 import { TerminalPane } from './WorkPanel.tsx';
 
 const post = (url: string, body: unknown) =>
   fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }).then((r) => r.json() as Promise<{ surface?: SurfaceInfo }>);
-
-/** Puts a surface on the canvas as a card (component "surface"), beside what is there. */
-function pinToCanvas(kind: SurfaceKind, id: string, title: string): void {
-  const editor = (window as unknown as { __aiclEditor?: { createShape: (s: unknown) => void; getViewportPageBounds: () => { x: number; y: number; w: number } } }).__aiclEditor;
-  if (!editor) return;
-  const view = editor.getViewportPageBounds();
-  editor.createShape({ type: 'aicl-component', x: view.x + view.w / 2 - 320, y: view.y + 80, props: { w: 640, h: 420, component: 'surface', title, props: { kind, id } } });
-}
 
 /** Newest first, this session's (or the user's) surfaces before others. */
 function pick(list: SurfaceInfo[], sessionId: string): SurfaceInfo[] {
@@ -40,8 +36,17 @@ function Switcher({ items, value, onChange, extra }: { items: Array<{ id: string
 }
 
 function PinButton({ info }: { info: SurfaceInfo }) {
+  const sessions = useSessions();
+  // The card joins the work frame of the session that owns this work (its root, for sub-agents).
+  const pin = () => {
+    const editor = getCanvasEditor();
+    if (!editor) return;
+    const own = sessions.find((s) => s.id === info.sessionId);
+    const owner = sessions.find((s) => s.id === (own?.rootId ?? own?.id)) ?? own;
+    pinSurface(editor, { id: owner?.id ?? info.sessionId ?? MAIN_SESSION_ID, title: owner?.title ?? 'Session' }, { kind: info.kind, id: info.id, title: info.title });
+  };
   return (
-    <button type="button" className="wp-switch-item" title="Pin to canvas" aria-label="Pin to canvas" onClick={() => pinToCanvas(info.kind, info.id, info.title)}>
+    <button type="button" className="wp-switch-item" title="Pin to canvas" aria-label="Pin to canvas" onClick={pin}>
       <Pin size={13} aria-hidden="true" />
     </button>
   );

@@ -15,6 +15,8 @@ import { getPrefs, setPrefs, toggledTheme, usePrefs } from './prefs.ts';
 import { openSession, startSession } from './Sessions.tsx';
 import { openFilePicker } from '../files/index.ts';
 import { WORKFLOWS } from '../swarm/workflows.ts';
+import { tidy, toggleFocus } from '../workspace/commands.ts';
+import { toggleFollow, useFollow } from '../workspace/presence.ts';
 
 /** Global keyboard handling; renders nothing. */
 export function useAppHotkeys(kit: ProviderKit): void {
@@ -37,6 +39,9 @@ export function useAppHotkeys(kit: ProviderKit): void {
       } else if (mod && e.key === ',') {
         e.preventDefault();
         setOverlay('settings');
+      } else if (mod && e.shiftKey && e.key.toLowerCase() === 'f') {
+        e.preventDefault();
+        toggleFocus();
       } else if (mod && e.key === '\\') {
         e.preventDefault();
         setPrefs({ workPanelOpen: !getPrefs().workPanelOpen });
@@ -56,6 +61,7 @@ export function CommandPalette({ kit, prefersDark }: { kit: ProviderKit; prefers
   const activeId = useActiveSessionId();
   const { models } = useModels();
   const prefs = usePrefs();
+  const following = useFollow();
   const s = kit.vocabulary.sessions.toLowerCase().replace(/s$/, '');
 
   const items = useMemo<CommandItem[]>(() => {
@@ -67,6 +73,9 @@ export function CommandPalette({ kit, prefersDark }: { kit: ProviderKit; prefers
       { id: 'theme', group: 'Actions', label: 'Toggle light/dark theme', onSelect: () => setPrefs({ theme: toggledTheme(kit, prefs.theme, prefersDark) }) },
       { id: 'settings', group: 'Actions', label: 'Open settings', shortcut: ['cmd', ','], onSelect: () => setOverlay('settings') },
       { id: 'shortcuts', group: 'Actions', label: 'Keyboard shortcuts', shortcut: ['cmd', '/'], onSelect: () => setOverlay('shortcuts') },
+      { id: 'follow', group: 'Canvas', label: following ? 'Stop following agent' : 'Follow agent', onSelect: toggleFollow },
+      { id: 'tidy', group: 'Canvas', label: 'Tidy canvas', onSelect: () => void tidy() },
+      { id: 'focus', group: 'Canvas', label: 'Canvas-first mode', shortcut: ['cmd', 'shift', 'F'], onSelect: toggleFocus },
       { id: 'go-agent', group: 'Go to', label: 'Go to Agent', onSelect: () => navigate({ tab: 'agent' }) },
       { id: 'go-canvas', group: 'Go to', label: 'Go to Canvas', onSelect: () => navigate({ tab: 'canvas' }) },
       { id: 'go-agents', group: 'Go to', label: 'Go to agents', onSelect: () => navigate({ tab: 'agents' }) },
@@ -77,7 +86,7 @@ export function CommandPalette({ kit, prefersDark }: { kit: ProviderKit; prefers
       ...models.map((m) => ({ id: `m-${m.id}`, group: 'Model', label: `Switch model: ${m.label}`, onSelect: () => void setSessionModel(activeId, m.id) })),
     ];
     return list;
-  }, [kit, prefs, prefersDark, sessions, models, activeId, s]);
+  }, [kit, prefs, prefersDark, sessions, models, activeId, s, following]);
 
   return <CommandMenu open={overlay === 'palette'} onOpenChange={(o) => setOverlay(o ? 'palette' : null)} items={items} placeholder={`Search commands, ${kit.vocabulary.sessions.toLowerCase()}, kits, models…`} />;
 }

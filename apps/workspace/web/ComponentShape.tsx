@@ -3,6 +3,8 @@ import { Box } from 'lucide-react';
 import { COMPONENTS, COMPONENT_SHAPE_TYPE, type ComponentShapeProps } from '../shared/components.ts';
 import { ErrorBoundary } from './ErrorBoundary.tsx';
 import { renderers } from './catalog/index.ts';
+import { OpenInAppButton } from './workspace/OpenInApp.tsx';
+import type { SurfaceKind } from '../shared/surfaces.ts';
 
 declare module 'tldraw' {
   interface TLGlobalShapePropsMap {
@@ -60,6 +62,9 @@ export class ComponentShapeUtil extends BaseBoxShapeUtil<ComponentShape> {
           <Box size={14} aria-hidden />
           <span className="aicl-card__title">{title}</span>
           <span className="aicl-card__name">{component}</span>
+          {component === 'surface' && typeof props['kind'] === 'string' && typeof props['id'] === 'string' ? (
+            <OpenInAppButton kind={props['kind'] as SurfaceKind} id={props['id']} />
+          ) : null}
         </div>
         <div
           className="aicl-card__body"

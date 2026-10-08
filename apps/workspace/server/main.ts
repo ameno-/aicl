@@ -17,6 +17,7 @@ import { createNodes } from './nodes.ts';
 import { createGraph } from './graph.ts';
 import { createSwarm } from './swarm.ts';
 import { createSurfaceRegistry } from './surfaces/registry.ts';
+import { createWorkframes } from './workframes.ts';
 import type { SurfaceContext } from './surfaces/context.ts';
 import { createTerminalSurface } from './surfaces/terminal.ts';
 import { createBrowserSurface } from './surfaces/browser.ts';
@@ -68,7 +69,9 @@ const featureContext: FeatureContext = {
   },
 };
 // Wave 4 surfaces (shared/surfaces.ts): one service per kind, one shared index.
-const surfaces = createSurfaceRegistry(relay);
+// Agent-opened surfaces become cards in the session's work frame on the canvas (AICL-41).
+const workframes = createWorkframes({ relay, session: (id) => hubRef?.get(id) });
+const surfaces = createSurfaceRegistry({ broadcast: (event) => (relay.broadcast(event), workframes.onEvent(event)) });
 const surfaceContext: SurfaceContext = { ...featureContext, surfaces };
 const features: FeatureModule[] = [
   createHitl(featureContext),
