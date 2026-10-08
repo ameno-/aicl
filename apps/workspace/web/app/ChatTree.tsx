@@ -223,7 +223,8 @@ export function ChatTree({ kit, newFolderRequest, onNewFolderHandled }: { kit: P
   const { model } = useFileTree({
     paths: [],
     sort: (a, b) => (rankRef.current.get(a.path) ?? Number.MAX_SAFE_INTEGER) - (rankRef.current.get(b.path) ?? Number.MAX_SAFE_INTEGER),
-    initialExpansion: 'open',
+    // Folders and sections open; chats with sub-agents start collapsed (expanded on demand).
+    initialExpansion: 'closed',
     search: true,
     fileTreeSearchMode: 'hide-non-matches',
     flattenEmptyDirectories: false,
@@ -278,6 +279,12 @@ export function ChatTree({ kit, newFolderRequest, onNewFolderHandled }: { kit: P
     if (key !== lastPaths.current) {
       lastPaths.current = key;
       model.resetPaths(tree.paths);
+      // Folders and Pinned open; Archived and sub-agent groups stay collapsed until asked.
+      for (const [path, node] of tree.nodes) {
+        if (node.kind === 'chat' || (node.kind === 'section' && node.section === 'archived')) continue;
+        const item = model.getItem(path);
+        if (item && 'expand' in item) item.expand();
+      }
     } else {
       model.setComposition(model.getComposition());
     }
@@ -287,9 +294,10 @@ export function ChatTree({ kit, newFolderRequest, onNewFolderHandled }: { kit: P
   useEffect(() => {
     const at = tree.pathOf.get(activeId);
     const item = at ? model.getItem(at) : null;
-    if (!item || item.isSelected()) return;
     syncing.current = true;
-    item.select();
+    // Exactly one selected row: the open chat.
+    for (const p of model.getSelectedPaths()) if (p !== at) model.getItem(p)?.deselect();
+    if (item && !item.isSelected()) item.select();
     syncing.current = false;
   }, [model, tree, activeId]);
 

@@ -8,7 +8,7 @@
  */
 import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { AnimatedPlan, LiveTerminal, SegmentedTabs, type PlanStep } from '@aicl/fx';
+import { AnimatedPlan, LiveTerminal, type PlanStep } from '@aicl/fx';
 import type { ToolCallPart } from '@aicl/core';
 import { Check, ChevronLeft, FileText, Folder, GitCompare, Globe, ListChecks, Loader, Monitor, Terminal as TerminalIcon, TriangleAlert, X } from 'lucide-react';
 import type { ProviderKit } from '../../shared/kits.ts';
@@ -290,7 +290,11 @@ const titles: Record<'tabs' | 'computer' | 'preview' | 'board', (kit: ProviderKi
 export function WorkPanel({ kit, sessionId, busy, visible }: { kit: ProviderKit; sessionId: string; busy: boolean; visible: boolean }) {
   const prefs = usePrefs();
   const type = kit.layout.workPanel;
-  const tabs = kit.layout.workTabs;
+  // Plan only matters while a plan is in effect: no plan, no tab (the Tasks overlay covers the rest).
+  const livePlan = usePlan(sessionId);
+  const planSteps = livePlan?.steps ?? [];
+  const planDone = planSteps.filter((s) => s.status === 'done').length;
+  const tabs = kit.layout.workTabs.filter((id) => id !== 'plan' || planSteps.length > 0 || type === 'board');
   const picked = useRef(false);
   const terminal = useTerminal(sessionId);
   const [width, setWidth] = useState<number | null>(null);
@@ -378,18 +382,23 @@ export function WorkPanel({ kit, sessionId, busy, visible }: { kit: ProviderKit;
         >
           <div className="wp-inner" style={auto ? undefined : { width: px }}>
             <div className="wp-resize" role="separator" aria-orientation="vertical" aria-label="Resize work panel" tabIndex={0} onPointerDown={startResize} />
-            <header className="wp-head">
-              <h2 className="wp-title">
-                {busy ? <span className="s-dot" data-status="running" aria-hidden="true" /> : null}
-                {titles[type](kit)}
-              </h2>
-              {type === 'computer' ? null : (
-                <SegmentedTabs
-                  label="Work panel tabs"
-                  value={tab}
-                  onChange={choose}
-                  tabs={tabs.map((id) => ({ id, label: TAB_META[id].label, icon: TAB_META[id].icon }))}
-                />
+            <header className="wp-head" data-type={type}>
+              {type === 'computer' ? (
+                <h2 className="wp-title">
+                  {busy ? <span className="s-dot" data-status="running" aria-hidden="true" /> : null}
+                  {titles[type](kit)}
+                </h2>
+              ) : (
+                <nav className="wp-tabs" role="tablist" aria-label="Work panel tabs">
+                  {tabs.map((id) => (
+                    <button key={id} type="button" role="tab" className="wp-tab" aria-selected={tab === id} data-tab={id} onClick={() => choose(id)}>
+                      {TAB_META[id].icon}
+                      <span>{TAB_META[id].label}</span>
+                      {id === 'plan' && planSteps.length ? <small className="wp-tab-count">{`${planDone}/${planSteps.length}`}</small> : null}
+                    </button>
+                  ))}
+                  {busy ? <span className="s-dot wp-busy" data-status="running" role="img" aria-label="Working" /> : null}
+                </nav>
               )}
               <button type="button" className="icon-button wp-close" aria-label="Hide work panel" title="Hide work panel" onClick={() => setPrefs({ workPanelOpen: false })}>
                 <X size={16} aria-hidden="true" />

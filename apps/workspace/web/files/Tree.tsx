@@ -3,7 +3,7 @@
  * path-first, virtualized, with built-in search, keyboard navigation and git
  * status markers. Selecting a file opens it.
  */
-import { useEffect, useRef, type CSSProperties } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { FileTree, useFileTree } from '@pierre/trees/react';
 import type { GitStatus, GitStatusEntry } from '@pierre/trees';
 import type { GitStatus as RepoStatus, GitStatusFile } from '../../shared/git.ts';
@@ -63,12 +63,14 @@ export function Tree({ onOpen, refreshKey, search = true, className }: TreeProps
     },
   });
 
+  const [count, setCount] = useState<number | null>(null);
   useEffect(() => {
     let live = true;
     void Promise.all([fetch('/api/surfaces/files/paths').then((r) => r.json() as Promise<{ paths: string[] }>), loadGitStatus()])
       .then(([{ paths }, git]) => {
         if (!live) return;
         model.resetPaths(paths);
+        setCount(paths.length);
         model.setGitStatus(git);
       })
       .catch(() => {});
@@ -77,5 +79,13 @@ export function Tree({ onOpen, refreshKey, search = true, className }: TreeProps
     };
   }, [model, refreshKey]);
 
+  if (count === 0) {
+    return (
+      <div className="files-empty">
+        <p>No files in this workspace yet.</p>
+        <p>Files the assistant creates, and anything you add to the folder, appear here.</p>
+      </div>
+    );
+  }
   return <FileTree model={model} className={className ? `files-tree ${className}` : 'files-tree'} style={THEME} />;
 }

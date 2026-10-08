@@ -42,3 +42,6 @@
 .fp-hint { margin-left: auto; color: var(--aicl-text-faint); font-size: 11px; }
 .fp-empty { padding: 14px; color: var(--aicl-text-faint); }
 @media (max-width: 640px) { .fp-body { grid-template-columns: 1fr; } .fp-preview { display: none; } }
+.files-empty { margin: auto; padding: 24px; text-align: center; color: var(--aicl-text-muted); font-size: 13px; }
+.files-empty p { margin: 0 0 6px; }
+.files-empty p:first-child { color: var(--aicl-text); font-weight: 600; }

@@ -408,12 +408,47 @@
 .wp-head {
   display: flex;
   flex: none;
-  flex-wrap: wrap;
   align-items: center;
-  gap: var(--aicl-space-2);
-  padding: var(--aicl-space-2) var(--aicl-space-3);
+  gap: var(--aicl-space-1);
+  min-height: 44px;
+  padding: 0 var(--aicl-space-2) 0 var(--aicl-space-3);
   border-bottom: 1px solid var(--aicl-border);
 }
+.wp-head[data-type='computer'] { padding: var(--aicl-space-2) var(--aicl-space-3); }
+/* Cofounder tabs: quiet text with an underline, one row, scrolls rather than wraps. */
+.wp-tabs {
+  display: flex;
+  flex: 1;
+  align-items: stretch;
+  align-self: stretch;
+  gap: 2px;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.wp-tabs::-webkit-scrollbar { display: none; }
+.wp-tab {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: -1px;
+  padding: 0 var(--aicl-space-2);
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--aicl-text-muted);
+  font: inherit;
+  font-size: 13px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color var(--aicl-anim-fast) var(--aicl-ease), border-color var(--aicl-anim) var(--aicl-ease);
+}
+.wp-tab:hover { color: var(--aicl-text); }
+.wp-tab[aria-selected='true'] { color: var(--aicl-text); border-bottom-color: var(--aicl-text); }
+.wp-tab svg { opacity: 0.75; }
+.wp-tab-count { color: var(--aicl-text-faint); font-size: 11px; font-variant-numeric: tabular-nums; }
+.wp-busy { align-self: center; margin-left: var(--aicl-space-1); }
 .wp-title {
   display: flex;
   flex: 1;
@@ -836,3 +871,5 @@ button.lr-row:hover { background: var(--aicl-surface-tint); }
 .lr-dot { flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--aicl-text-faint); }
 .lr-dot[data-status='busy'] { background: var(--aicl-success); box-shadow: 0 0 0 3px color-mix(in oklab, var(--aicl-success) 20%, transparent); }
 .lr-dot[data-status='error'] { background: var(--aicl-danger); }
+.wp-error { color: var(--aicl-danger); }
+.wp-github .wp-url-form { width: min(360px, 100%); }

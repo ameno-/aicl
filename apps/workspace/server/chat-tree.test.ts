@@ -49,6 +49,11 @@ test('chat tree: search keeps matches and their ancestors only', () => {
   assert.deepEqual(tree.paths, ['Finance/', 'Finance/Invoices']);
 });
 
+test('long titles end-truncate before the tree sees them', () => {
+  const tree = buildChatTree([s('a', 'Make a 3-step plan with plan_update for tidying my notes', 1)], []);
+  assert.deepEqual(tree.paths, ['Make a 3-step plan with…']);
+});
+
 test('drops map to folder moves, pin or archive', () => {
   const tree = buildChatTree([s('a', 'A', 1, { pinned: true }), s('b', 'B', 1, { archived: true })], ['Work']);
   assert.deepEqual(folderForDrop(tree, null), { folder: '' });

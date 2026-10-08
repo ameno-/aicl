@@ -32,10 +32,17 @@ export interface ChatTree {
 /** "a/b" in a title would read as folders: swap in a look-alike slash. */
 const safe = (name: string): string => name.replace(/\//g, '∕').trim() || 'Untitled';
 
+/** Chat titles end-truncate here, so the tree (which middle-truncates long names) never has to. */
+export const MAX_TITLE = 24;
+const short = (name: string, max: number): string => {
+  const t = name.replace(/…$/, '').trim();
+  return t.length > max ? `${t.slice(0, max - 1).trimEnd()}…` : name;
+};
+
 export function buildChatTree(
   sessions: readonly SessionInfo[],
   folders: readonly string[],
-  options: { title?: (s: SessionInfo) => string; query?: string } = {},
+  options: { title?: (s: SessionInfo) => string; query?: string; maxTitle?: number } = {},
 ): ChatTree {
   const title = options.title ?? ((s: SessionInfo) => s.title);
   const q = options.query?.trim().toLowerCase() ?? '';
@@ -54,18 +61,19 @@ export function buildChatTree(
 
   /** Unique child name within one directory. */
   const used = new Map<string, Set<string>>();
-  const nameIn = (dir: string, wanted: string): string => {
+  const nameIn = (dir: string, wanted: string, max: number): string => {
     const taken = used.get(dir) ?? new Set<string>();
     used.set(dir, taken);
-    let name = wanted;
-    for (let i = 2; taken.has(name); i++) name = `${wanted} (${i})`;
+    let name = short(wanted, max);
+    // A " (2)" suffix counts toward the limit, so the whole name still fits.
+    for (let i = 2; taken.has(name); i++) name = `${short(wanted, max - ` (${i})`.length)} (${i})`;
     taken.add(name);
     return name;
   };
 
   const addChat = (dir: string, s: SessionInfo): void => {
     const kids = (childrenOf.get(s.id) ?? []).filter(matches).sort(recent);
-    const name = nameIn(dir, safe(title(s)));
+    const name = nameIn(dir, safe(title(s)), options.maxTitle ?? MAX_TITLE);
     const path = kids.length ? `${dir}${name}/` : `${dir}${name}`;
     paths.push(path);
     nodes.set(path, { kind: 'chat', sessionId: s.id });
