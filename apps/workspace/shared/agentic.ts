@@ -60,7 +60,7 @@ export type HitlAnswer =
  */
 
 /** Tools that always need approval, and the path prefix that write/edit may touch freely. */
-export const GATED_TOOLS = ['bash'] as const;
+export const GATED_TOOLS = ['bash', 'terminal_run'] as const;
 export const FREE_WRITE_PREFIX = '.aicl/';
 
 /* ── B: live work ─────────────────────────────────────────────────── */

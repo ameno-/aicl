@@ -1,0 +1,16 @@
+.term { display: flex; flex-direction: column; width: 100%; height: 100%; min-height: 0; background: var(--aicl-terminal-bg); color: var(--aicl-terminal-fg); }
+.term-head { display: flex; align-items: center; gap: 8px; flex: none; padding: 4px 6px 4px 10px; font-size: 12px; background: color-mix(in oklab, var(--aicl-terminal-bg) 88%, white); color: var(--aicl-terminal-prompt); user-select: none; }
+.term[data-variant='card'] .term-head { padding-block: 2px; }
+.term-dot { width: 8px; height: 8px; border-radius: 50%; flex: none; background: var(--aicl-tool-pending); }
+.term-dot[data-status='busy'] { background: var(--aicl-warning); animation: term-pulse 1s ease-in-out infinite; }
+.term-dot[data-status='idle'] { background: var(--aicl-success); }
+.term-dot[data-status='done'] { background: var(--aicl-tool-pending); }
+.term-dot[data-status='error'] { background: var(--aicl-danger); }
+.term-title { font-weight: 500; color: var(--aicl-terminal-fg); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.term-summary { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--aicl-font-mono); font-size: 11px; opacity: 0.8; }
+.term-btn { display: grid; place-items: center; width: 22px; height: 22px; border: 0; border-radius: 5px; background: transparent; color: inherit; cursor: pointer; flex: none; }
+.term-btn:hover { background: color-mix(in oklab, var(--aicl-terminal-fg) 14%, transparent); color: var(--aicl-terminal-fg); }
+.term-body { position: relative; flex: 1; min-height: 0; padding: 6px 0 0 8px; overflow: hidden; }
+.term-body .xterm { height: 100%; }
+.term-body .xterm-viewport { background-color: transparent !important; }
+@keyframes term-pulse { 50% { opacity: 0.35; } }
