@@ -23,6 +23,7 @@ import { createBrowserSurface } from './surfaces/browser.ts';
 import { createFilesSurface } from './surfaces/files.ts';
 import { createGitSurface } from './surfaces/git.ts';
 import { createProcessSurface } from './surfaces/process.ts';
+import { createSideshowSurface } from './surfaces/sideshow.ts';
 import { setSessionResolver } from './session-context.ts';
 import { serveFile, defaultReferencesRoot } from './files.ts';
 import { BrowseError, listDir, readText } from './browse.ts';
@@ -81,6 +82,7 @@ const features: FeatureModule[] = [
   createFilesSurface(surfaceContext),
   createGitSurface(surfaceContext),
   createProcessSurface(surfaceContext),
+  createSideshowSurface(surfaceContext),
 ];
 
 function allTools() {
