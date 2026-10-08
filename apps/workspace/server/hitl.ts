@@ -46,6 +46,8 @@ export function summarizeCall(tool: string, input: unknown): string {
   switch (tool) {
     case 'bash':
       return `Run \`${oneLine(String(args['command'] ?? ''))}\``;
+    case 'terminal_run':
+      return `Run \`${oneLine(String(args['command'] ?? ''))}\` in a terminal`;
     case 'write': {
       const content = typeof args['content'] === 'string' ? args['content'] : '';
       const lines = content ? content.split('\n').length - (content.endsWith('\n') ? 1 : 0) : 0;
