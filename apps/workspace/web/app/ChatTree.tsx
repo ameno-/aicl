@@ -247,9 +247,10 @@ export function ChatTree({ kit, newFolderRequest, onNewFolderHandled }: { kit: P
       const s = ids.get(node.sessionId);
       if (!s) return null;
       const asks = w.get(s.id) ?? 0;
-      if (asks) return { text: `${asks} waiting`, title: `${asks} approval${asks === 1 ? '' : 's'} or question${asks === 1 ? '' : 's'} waiting for you`, parts: [{ text: '● ', color: 'var(--aicl-warning)' }, { text: `${asks} waiting` }] };
-      if (s.status === 'running') return { text: 'working', title: s.currentStep ?? 'Working', parts: [{ text: '● ', color: 'var(--aicl-success)' }, { text: 'working' }] };
-      if (s.status === 'error') return { text: 'failed', title: 'The last run failed', parts: [{ text: '● ', color: 'var(--aicl-danger)' }, { text: 'failed' }] };
+      // Compact: a coloured dot (and a count when something waits for you); the tooltip says what.
+      if (asks) return { text: `● ${asks}`, title: `${asks} approval${asks === 1 ? '' : 's'} or question${asks === 1 ? '' : 's'} waiting for you`, parts: [{ text: '● ', color: 'var(--aicl-warning)' }, { text: String(asks) }] };
+      if (s.status === 'running') return { text: '●', title: s.currentStep ? `Working: ${s.currentStep}` : 'Working', parts: [{ text: '●', color: 'var(--aicl-success)' }] };
+      if (s.status === 'error') return { text: '●', title: 'The last run failed', parts: [{ text: '●', color: 'var(--aicl-danger)' }] };
       return null;
     },
     dragAndDrop: {

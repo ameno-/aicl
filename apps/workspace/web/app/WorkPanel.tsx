@@ -294,7 +294,9 @@ export function WorkPanel({ kit, sessionId, busy, visible }: { kit: ProviderKit;
   const livePlan = usePlan(sessionId);
   const planSteps = livePlan?.steps ?? [];
   const planDone = planSteps.filter((s) => s.status === 'done').length;
-  const tabs = kit.layout.workTabs.filter((id) => id !== 'plan' || planSteps.length > 0 || type === 'board');
+  const hasPlan = planSteps.length > 0;
+  // Stable identity: effects below depend on it, and a fresh array each render loops them.
+  const tabs = useMemo(() => kit.layout.workTabs.filter((id) => id !== 'plan' || hasPlan || type === 'board'), [kit.layout.workTabs, hasPlan, type]);
   const picked = useRef(false);
   const terminal = useTerminal(sessionId);
   const [width, setWidth] = useState<number | null>(null);

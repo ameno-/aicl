@@ -873,3 +873,5 @@ button.lr-row:hover { background: var(--aicl-surface-tint); }
 .lr-dot[data-status='error'] { background: var(--aicl-danger); }
 .wp-error { color: var(--aicl-danger); }
 .wp-github .wp-url-form { width: min(360px, 100%); }
+/* Panes inside a surface-backed tab fill it (the bash stream used to sit in a narrow column). */
+.wp-surface-body > * { flex: 1 1 auto; min-width: 0; }
