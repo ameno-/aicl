@@ -15,6 +15,13 @@ import { createHitl } from './hitl.ts';
 import { createLive } from './live.ts';
 import { createNodes } from './nodes.ts';
 import { createGraph } from './graph.ts';
+import { createSwarm } from './swarm.ts';
+import { createSurfaceRegistry } from './surfaces/registry.ts';
+import type { SurfaceContext } from './surfaces/context.ts';
+import { createTerminalSurface } from './surfaces/terminal.ts';
+import { createBrowserSurface } from './surfaces/browser.ts';
+import { createFilesSurface } from './surfaces/files.ts';
+import { createGitSurface } from './surfaces/git.ts';
 import { setSessionResolver } from './session-context.ts';
 import { serveFile, defaultReferencesRoot } from './files.ts';
 import { BrowseError, listDir, readText } from './browse.ts';
@@ -58,11 +65,20 @@ const featureContext: FeatureContext = {
     return hubRef;
   },
 };
+// Wave 4 surfaces (shared/surfaces.ts): one service per kind, one shared index.
+const surfaces = createSurfaceRegistry(relay);
+const surfaceContext: SurfaceContext = { ...featureContext, surfaces };
 const features: FeatureModule[] = [
   createHitl(featureContext),
   createLive(featureContext),
   createNodes(featureContext),
   createGraph(featureContext),
+  createSwarm(featureContext),
+  { routes: surfaces.routes, tools: [] },
+  createTerminalSurface(surfaceContext),
+  createBrowserSurface(surfaceContext),
+  createFilesSurface(surfaceContext),
+  createGitSurface(surfaceContext),
 ];
 
 function allTools() {
@@ -272,6 +288,17 @@ const server = createServer((req, res) => {
     if (!res.headersSent) json(res, 500, { message: 'internal error' });
     else res.end();
   });
+});
+
+// WebSocket upgrades (terminal I/O, browser screencast…), routed by path prefix to the owning module.
+server.on('upgrade', (req, socket, head) => {
+  const pathname = new URL(req.url ?? '/', 'http://local').pathname;
+  for (const f of features) {
+    for (const [prefix, handle] of Object.entries(f.upgrades ?? {})) {
+      if (pathname.startsWith(prefix)) return handle(req, socket, head);
+    }
+  }
+  socket.destroy();
 });
 
 server.listen(PORT, HOST, () => {

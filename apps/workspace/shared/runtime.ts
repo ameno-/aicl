@@ -9,6 +9,8 @@
  *   D  canvas agent — viewport/action context, arrange + focus tools, CLI
  */
 
+import type { SwarmEvent } from './swarm.ts';
+import type { SurfaceInfo, SurfaceKind } from './surfaces.ts';
 import type { Message } from '@aicl/core';
 import type { GraphEdge, GraphNode, HitlAnswer, HitlRequest, LivePlan, TerminalChunk } from './agentic.ts';
 
@@ -26,6 +28,27 @@ export interface SessionInfo {
   kind: 'chat' | 'node';
   /** "provider/id" chosen for this session with POST /api/sessions/:id/model; absent = the workspace default. */
   model?: string;
+  /** Multi-agent lineage (swarm): the session that spawned this one, the top of its tree, its role and task. */
+  parentId?: string;
+  rootId?: string;
+  role?: string;
+  task?: string;
+  spawnedBy?: 'user' | 'agent';
+  /** Tokens and cost summed over this session's assistant messages. */
+  usage?: SessionUsage;
+  /** What it is doing now: a tool call label, "thinking" or "writing"; only while running. */
+  currentStep?: string;
+  /** Start of the latest run, and its end (absent while running). */
+  startedAt?: number;
+  finishedAt?: number;
+  /** The latest run was stopped by a user or a parent. */
+  stopped?: boolean;
+}
+
+export interface SessionUsage {
+  inputTokens: number;
+  outputTokens: number;
+  costUsd?: number;
 }
 
 /** One entry of GET /api/models → { models: ModelOption[], default: string | null }. */
@@ -139,6 +162,7 @@ export interface AppletIntents {
  *   aicl:/agent            full-page chat (optionally aicl:/agent/<sessionId>)
  *   aicl:/canvas           the scratchpad
  *   aicl:/overview         widget grid
+ *   aicl:/agents           live tree of all agents (swarm)
  *   aicl:/views/<appletId> one view applet
  */
 export type WorkspaceAddress = `aicl:/${string}`;
@@ -147,6 +171,7 @@ export type WorkspaceRoute =
   | { tab: 'agent'; sessionId?: string }
   | { tab: 'canvas' }
   | { tab: 'overview' }
+  | { tab: 'agents' }
   | { tab: 'view'; appletId: string };
 
 export function parseAddress(address: string): WorkspaceRoute {
@@ -154,6 +179,7 @@ export function parseAddress(address: string): WorkspaceRoute {
   const [head, rest] = [path.split('/')[0], path.split('/').slice(1).join('/')];
   if (head === 'agent') return rest ? { tab: 'agent', sessionId: decodeURIComponent(rest) } : { tab: 'agent' };
   if (head === 'overview') return { tab: 'overview' };
+  if (head === 'agents') return { tab: 'agents' };
   if (head === 'views' && rest) return { tab: 'view', appletId: decodeURIComponent(rest) };
   return { tab: 'canvas' };
 }
@@ -164,6 +190,8 @@ export function formatAddress(route: WorkspaceRoute): WorkspaceAddress {
       return route.sessionId ? `aicl:/agent/${encodeURIComponent(route.sessionId)}` : 'aicl:/agent';
     case 'overview':
       return 'aicl:/overview';
+    case 'agents':
+      return 'aicl:/agents';
     case 'view':
       return `aicl:/views/${encodeURIComponent(route.appletId)}`;
     default:
@@ -199,4 +227,7 @@ export type ServerEvent =
   | { type: 'hitl'; request: HitlRequest }
   | { type: 'hitl-resolved'; id: string; answer: HitlAnswer }
   | { type: 'plan'; plan: LivePlan }
-  | { type: 'terminal'; chunk: TerminalChunk };
+  | { type: 'terminal'; chunk: TerminalChunk }
+  | { type: 'surface'; surface: SurfaceInfo }
+  | { type: 'surface-removed'; kind: SurfaceKind; id: string }
+  | { type: 'swarm'; event: SwarmEvent };

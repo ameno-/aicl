@@ -6,6 +6,7 @@ import { ConnectionBanner } from '../ConnectionBanner.tsx';
 import { Scratchpad } from '../Scratchpad.tsx';
 import { toasts } from '../chatStore.ts';
 import { KitScope, useKit } from '../kits/index.tsx';
+import { FilePickerHost } from '../files/index.ts';
 import { CommandPalette, useAppHotkeys } from '../app/Palette.tsx';
 import { SettingsDialog, ShortcutsDialog } from '../app/Settings.tsx';
 import { themeVars } from '../ui/theme.ts';
@@ -15,6 +16,7 @@ import { navigate, useRoute } from '../router.ts';
 import { useApplets, useWorkspaceConfig } from '../applets/index.tsx';
 import { AgentPage } from './AgentPage.tsx';
 import { OverviewPage } from './OverviewPage.tsx';
+import { AgentsView } from '../swarm/AgentsView.tsx';
 import { TopBar } from './TopBar.tsx';
 import { ViewPage } from './ViewPage.tsx';
 import './shell.css';
@@ -117,6 +119,11 @@ function ShellBody({ kit, prefersDark }: { kit: ReturnType<typeof withTheme>; pr
               <AgentPage routeSessionId={route.sessionId} kit={kit} />
             </div>
           ) : null}
+          {route.tab === 'agents' ? (
+            <div className="shell-pane" data-pane="agents">
+              <AgentsView kit={kit} />
+            </div>
+          ) : null}
           {route.tab === 'overview' ? (
             <div className="shell-pane" data-pane="overview">
               <OverviewPage />
@@ -133,6 +140,7 @@ function ShellBody({ kit, prefersDark }: { kit: ReturnType<typeof withTheme>; pr
         </div>
       </div>
       <CommandPalette kit={kit} prefersDark={prefersDark} />
+      <FilePickerHost />
       <SettingsDialog kit={kit} />
       <ShortcutsDialog />
       <ToastRegion queue={toasts} placement="top-center" />

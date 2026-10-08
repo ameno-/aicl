@@ -3,6 +3,8 @@
  * nodes.ts, graph.ts). main.ts collects routes, tools, prompt fragments,
  * Pi extensions, and agent-event listeners from each.
  */
+import type { IncomingMessage } from 'node:http';
+import type { Duplex } from 'node:stream';
 import type { InlineExtension, ToolDefinition } from '@earendil-works/pi-coding-agent';
 import type { RouteTable } from './http.ts';
 import type { Relay } from './relay.ts';
@@ -26,6 +28,11 @@ export interface FeatureModule {
   contextFor?(sessionId: string): Promise<string>;
   /** Every Pi event of every session. */
   onAgentEvent?(sessionId: string, event: unknown): void;
+  /**
+   * WebSocket upgrades by path prefix (e.g. '/ws/terminal/'). The handler
+   * owns the socket (use the `ws` package's WebSocketServer({ noServer: true })).
+   */
+  upgrades?: Record<string, (req: IncomingMessage, socket: Duplex, head: Buffer) => void>;
 }
 
 export const emptyFeature = (): FeatureModule => ({ routes: {}, tools: [] });

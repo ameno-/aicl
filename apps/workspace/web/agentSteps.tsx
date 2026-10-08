@@ -10,6 +10,15 @@ const count = (args: unknown, key: string) => {
   return Array.isArray(list) ? list.length : 0;
 };
 const plural = (n: number, one: string) => `${n} ${one}${n === 1 ? '' : 's'}`;
+/** "localhost:5173/app" from a URL argument; the raw text when it does not parse. */
+const host = (url: unknown): string => {
+  try {
+    const u = new URL(String(url));
+    return `${u.host}${u.pathname === '/' ? '' : u.pathname}`;
+  } catch {
+    return String(url ?? 'a page');
+  }
+};
 
 /** Agent steps in the product's voice ("Drew 4 shapes"), not tool ids. */
 export function describe(part: ToolCallPart): string {
@@ -89,6 +98,59 @@ export function describe(part: ToolCallPart): string {
       return `${done ? 'Searched' : 'Searching'} for ${String(args?.['pattern'] ?? 'files')}`;
     case 'ls':
       return `${done ? 'Listed' : 'Listing'} ${String(args?.['path'] ?? 'files')}`;
+    case 'canvas_graph':
+      return done ? 'Checked what is near what' : 'Checking what is near what';
+    case 'canvas_changes':
+      return done ? 'Reviewed canvas changes' : 'Reviewing canvas changes';
+    case 'agent_send':
+      return `${done ? 'Asked' : 'Asking'} ${String(args?.['to'] ?? 'an agent')}`;
+    // Wave 4: surfaces (shared/surfaces.ts) and sub-agents.
+    case 'terminal_open':
+      return done ? 'Opened a terminal' : 'Opening a terminal';
+    case 'terminal_run':
+      return `${done ? 'Ran' : 'Running'} ${String(args?.['command'] ?? 'a command')}`;
+    case 'terminal_read':
+      return done ? 'Read the terminal' : 'Reading the terminal';
+    case 'browser_open':
+      return `${done ? 'Opened' : 'Opening'} ${host(args?.['url'])}`;
+    case 'browser_snapshot':
+      return done ? 'Looked at the page' : 'Looking at the page';
+    case 'browser_screenshot':
+      return done ? 'Took a screenshot' : 'Taking a screenshot';
+    case 'browser_click':
+      return `${done ? 'Clicked' : 'Clicking'} ${String(args?.['text'] ?? args?.['ref'] ?? args?.['selector'] ?? 'on the page')}`;
+    case 'browser_type':
+      return done ? 'Typed into the page' : 'Typing into the page';
+    case 'browser_read':
+      return done ? 'Read the page' : 'Reading the page';
+    case 'file_open':
+      return `${done ? 'Opened' : 'Opening'} ${String(args?.['path'] ?? 'a file')}`;
+    case 'file_reveal':
+      return `${done ? 'Pointed at' : 'Pointing at'} ${String(args?.['path'] ?? 'code')}${args?.['startLine'] ? `:${String(args['startLine'])}` : ''}`;
+    case 'git_status':
+      return done ? 'Checked git status' : 'Checking git status';
+    case 'diff_show':
+      return args?.['target'] === 'turn' ? (done ? 'Showed this turn’s changes' : 'Showing this turn’s changes') : done ? 'Showed the diff' : 'Showing the diff';
+    case 'git_commit':
+      return done ? 'Committed' : 'Committing';
+    case 'git_branch':
+      return `${done ? 'Created branch' : 'Creating branch'} ${String(args?.['name'] ?? '')}`.trim();
+    case 'review_open':
+      return `${done ? 'Opened' : 'Opening'} PR ${String(args?.['pr'] ?? '')}`.trim();
+    case 'review_comment':
+      return done ? 'Drafted a review comment' : 'Drafting a review comment';
+    case 'review_submit':
+      return done ? 'Submitted the review' : 'Submitting the review';
+    case 'spawn_agent':
+      return `${done ? 'Delegated to' : 'Delegating to'} ${String(args?.['name'] ?? 'an agent')}`;
+    case 'agent_wait':
+      return done ? `Collected ${plural(count(args, 'ids'), 'agent')}` : `Waiting for ${plural(count(args, 'ids'), 'agent')}`;
+    case 'agent_status':
+      return done ? 'Checked on sub-agents' : 'Checking on sub-agents';
+    case 'agent_message':
+      return done ? 'Steered a sub-agent' : 'Steering a sub-agent';
+    case 'agent_stop':
+      return done ? 'Stopped a sub-agent' : 'Stopping a sub-agent';
     default:
       return part.name;
   }

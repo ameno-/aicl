@@ -57,6 +57,11 @@ const C = {
   done: '[data-aicl=composer][data-state=ready], [data-aicl=composer][data-state=error], [data-fx-component=prompt-composer][data-status=ready], [data-fx-component=prompt-composer][data-status=error]',
 };
 
+/** Re-throws a wait failure with the step's name, so a FAIL line says what was missing. */
+const step = (name) => (e) => {
+  throw new Error(`${name}: ${e.message.split('\n')[0]}`);
+};
+
 async function palette(query) {
   await p.keyboard.press(`${MOD}+k`);
   const input = p.getByRole('combobox', { name: 'Search commands' });
@@ -141,16 +146,18 @@ for (const kit of KITS) {
     // After the run, the panel kept the evidence.
     if (kit.panel === 'tabs') {
       await panel.getByRole('tab', { name: 'Plan' }).click();
-      await panel.locator('[data-fx-component=AnimatedPlan]').waitFor({ timeout: 10000 });
+      await panel.locator('[data-fx-component=AnimatedPlan]').waitFor({ timeout: 10000 }).catch(step('Plan tab shows the plan'));
       const done = await panel.locator('[data-fx-component=AnimatedPlan]').getAttribute('data-total');
       if (!Number(done)) throw new Error('empty plan');
       await panel.getByRole('tab', { name: 'Files' }).click();
-      await panel.locator('[data-entry="notes.md"]').waitFor({ timeout: 10000 });
-      await panel.locator('[data-entry="notes.md"]').click();
+      // The tree (@pierre/trees) renders rows as treeitems in an open shadow root (names are split for truncation).
+      const entry = panel.locator('[data-pane=files]').getByRole('treeitem', { name: 'notes.md' }).first();
+      await entry.waitFor({ timeout: 10000 }).catch(step('Files tab lists notes.md'));
+      await entry.click();
       // Whatever notes.md says, its last line shows in the viewer.
       const { text: notes } = await (await fetch(`${API}/api/file/text?path=notes.md`)).json();
       const line = notes.trim().split('\n').pop().replace(/^[-#\s]+/, '').slice(0, 40);
-      await panel.locator('[data-pane=file-content]').getByText(line).first().waitFor({ timeout: 10000 });
+      await panel.locator('[data-pane=file-content]').getByText(line).first().waitFor({ timeout: 10000 }).catch(step(`file view shows "${line}"`));
     } else if (kit.panel === 'computer') {
       // Scrub back to the bash step: its terminal output is there.
       const range = panel.getByRole('slider', { name: 'Step' });

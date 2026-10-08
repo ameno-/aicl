@@ -9,7 +9,7 @@ import path from 'node:path';
 import { defineTool, type InlineExtension } from '@earendil-works/pi-coding-agent';
 import { Type } from 'typebox';
 import { FREE_WRITE_PREFIX, GATED_TOOLS, type HitlAnswer, type HitlRequest, type QuestionOption } from '../shared/agentic.ts';
-import type { ServerEvent } from '../shared/runtime.ts';
+import { MAIN_SESSION_ID, type ServerEvent } from '../shared/runtime.ts';
 import type { FeatureContext, FeatureModule } from './feature.ts';
 import { json, readJson } from './http.ts';
 import { sessionIdFromToolContext } from './session-context.ts';
@@ -46,6 +46,8 @@ export function summarizeCall(tool: string, input: unknown): string {
   switch (tool) {
     case 'bash':
       return `Run \`${oneLine(String(args['command'] ?? ''))}\``;
+    case 'terminal_run':
+      return `Run \`${oneLine(String(args['command'] ?? ''))}\` in a terminal`;
     case 'write': {
       const content = typeof args['content'] === 'string' ? args['content'] : '';
       const lines = content ? content.split('\n').length - (content.endsWith('\n') ? 1 : 0) : 0;
@@ -138,6 +140,35 @@ export function createRegistry(
 
 export type HitlRegistry = ReturnType<typeof createRegistry>;
 
+let activeRegistry: HitlRegistry | null = null;
+
+/**
+ * For feature modules whose own tools or routes need an explicit OK (git
+ * commit, review submission): shows an approval card and resolves with the
+ * answer. Declines when the HITL module is not running.
+ */
+export async function requestApproval(
+  request: { sessionId?: string; tool: string; summary: string; input?: unknown; toolCallId?: string },
+  signal?: AbortSignal,
+): Promise<{ approved: boolean; note?: string }> {
+  if (!activeRegistry) return { approved: false, note: 'approvals are unavailable' };
+  const answer = await activeRegistry.ask(
+    {
+      kind: 'approval',
+      id: randomUUID(),
+      sessionId: request.sessionId ?? MAIN_SESSION_ID,
+      ...(request.toolCallId ? { toolCallId: request.toolCallId } : {}),
+      tool: request.tool,
+      summary: request.summary,
+      input: request.input ?? {},
+      createdAt: Date.now(),
+    },
+    signal,
+  );
+  if (answer?.kind === 'approval') return { approved: answer.approved, ...(answer.note ? { note: answer.note } : {}) };
+  return { approved: false, note: 'cancelled' };
+}
+
 /* ── Feature module ───────────────────────────────────────────────── */
 
 const PROMPT = `Asking the user:
@@ -153,6 +184,9 @@ function readHistory(file: string): ResolvedRequest[] {
   }
 }
 
+/** Same as requestApproval (the browser surface's name for it). */
+export const askApproval = requestApproval;
+
 export function createHitl(context: FeatureContext): FeatureModule {
   const historyFile = path.join(context.workspace, '.aicl', 'hitl.json');
   const registry = createRegistry((event) => context.relay.broadcast(event), {
@@ -166,6 +200,8 @@ export function createHitl(context: FeatureContext): FeatureModule {
       }
     },
   });
+
+  activeRegistry = registry;
 
   const askUser = defineTool({
     name: 'ask_user',

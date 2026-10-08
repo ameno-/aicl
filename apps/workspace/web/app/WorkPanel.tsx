@@ -10,12 +10,15 @@ import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointer
 import { AnimatePresence, motion } from 'motion/react';
 import { AnimatedPlan, LiveTerminal, SegmentedTabs, type PlanStep } from '@aicl/fx';
 import type { ToolCallPart } from '@aicl/core';
-import { Check, ChevronLeft, FileText, Folder, Globe, ListChecks, Loader, Monitor, Terminal as TerminalIcon, TriangleAlert, X } from 'lucide-react';
+import { Check, ChevronLeft, FileText, Folder, GitCompare, Globe, ListChecks, Loader, Monitor, Terminal as TerminalIcon, TriangleAlert, X } from 'lucide-react';
 import type { ProviderKit } from '../../shared/kits.ts';
 import { usePlan, useTerminal } from '../agentic/liveData.ts';
 import { AppletHost, useApplets } from '../applets/index.tsx';
 import { useSessionChat } from '../sessionsApi.ts';
 import { setPrefs, usePrefs } from './prefs.ts';
+import { BrowserPane, ChangesPane, TerminalsPane } from './SurfacePanes.tsx';
+import { SurfaceView } from '../surfaces/index.tsx';
+import { Tree } from '../files/index.ts';
 
 type TabId = ProviderKit['layout']['workTabs'][number];
 
@@ -25,6 +28,7 @@ const TAB_META: Record<TabId, { label: string; icon: ReactNode }> = {
   files: { label: 'Files', icon: <Folder size={14} aria-hidden="true" /> },
   preview: { label: 'Preview', icon: <Monitor size={14} aria-hidden="true" /> },
   browser: { label: 'Browser', icon: <Globe size={14} aria-hidden="true" /> },
+  changes: { label: 'Changes', icon: <GitCompare size={14} aria-hidden="true" /> },
 };
 
 const MIN_WIDTH = 320;
@@ -66,13 +70,6 @@ export function TerminalPane({ sessionId, toolCallId }: { sessionId: string; too
   );
 }
 
-interface Entry {
-  name: string;
-  path: string;
-  dir: boolean;
-  size?: number;
-}
-
 const IMAGE = /\.(png|jpe?g|gif|webp|svg)$/i;
 
 function FileViewer({ path, content }: { path: string; content?: string }) {
@@ -104,65 +101,26 @@ function FileViewer({ path, content }: { path: string; content?: string }) {
   );
 }
 
+/** The workspace tree (@pierre/trees); a picked file opens as a live file surface (CodeMirror, pinnable). */
 export function FilesPane({ refreshKey }: { refreshKey: unknown }) {
-  const [dir, setDir] = useState('');
   const [file, setFile] = useState<string | null>(null);
-  const [list, setList] = useState<{ entries: Entry[]; error?: string } | null>(null);
-  useEffect(() => {
-    let live = true;
-    void fetch(`/api/files?dir=${encodeURIComponent(dir)}`)
-      .then(async (r) => {
-        const body = (await r.json()) as { entries?: Entry[]; message?: string };
-        if (!r.ok) throw new Error(body.message ?? `HTTP ${r.status}`);
-        if (live) setList({ entries: body.entries ?? [] });
-      })
-      .catch((e: unknown) => live && setList({ entries: [], error: e instanceof Error ? e.message : String(e) }));
-    return () => {
-      live = false;
-    };
-  }, [dir, refreshKey]);
-
-  const crumbs = dir ? dir.split('/') : [];
+  const open = (path: string) => {
+    setFile(path);
+    void fetch('/api/surfaces/file/open', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ path }) });
+  };
   return (
     <div className="wp-files" data-pane="files">
-      <nav className="wp-crumbs" aria-label="Path">
-        <button type="button" onClick={() => (setDir(''), setFile(null))}>
-          workspace
-        </button>
-        {crumbs.map((c, i) => (
-          <span key={i}>
-            {' / '}
-            <button type="button" onClick={() => (setDir(crumbs.slice(0, i + 1).join('/')), setFile(null))}>
-              {c}
-            </button>
-          </span>
-        ))}
-      </nav>
       {file ? (
         <>
           <button type="button" className="wp-back" onClick={() => setFile(null)}>
-            <ChevronLeft size={14} aria-hidden="true" /> {file.split('/').pop()}
+            <ChevronLeft size={14} aria-hidden="true" /> {file}
           </button>
-          <FileViewer path={file} />
+          <div className="wp-surface-body" data-pane="file-content">
+            <SurfaceView kind="file" id={file} variant="panel" />
+          </div>
         </>
-      ) : !list ? (
-        <p className="wp-note">Loading…</p>
-      ) : list.error ? (
-        <p className="wp-note">{list.error}</p>
-      ) : list.entries.length === 0 ? (
-        <p className="wp-note">This folder is empty.</p>
       ) : (
-        <ul className="wp-entries">
-          {list.entries.map((e) => (
-            <li key={e.path}>
-              <button type="button" data-entry={e.name} onClick={() => (e.dir ? setDir(e.path) : setFile(e.path))}>
-                {e.dir ? <Folder size={14} aria-hidden="true" /> : <FileText size={14} aria-hidden="true" />}
-                <span>{e.name}</span>
-                {e.size !== undefined ? <small>{e.size < 1024 ? `${e.size} B` : `${(e.size / 1024).toFixed(1)} KB`}</small> : null}
-              </button>
-            </li>
-          ))}
-        </ul>
+        <Tree onOpen={open} refreshKey={refreshKey} />
       )}
     </div>
   );
@@ -390,7 +348,11 @@ export function WorkPanel({ kit, sessionId, busy, visible }: { kit: ProviderKit;
     type === 'computer' ? (
       <ComputerPane sessionId={sessionId} kit={kit} />
     ) : tab === 'terminal' ? (
-      <TerminalPane sessionId={sessionId} />
+      <TerminalsPane sessionId={sessionId} />
+    ) : tab === 'browser' ? (
+      <BrowserPane sessionId={sessionId} />
+    ) : tab === 'changes' ? (
+      <ChangesPane sessionId={sessionId} />
     ) : tab === 'files' ? (
       <FilesPane refreshKey={`${filesTick}:${steps.length}`} />
     ) : tab === 'plan' ? (

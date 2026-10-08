@@ -1,17 +1,20 @@
 /**
  * The command menu (⌘K) and the app's global shortcuts:
- * ⌘K is CommandMenu's own hotkey. ⌘N new session, ⌘/ shortcuts, ⌘, settings, ⌘\ work panel, Esc stops a running turn.
+ * ⌘K is CommandMenu's own hotkey. ⌘P open file, ⌘N new session, ⌘/ shortcuts, ⌘, settings, ⌘\ work panel, Esc stops a running turn.
  */
 import { useEffect, useMemo } from 'react';
 import { CommandMenu, type CommandItem } from '@aicl/fx';
 import { KIT_IDS, KITS, type ProviderKit } from '../../shared/kits.ts';
 import { setKit } from '../kits/index.tsx';
 import { navigate } from '../router.ts';
-import { setActiveSession, useActiveSessionId, useSessionChat, useSessions } from '../sessionsApi.ts';
+import { MAIN_SESSION_ID } from '../../shared/runtime.ts';
+import { sendToSession, setActiveSession, useActiveSessionId, useSessionChat, useSessions } from '../sessionsApi.ts';
 import { useModels, setSessionModel } from './models.ts';
 import { getOverlay, setOverlay, useOverlay } from './overlays.ts';
 import { getPrefs, setPrefs, toggledTheme, usePrefs } from './prefs.ts';
 import { openSession, startSession } from './Sessions.tsx';
+import { openFilePicker } from '../files/index.ts';
+import { WORKFLOWS } from '../swarm/workflows.ts';
 
 /** Global keyboard handling; renders nothing. */
 export function useAppHotkeys(kit: ProviderKit): void {
@@ -25,6 +28,9 @@ export function useAppHotkeys(kit: ProviderKit): void {
       if (mod && e.key === 'n' && !e.shiftKey) {
         e.preventDefault();
         void startSession();
+      } else if (mod && e.key === 'p' && !e.shiftKey) {
+        e.preventDefault();
+        openFilePicker();
       } else if (mod && e.key === '/') {
         e.preventDefault();
         setOverlay(getOverlay() === 'shortcuts' ? null : 'shortcuts');
@@ -55,6 +61,7 @@ export function CommandPalette({ kit, prefersDark }: { kit: ProviderKit; prefers
   const items = useMemo<CommandItem[]>(() => {
     const list: CommandItem[] = [
       { id: 'new', group: 'Actions', label: kit.vocabulary.newSession, shortcut: ['cmd', 'N'], onSelect: () => void startSession() },
+      { id: 'open-file', group: 'Actions', label: 'Open file…', shortcut: ['cmd', 'P'], onSelect: openFilePicker },
       { id: 'panel', group: 'Actions', label: prefs.workPanelOpen ? 'Hide work panel' : 'Show work panel', shortcut: ['cmd', '\\'], onSelect: () => setPrefs({ workPanelOpen: !prefs.workPanelOpen }) },
       { id: 'sidebar', group: 'Actions', label: prefs.sidebarCollapsed ? 'Show sidebar' : 'Hide sidebar', onSelect: () => setPrefs({ sidebarCollapsed: !prefs.sidebarCollapsed }) },
       { id: 'theme', group: 'Actions', label: 'Toggle light/dark theme', onSelect: () => setPrefs({ theme: toggledTheme(kit, prefs.theme, prefersDark) }) },
@@ -62,6 +69,8 @@ export function CommandPalette({ kit, prefersDark }: { kit: ProviderKit; prefers
       { id: 'shortcuts', group: 'Actions', label: 'Keyboard shortcuts', shortcut: ['cmd', '/'], onSelect: () => setOverlay('shortcuts') },
       { id: 'go-agent', group: 'Go to', label: 'Go to Agent', onSelect: () => navigate({ tab: 'agent' }) },
       { id: 'go-canvas', group: 'Go to', label: 'Go to Canvas', onSelect: () => navigate({ tab: 'canvas' }) },
+      { id: 'go-agents', group: 'Go to', label: 'Go to agents', onSelect: () => navigate({ tab: 'agents' }) },
+      ...WORKFLOWS.map((w) => ({ id: `wf-${w.id}`, group: 'Workflows', label: w.label, onSelect: () => (navigate({ tab: 'agents' }), sendToSession(w.prompt, MAIN_SESSION_ID)) })),
       { id: 'go-overview', group: 'Go to', label: 'Go to Overview', onSelect: () => navigate({ tab: 'overview' }) },
       ...KIT_IDS.map((id) => ({ id: `kit-${id}`, group: 'Kit', label: `Switch kit: ${KITS[id].label}${id === kit.id ? ' (current)' : ''}`, onSelect: () => setKit(id) })),
       ...sessions.map((x) => ({ id: `s-${x.id}`, group: kit.vocabulary.sessions, label: `Open ${s}: ${x.title}`, onSelect: () => (setActiveSession(x.id), openSession(x.id)) })),
