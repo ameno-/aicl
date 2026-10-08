@@ -7,6 +7,7 @@ import type { StreamEvent } from '@aicl/core';
 import {
   convertHistory,
   createSessionHub,
+  normalizeFolder,
   previewOf,
   SessionError,
   stripCanvasContext,
@@ -149,4 +150,41 @@ test('an errored run marks the session error', async () => {
   const events = await drain(hub.run('main', 'hi', new AbortController().signal));
   assert.ok(events.some((e) => e.type === 'error'));
   assert.equal(hub.get('main')!.status, 'error');
+});
+
+test('sidebar organisation: folders, pins and archive persist; folder rename and delete carry sessions', async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'aicl-organize-'));
+  let n = 0;
+  const make = () =>
+    createSessionHub({
+      dir,
+      createAgent: async (file) => {
+        const f = file ?? path.join(dir, `o${n++}.jsonl`);
+        await writeFile(f, '');
+        return fakeAgent(f);
+      },
+    });
+  const hub = await make();
+  const a = await hub.create({ title: 'Research notes' });
+  const b = await hub.create({ title: 'Invoices' });
+  assert.equal((await hub.organize(a.id, { folder: ' Work / Research ', pinned: true })).folder, 'Work/Research');
+  await hub.organize(b.id, { folder: 'Work', archived: true });
+  await hub.addFolder('Personal');
+  assert.deepEqual(await hub.folders(), ['Personal', 'Work', 'Work/Research']);
+
+  const again = await make();
+  const ra = again.list().find((s) => s.id === a.id)!;
+  assert.equal(ra.folder, 'Work/Research');
+  assert.equal(ra.pinned, true);
+  assert.equal(again.list().find((s) => s.id === b.id)!.archived, true);
+
+  await again.renameFolder('Work', 'Jobs');
+  assert.equal(again.list().find((s) => s.id === a.id)!.folder, 'Jobs/Research');
+  assert.deepEqual(await again.folders(), ['Jobs', 'Jobs/Research', 'Personal']);
+  await again.deleteFolder('Jobs');
+  assert.equal(again.list().find((s) => s.id === a.id)!.folder, undefined);
+  assert.deepEqual(await again.folders(), ['Personal']);
+  await again.organize(a.id, { pinned: false, folder: '' });
+  assert.equal(again.list().find((s) => s.id === a.id)!.pinned, undefined);
+  assert.equal(normalizeFolder('/a//b /'), 'a/b');
 });

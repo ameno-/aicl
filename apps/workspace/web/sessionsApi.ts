@@ -150,6 +150,58 @@ export async function renameSession(id: string, title: string): Promise<void> {
   if (res.ok) upsert(((await res.json()) as { session: SessionInfo }).session);
 }
 
+/** Sidebar organisation (AICL-46): folder ('' = none), pin, archive. */
+export async function organizeSession(id: string, change: { folder?: string; pinned?: boolean; archived?: boolean; title?: string }): Promise<void> {
+  const res = await fetch(`/api/sessions/${encodeURIComponent(id)}`, {
+    method: 'PATCH',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(change),
+  });
+  if (!res.ok) throw new Error(((await res.json().catch(() => ({}))) as { message?: string }).message ?? `HTTP ${res.status}`);
+  upsert(((await res.json()) as { session: SessionInfo }).session);
+}
+
+/* ── Folders: saved paths like "Work/Research" (sessions carry their folder) ── */
+
+let folders: string[] = [];
+let foldersStarted = false;
+const folderListeners = new Set<() => void>();
+function setFolders(next: string[]): void {
+  folders = next;
+  for (const l of [...folderListeners]) l();
+}
+async function folderCall(method: string, body?: unknown, query = ''): Promise<void> {
+  const res = await fetch(`/api/session-folders${query}`, {
+    method,
+    headers: { 'content-type': 'application/json' },
+    ...(body ? { body: JSON.stringify(body) } : {}),
+  });
+  const json = (await res.json().catch(() => ({}))) as { folders?: string[]; message?: string };
+  if (!res.ok) throw new Error(json.message ?? `HTTP ${res.status}`);
+  if (json.folders) setFolders(json.folders);
+}
+
+export function useFolders(): string[] {
+  if (!foldersStarted && typeof window !== 'undefined') {
+    foldersStarted = true;
+    onServerEvent('session-folders', (e) => setFolders(e.folders));
+    onReconnect(() => void folderCall('GET').catch(() => undefined));
+    void folderCall('GET').catch(() => undefined);
+  }
+  return useSyncExternalStore(
+    (l) => {
+      folderListeners.add(l);
+      return () => folderListeners.delete(l);
+    },
+    () => folders,
+    () => folders,
+  );
+}
+
+export const addFolder = (path: string) => folderCall('POST', { path });
+export const renameFolder = (from: string, to: string) => folderCall('PATCH', { from, to });
+export const deleteFolder = (path: string) => folderCall('DELETE', undefined, `?path=${encodeURIComponent(path)}`);
+
 export async function deleteSession(id: string): Promise<void> {
   if (id === MAIN_SESSION_ID) return;
   const res = await fetch(`/api/sessions/${encodeURIComponent(id)}`, { method: 'DELETE' });

@@ -94,7 +94,7 @@ async function request(base, method, path, body) {
   try {
     res = await fetch(base + path, {
       method,
-      headers: body ? { 'content-type': 'application/json' } : undefined,
+      headers: { 'x-aicl-client': 'cli', ...(body ? { 'content-type': 'application/json' } : {}) },
       body: body ? JSON.stringify(body) : undefined,
     });
   } catch (cause) {

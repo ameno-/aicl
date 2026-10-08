@@ -55,6 +55,18 @@ export interface IndexEntry {
   usage?: SessionUsage;
   startedAt?: number;
   finishedAt?: number;
+  folder?: string;
+  pinned?: boolean;
+  archived?: boolean;
+}
+
+/** A folder path: segments trimmed, empty ones dropped, no leading/trailing slashes. */
+export function normalizeFolder(folder: string): string {
+  return folder
+    .split('/')
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .join('/');
 }
 
 export class SessionError extends Error {
@@ -207,6 +219,7 @@ export type SessionHub = Awaited<ReturnType<typeof createSessionHub>>;
 export async function createSessionHub(options: SessionHubOptions) {
   const now = options.now ?? Date.now;
   const indexPath = path.join(options.dir, 'index.json');
+  const foldersPath = path.join(options.dir, 'folders.json');
   const entries = new Map<string, IndexEntry>();
   const status = new Map<string, 'running' | 'error'>();
   const agents = new Map<string, Promise<AgentLike>>();
@@ -246,6 +259,9 @@ export async function createSessionHub(options: SessionHubOptions) {
     ...(e.startedAt ? { startedAt: e.startedAt } : {}),
     ...(e.finishedAt ? { finishedAt: e.finishedAt } : {}),
     ...(stopped.has(e.id) ? { stopped: true } : {}),
+    ...(e.folder ? { folder: e.folder } : {}),
+    ...(e.pinned ? { pinned: true } : {}),
+    ...(e.archived ? { archived: true } : {}),
   });
 
   /** Every session below `id`, nearest first. */
@@ -396,6 +412,74 @@ export async function createSessionHub(options: SessionHubOptions) {
       e.titleSource = 'user';
       await touch(e);
       return info(e);
+    },
+
+    /** Sidebar organisation: move to a folder ('' = no folder), pin, archive. */
+    async organize(id: string, change: { folder?: string; pinned?: boolean; archived?: boolean }): Promise<SessionInfo> {
+      const e = need(id);
+      if (change.folder !== undefined) {
+        const folder = normalizeFolder(change.folder);
+        if (folder) e.folder = folder;
+        else delete e.folder;
+      }
+      if (change.pinned !== undefined) {
+        if (change.pinned) e.pinned = true;
+        else delete e.pinned;
+      }
+      if (change.archived !== undefined) {
+        if (change.archived) e.archived = true;
+        else delete e.archived;
+      }
+      await persist();
+      options.onChange?.(info(e));
+      return info(e);
+    },
+
+    /** Every folder: saved ones (they may be empty) plus those sessions are in. */
+    async folders(): Promise<string[]> {
+      const saved = await readFile(foldersPath, 'utf8')
+        .then((t) => JSON.parse(t) as unknown)
+        .catch(() => []);
+      const all = new Set<string>(Array.isArray(saved) ? saved.filter((f): f is string => typeof f === 'string').map(normalizeFolder).filter(Boolean) : []);
+      for (const e of entries.values()) if (e.folder) all.add(e.folder);
+      return [...all].sort((a, b) => a.localeCompare(b));
+    },
+
+    async addFolder(folder: string): Promise<string[]> {
+      const f = normalizeFolder(folder);
+      if (!f) throw new SessionError(400, 'A folder name is required.');
+      const list = new Set(await this.folders());
+      list.add(f);
+      await writeFile(foldersPath, JSON.stringify([...list]));
+      return this.folders();
+    },
+
+    /** Renames a folder (and every sub-folder); its sessions move with it. */
+    async renameFolder(from: string, to: string): Promise<string[]> {
+      const a = normalizeFolder(from);
+      const b = normalizeFolder(to);
+      if (!a || !b) throw new SessionError(400, 'Both folder names are required.');
+      const move = (f: string) => (f === a ? b : f.startsWith(`${a}/`) ? `${b}${f.slice(a.length)}` : f);
+      for (const e of entries.values()) if (e.folder) e.folder = move(e.folder);
+      await writeFile(foldersPath, JSON.stringify((await this.folders()).map(move)));
+      await persist();
+      for (const e of entries.values()) if (e.folder && (e.folder === b || e.folder.startsWith(`${b}/`))) options.onChange?.(info(e));
+      return this.folders();
+    },
+
+    /** Deletes a folder (and sub-folders); its sessions are kept, out of any folder. */
+    async deleteFolder(folder: string): Promise<string[]> {
+      const f = normalizeFolder(folder);
+      const inside = (x: string) => x === f || x.startsWith(`${f}/`);
+      for (const e of entries.values()) {
+        if (e.folder && inside(e.folder)) {
+          delete e.folder;
+          options.onChange?.(info(e));
+        }
+      }
+      await writeFile(foldersPath, JSON.stringify((await this.folders()).filter((x) => !inside(x))));
+      await persist();
+      return this.folders();
     },
 
     /** Switches a session's model; remembered across reloads. 409 while it is running. */

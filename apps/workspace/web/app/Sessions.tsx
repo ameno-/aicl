@@ -3,16 +3,18 @@
  * (top-bar kits, narrow screens, the sidebar collapsed). Labels come from
  * kit.vocabulary; grouping from kit.layout.grouping.
  */
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { bucketByRecency, type SessionMeta } from '@aicl/core';
 import { AlertDialog } from '@aicl/react';
-import { ChevronDown, Pencil, PanelLeftClose, Search, SquarePen, Trash2 } from 'lucide-react';
+import { ChevronDown, FolderPlus, Pencil, PanelLeftClose, Search, SquarePen, Trash2 } from 'lucide-react';
 import { MAIN_SESSION_ID, type SessionInfo } from '../../shared/runtime.ts';
 import type { ProviderKit } from '../../shared/kits.ts';
 import { toasts } from '../chatStore.ts';
 import { createSession, deleteSession, renameSession, setActiveSession, useActiveSessionId, useSessions } from '../sessionsApi.ts';
 import { navigate } from '../router.ts';
 import { setPrefs } from './prefs.ts';
+import { ChatTree } from './ChatTree.tsx';
+import { LiveResources } from './LiveResources.tsx';
 
 /** The server's defaults ("Main", "New chat") in the kit's words ("Main task", "New project"). */
 export const sessionTitle = (s: SessionInfo, kit: ProviderKit): string =>
@@ -175,23 +177,29 @@ function SearchField({ kit, value, onChange }: { kit: ProviderKit; value: string
 }
 
 export function SessionsSidebar({ kit }: { kit: ProviderKit }) {
-  const [query, setQuery] = useState('');
+  const [folderRequest, setFolderRequest] = useState<string | null>(null);
+  const clearRequest = useCallback(() => setFolderRequest(null), []);
   return (
     <aside className="agent-sidebar" aria-label={kit.vocabulary.sessions}>
       <div className="s-head">
         <h2 className="s-heading">{kit.vocabulary.sessions}</h2>
-        <button type="button" className="icon-button" aria-label="Collapse sidebar" title="Collapse sidebar" onClick={() => setPrefs({ sidebarCollapsed: true })}>
-          <PanelLeftClose size={16} aria-hidden="true" />
-        </button>
+        <span className="s-head-actions">
+          <button type="button" className="icon-button" aria-label="New folder" title="New folder" onClick={() => setFolderRequest('')}>
+            <FolderPlus size={16} aria-hidden="true" />
+          </button>
+          <button type="button" className="icon-button" aria-label="Collapse sidebar" title="Collapse sidebar" onClick={() => setPrefs({ sidebarCollapsed: true })}>
+            <PanelLeftClose size={16} aria-hidden="true" />
+          </button>
+        </span>
       </div>
       <button type="button" className="agent-new" onClick={() => void startSession()}>
         <SquarePen size={16} aria-hidden="true" />
         <span>{kit.vocabulary.newSession}</span>
       </button>
-      <SearchField kit={kit} value={query} onChange={setQuery} />
       <div className="agent-sessions">
-        <SessionRows kit={kit} query={query} />
+        <ChatTree kit={kit} newFolderRequest={folderRequest} onNewFolderHandled={clearRequest} />
       </div>
+      <LiveResources />
     </aside>
   );
 }

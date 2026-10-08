@@ -13,7 +13,7 @@
  */
 import { THEME_PRESETS, type ThemePresetName, type ThemeTokens } from './ui-spec.ts';
 
-export type KitId = 'aicl' | 'devin' | 'manus' | 'lovable' | 'cofounder';
+export type KitId = 'aicl' | 'devin' | 'manus' | 'lovable' | 'cofounder' | 'assistant';
 
 /** How the agent's tool work appears in the transcript. */
 export type ToolCallStyle =
@@ -183,6 +183,26 @@ export const KITS: Record<KitId, ProviderKit> = {
     transcript: { user: 'bubble', timestamps: 'none', assistantHeader: true, actions: ['copy'], reasoning: 'inline', toolCalls: 'timeline', streaming: 'blur', thinking: 'shimmer' },
     composer: { modes: [], contextChips: false, integrations: [], progressChip: false, attachLabel: '', hero: true },
     layout: { nav: 'topbar', grouping: 'flat', workPanel: 'board', workTabs: ['plan', 'changes', 'files'] },
+    motion: { personality: 'calm', spring: { stiffness: 180, damping: 28 } },
+    ambient: ['#e9e8e3', '#cfc8b8', '#f7f4ee'],
+  },
+  /**
+   * The app's one design (AICL-44): AICL's layout (left sidebar, conversation,
+   * work panel) with Cofounder's paper palette, serif type, timeline
+   * transcript and calm motion. The other kits remain as presets for screens
+   * designed on the canvas; the app no longer switches between them.
+   */
+  assistant: {
+    id: 'assistant',
+    label: 'Assistant',
+    tagline: 'A worker for every kind of task: Cofounder calm on the AICL layout.',
+    preset: 'cofounder',
+    tokens: tokens('cofounder'),
+    vocabulary: { sessions: 'Chats', newSession: 'New chat', agent: 'Assistant', placeholder: 'Ask anything, or hand off a task…', heroTitle: 'What should we work on today?' },
+    transcript: { user: 'bubble', timestamps: 'none', assistantHeader: true, actions: ['copy', 'retry'], reasoning: 'inline', toolCalls: 'timeline', streaming: 'blur', thinking: 'shimmer' },
+    composer: { modes: [], contextChips: false, integrations: [], progressChip: true, attachLabel: '', hero: true },
+    // Plan is last: it only matters while a plan is in effect (the Tasks overlay covers the rest).
+    layout: { nav: 'sidebar', grouping: 'recency', workPanel: 'tabs', workTabs: ['files', 'changes', 'terminal', 'browser', 'preview', 'plan'] },
     motion: { personality: 'calm', spring: { stiffness: 180, damping: 28 } },
     ambient: ['#e9e8e3', '#cfc8b8', '#f7f4ee'],
   },

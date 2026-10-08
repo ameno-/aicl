@@ -3,7 +3,7 @@
  * the shared browser, and diffs. The same objects show as canvas cards; the
  * "Pin to canvas" button puts the one on screen there too.
  */
-import { useState, type FormEvent, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { GitCompare, Globe, Pin, Plus } from 'lucide-react';
 import { MAIN_SESSION_ID } from '../../shared/runtime.ts';
 import type { SurfaceInfo } from '../../shared/surfaces.ts';
@@ -122,39 +122,93 @@ export function BrowserPane({ sessionId }: { sessionId: string }) {
   );
 }
 
-/** Diffs: this session's newest (usually "Changes in this turn"), or the working tree on request. */
+/**
+ * Changes, never empty: this session's diffs when it has some; otherwise the
+ * workspace's working changes, or (clean tree) the latest commit; outside a
+ * git repo, GitHub: review any pull request by URL or owner/repo#n — which
+ * also works when the assistant has no local checkout (MCP, remote).
+ */
 export function ChangesPane({ sessionId }: { sessionId: string }) {
   const diffs = pick(useSurfaces('diff'), sessionId);
+  const reviews = pick(useSurfaces('review'), sessionId);
   const [choice, setChoice] = useState<string | null>(null);
-  const current = diffs.find((d) => d.id === choice) ?? diffs[0];
-  const working = async () => {
-    const { surface } = await post('/api/surfaces/diff', { target: 'working', sessionId });
-    if (surface) setChoice(surface.id);
+  const [repo, setRepo] = useState<{ repo: boolean; dirty: boolean; branch?: string } | null>(null);
+  const [opening, setOpening] = useState<string | null>(null);
+  const [failed, setFailed] = useState<string | null>(null);
+  const tried = useRef(false);
+
+  // Learn the repo state once, then open a sensible default if nothing is open.
+  useEffect(() => {
+    let live = true;
+    void fetch('/api/git/status')
+      .then((r) => r.json() as Promise<{ repo: boolean; branch?: string; staged?: unknown[]; unstaged?: unknown[]; untracked?: unknown[] }>)
+      .then((st) => live && setRepo({ repo: st.repo, dirty: Boolean(st.staged?.length || st.unstaged?.length || st.untracked?.length), ...(st.branch ? { branch: st.branch } : {}) }))
+      .catch(() => live && setRepo({ repo: false, dirty: false }));
+    return () => {
+      live = false;
+    };
+  }, []);
+  const open = async (target: string, label: string) => {
+    setOpening(label);
+    setFailed(null);
+    try {
+      const res = await fetch('/api/surfaces/diff', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ target, sessionId }) });
+      const body = (await res.json()) as { surface?: SurfaceInfo; message?: string; error?: string };
+      if (!res.ok || !body.surface) throw new Error(body.message ?? body.error ?? `HTTP ${res.status}`);
+      setChoice(body.surface.id);
+    } catch (cause) {
+      setFailed(`${label}: ${cause instanceof Error ? cause.message : String(cause)}`);
+    } finally {
+      setOpening(null);
+    }
   };
-  const workingButton = (
-    <button type="button" className="wp-switch-item" onClick={() => void working()}>
-      Working tree
-    </button>
-  );
+  useEffect(() => {
+    if (!repo?.repo || diffs.length || tried.current) return;
+    tried.current = true;
+    void (repo.dirty ? open('working', 'Working changes') : open('HEAD~1..HEAD', 'Latest commit'));
+  }, [repo, diffs.length]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const current = diffs.find((d) => d.id === choice) ?? diffs[0];
+  const review = reviews.find((r) => r.id === choice);
+
+  if (review) {
+    return (
+      <div className="wp-surface-pane">
+        <Switcher items={[...diffs.slice(0, 4), ...reviews.slice(0, 3)].map((d) => ({ id: d.id, label: d.title }))} value={review.id} onChange={setChoice} extra={<PinButton info={review} />} />
+        <div className="wp-surface-body">
+          <SurfaceView kind="review" id={review.id} variant="panel" />
+        </div>
+      </div>
+    );
+  }
+  if (repo && !repo.repo && !current) return <GitHubStart sessionId={sessionId} onOpened={setChoice} />;
   if (!current) {
     return (
       <div className="wp-empty">
         <GitCompare size={22} aria-hidden="true" />
-        <p className="wp-empty-title">No changes to review yet</p>
-        <p className="wp-empty-hint">Each turn’s edits show up here as a diff you can stage, comment on, or send to Hunk.</p>
-        {workingButton}
+        <p className="wp-empty-title">{opening ? `Loading ${opening.toLowerCase()}…` : failed ? 'Nothing to show yet' : 'Reading the repository…'}</p>
+        {failed ? <p className="wp-empty-hint">{failed}</p> : null}
       </div>
     );
   }
   return (
     <div className="wp-surface-pane">
       <Switcher
-        items={diffs.slice(0, 6).map((d) => ({ id: d.id, label: d.title }))}
+        items={[...diffs.slice(0, 6), ...reviews.slice(0, 3)].map((d) => ({ id: d.id, label: d.title }))}
         value={current.id}
         onChange={setChoice}
         extra={
           <>
-            {workingButton}
+            {repo?.repo && !diffs.some((d) => d.id === 'working') ? (
+              <button type="button" className="wp-switch-item" onClick={() => void open('working', 'Working changes')}>
+                + Working tree
+              </button>
+            ) : null}
+            {repo?.repo && !diffs.some((d) => d.title === 'Latest commit' || d.id.includes('HEAD~1')) ? (
+              <button type="button" className="wp-switch-item" onClick={() => void open('HEAD~1..HEAD', 'Latest commit')}>
+                + Last commit
+              </button>
+            ) : null}
             <PinButton info={current} />
           </>
         }
@@ -162,6 +216,43 @@ export function ChangesPane({ sessionId }: { sessionId: string }) {
       <div className="wp-surface-body">
         <SurfaceView kind="diff" id={current.id} variant="panel" />
       </div>
+    </div>
+  );
+}
+
+/** Outside a git repo: GitHub is the source — review a pull request by URL or owner/repo#n. */
+function GitHubStart({ sessionId, onOpened }: { sessionId: string; onOpened: (id: string) => void }) {
+  const [pr, setPr] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const submit = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!pr.trim()) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch('/api/surfaces/review', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ pr: pr.trim(), sessionId }) });
+      const body = (await res.json()) as { surface?: SurfaceInfo; message?: string; error?: string };
+      if (!res.ok || !body.surface) throw new Error(body.message ?? body.error ?? `HTTP ${res.status}`);
+      onOpened(body.surface.id);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : String(cause));
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <div className="wp-empty wp-github">
+      <GitCompare size={22} aria-hidden="true" />
+      <p className="wp-empty-title">This workspace isn’t a git repository</p>
+      <p className="wp-empty-hint">Review changes from GitHub instead: paste a pull request URL or owner/repo#number.</p>
+      <form onSubmit={(e) => void submit(e)} className="wp-url-form">
+        <input aria-label="Pull request" placeholder="github.com/owner/repo/pull/12" value={pr} onChange={(e) => setPr(e.target.value)} className="wp-url" />
+        <button type="submit" className="wp-switch-item" disabled={busy}>
+          {busy ? 'Opening…' : 'Review'}
+        </button>
+      </form>
+      {error ? <p className="wp-empty-hint wp-error">{error}</p> : null}
     </div>
   );
 }

@@ -61,12 +61,15 @@ export function parseArgs(argv) {
   return { url: url.replace(/\/$/, '') };
 }
 
+/** Who is calling, for the workspace's Connections list: the MCP client's own name once it has introduced itself. */
+let clientName = 'mcp';
+
 async function api(base, method, path, body) {
   let res;
   try {
     res = await fetch(base + path, {
       method,
-      headers: body ? { 'content-type': 'application/json' } : undefined,
+      headers: { 'x-aicl-client': clientName, ...(body ? { 'content-type': 'application/json' } : {}) },
       body: body ? JSON.stringify(body) : undefined,
     });
   } catch (cause) {
@@ -95,6 +98,10 @@ export async function serve(base) {
   const { CallToolRequestSchema, ListToolsRequestSchema, ListResourcesRequestSchema, ReadResourceRequestSchema } = await import('@modelcontextprotocol/sdk/types.js');
 
   const server = new Server({ name: 'aicl', version: '0.1.0' }, { capabilities: { tools: {}, resources: {} } });
+  server.oninitialized = () => {
+    const name = server.getClientVersion()?.name;
+    if (name) clientName = `mcp:${name}`;
+  };
   server.setRequestHandler(ListToolsRequestSchema, async () => ({ tools: toMcpTools(await api(base, 'GET', '/api/tools')) }));
   server.setRequestHandler(CallToolRequestSchema, async (request) => {
     try {

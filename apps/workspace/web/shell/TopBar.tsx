@@ -2,7 +2,6 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Check, ChevronDown, Command, LayoutGrid, MessageSquare, Network, PanelRight, PenTool, Settings } from 'lucide-react';
 import type { ProviderKit } from '../../shared/kits.ts';
 import type { AppletInfo, WorkspaceRoute } from '../../shared/runtime.ts';
-import { KitSwitcher } from '../app/KitSwitcher.tsx';
 import { setOverlay } from '../app/overlays.ts';
 import { SessionsMenu, sessionTitle } from '../app/Sessions.tsx';
 import { navigate } from '../router.ts';
@@ -113,8 +112,8 @@ export function TopBar({ kit, name, route, views, dockVisible, dockOpen, onToggl
         )}
       </nav>
       <span className="shell-spacer" />
-      {topNav && route.tab === 'agent' ? <SessionsMenu kit={kit} compact /> : null}
-      <KitSwitcher kit={kit} />
+      {/* The Cofounder Tasks overlay: quick access to chats wherever the sidebar is not (AICL-44). */}
+      {topNav ? (route.tab === 'agent' ? <SessionsMenu kit={kit} compact /> : null) : route.tab !== 'agent' ? <SessionsMenu kit={kit} compact /> : null}
       <button type="button" className="shell-cmdk" aria-label="Open command menu" title="Command menu" onClick={() => setOverlay('palette')}>
         <Command size={13} aria-hidden="true" />
         <span>K</span>

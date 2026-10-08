@@ -13,7 +13,7 @@ import type { CSSProperties, ReactNode } from 'react';
 import type { ProviderKit } from '../../shared/kits.ts';
 import { themeVars } from '../ui/theme.ts';
 
-export { setKit, useKit } from './state.ts';
+export { useKit } from './state.ts';
 export { KitTranscript, type KitTranscriptProps } from './transcript.tsx';
 export { KitComposer, type KitComposerProps } from './composer.tsx';
 
