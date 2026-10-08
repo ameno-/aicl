@@ -86,6 +86,9 @@ async function submit(id: string, answer: HitlAnswer): Promise<void> {
 
 const card: CSSProperties = {
   display: 'grid',
+  // One column that may shrink: long summaries ellipsize instead of pushing the buttons out of the dock.
+  gridTemplateColumns: 'minmax(0, 1fr)',
+  minWidth: 0,
   gap: 'var(--aicl-space-2)',
   padding: 'var(--aicl-space-3)',
   border: '1px solid var(--aicl-border)',
@@ -265,7 +268,7 @@ export function ApprovalCard({ request }: { request: Approval }) {
         </pre>
       ) : null}
       <div style={{ display: 'flex', gap: 'var(--aicl-space-2)', alignItems: 'center' }}>
-        <input style={{ ...input, flex: 1 }} value={note} placeholder="Note (optional)" aria-label="Note" onChange={(e) => setNote(e.target.value)} />
+        <input style={{ ...input, flex: 1, minWidth: 0 }} value={note} placeholder="Note (optional)" aria-label="Note" onChange={(e) => setNote(e.target.value)} />
         <button type="button" style={btn('danger')} disabled={busy} onClick={() => decide(false)}>
           <X size={13} aria-hidden="true" />
           Deny

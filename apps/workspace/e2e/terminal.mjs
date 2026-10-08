@@ -138,10 +138,15 @@ await check('agent terminal_run: approval, live lines in the agent terminal, rep
 });
 
 await check('reload replays the scrollback', async () => {
+  // The resize check ran `clear`, so write a fresh line to look for after the reload.
+  await p.locator(`[data-surface-id="${id}"] .xterm-screen`).click();
+  await p.keyboard.type('echo replay-marker');
+  await p.keyboard.press('Enter');
+  await p.waitForFunction((tid) => (document.querySelector(`[data-surface-id="${tid}"] .xterm-rows`)?.textContent ?? '').split('replay-marker').length > 2, id, { timeout: 10000 });
   await p.reload();
   await open();
   await p.waitForFunction(
-    (tid) => (document.querySelector(`[data-surface-id="${tid}"] .xterm-rows`)?.textContent ?? '').includes('typed-by-user'),
+    (tid) => (document.querySelector(`[data-surface-id="${tid}"] .xterm-rows`)?.textContent ?? '').split('replay-marker').length > 2,
     id,
     { timeout: 20000 },
   );

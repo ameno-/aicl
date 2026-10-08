@@ -86,6 +86,14 @@ export function createTerminalSurface(context: SurfaceContext, injected?: { mana
     return openTerminal({ title: AGENT_TERMINAL }, 'agent', sessionId).id;
   };
 
+  /** A terminal by id, else by title (models often pass the name: "agent", "dev server"); "agent" is made on demand. */
+  const resolveTerminal = (ref: string | undefined, sessionId: string): string | undefined => {
+    if (!ref || ref === AGENT_TERMINAL) return agentTerminal(sessionId);
+    if (manager.get(ref)) return ref;
+    const byTitle = manager.list().find((t) => !t.exited && t.title.toLowerCase() === ref.toLowerCase());
+    return byTitle?.id;
+  };
+
   const terminalOpen = defineTool({
     name: 'terminal_open',
     label: 'Open terminal',
@@ -103,15 +111,16 @@ export function createTerminalSurface(context: SurfaceContext, injected?: { mana
     description:
       'Type a shell command into a terminal the user can watch live, wait for it to finish, and return its output and exit code. Needs the user\'s approval, like bash. Default terminal: "agent" (created on demand).',
     parameters: Type.Object({
-      id: Type.Optional(Type.String({ description: 'Terminal id from terminal_open; default: the "agent" terminal.' })),
+      id: Type.Optional(Type.String({ description: 'Terminal id or title (from terminal_open); default: the "agent" terminal.' })),
       command: Type.String(),
       timeoutMs: Type.Optional(Type.Number({ description: 'Give up waiting after this long (default 120000, max 600000). The command keeps running.' })),
     }),
     async execute(_id, params, signal, _onUpdate, ctx) {
       const sessionId = sessionIdFromToolContext(ctx);
-      const fresh = !params.id && !manager.list().some((t) => t.title === AGENT_TERMINAL && !t.exited);
-      const id = params.id ?? agentTerminal(sessionId);
-      if (!manager.get(id)) return text(`No terminal ${id}. Use terminal_open first.`);
+      const wantsAgent = !params.id || params.id === AGENT_TERMINAL;
+      const fresh = wantsAgent && !manager.list().some((t) => t.title === AGENT_TERMINAL && !t.exited);
+      const id = resolveTerminal(params.id, sessionId);
+      if (!id) return text(`No terminal "${params.id}". Use terminal_open first, or omit id to use the "agent" terminal.`);
       if (fresh) await manager.ready(id);
       const r = await manager.run(id, params.command, { timeoutMs: params.timeoutMs, signal });
       const head = r.timedOut
@@ -125,9 +134,10 @@ export function createTerminalSurface(context: SurfaceContext, injected?: { mana
     name: 'terminal_read',
     label: 'Read terminal',
     description: 'Read the most recent output of a terminal (including what the user typed there).',
-    parameters: Type.Object({ id: Type.String(), lines: Type.Optional(Type.Number({ description: 'How many trailing lines (default 50, max 500).' })) }),
-    async execute(_id, params) {
-      const out = manager.read(params.id, Math.min(params.lines ?? 50, 500));
+    parameters: Type.Object({ id: Type.String({ description: 'Terminal id or title.' }), lines: Type.Optional(Type.Number({ description: 'How many trailing lines (default 50, max 500).' })) }),
+    async execute(_id, params, _signal, _onUpdate, ctx) {
+      const id = resolveTerminal(params.id, sessionIdFromToolContext(ctx)) ?? params.id;
+      const out = manager.read(id, Math.min(params.lines ?? 50, 500));
       return text(out === undefined ? `No terminal ${params.id}.` : out || '(no output yet)');
     },
   });
