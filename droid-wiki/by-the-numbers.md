@@ -1,55 +1,58 @@
 # By the numbers
 
-Data collected on 2026-10-05 from the working tree at `/tmp/janitor-work/aicl/`. Run `git -C /tmp/janitor-work/aicl log --reverse --format='%cI' -n 1` and `git -C /tmp/janitor-work/aicl log --format='%H' -n 1` to refresh the dates and head; rerun the recursive file listing to update the counts.
+Measured on 2026-10-08 against `main` at `c113e9b` (before the AICL-53 docs pass). Refresh with:
+
+```bash
+git rev-list --count HEAD
+git log --reverse --format=%cI | head -1; git log -1 --format='%cI %H'
+git shortlog -sn HEAD
+git ls-files | wc -l
+git ls-files | sed -n 's/.*\.\([A-Za-z0-9]*\)$/\1/p' | sort | uniq -c | sort -rn
+```
 
 ## Repository
 
 | Metric | Value |
 | --- | --- |
-| Total commits | 1 |
-| Contributors | 1 (`Ameno`) |
-| First commit | `2026-10-05T01:52:50-07:00` |
-| Last commit | `2026-10-05T01:52:50-07:00` |
-| Default branch | `main` |
-| Head | `118f39478dcecd5de413e5ae97680b2c17e2badb` |
-| License | MIT (declared in `./package.json` and every `packages/<pkg>/package.json`) |
+| Total commits | 115 |
+| Authors | 1 person (two git identities: `Ameno Osman` 102, `Ameno` 13) |
+| First commit | `2026-09-21T10:51:54-07:00` |
+| Last commit | `2026-10-08T12:07:30-07:00` |
+| Merged PRs | 16 (most recent: #16, `linear/AICL-44-assistant-shell`) |
+| License | MIT |
 
-## File tree
-
-| Metric | Value |
-| --- | --- |
-| Files (excluding `.git`, `node_modules`) | 153 |
-| `md` files | 40 |
-| `ts` files | 35 |
-| `tsx` files | 29 |
-| `json` files | 22 |
-| `png` files | 9 |
-| `css` files | 7 |
-| `mjs` files | 4 |
-| `html` files | 2 |
-| `gitignore` files | 2 |
-| `yaml` files | 1 |
-| `jsonl` files | 1 |
-| `gitattributes` files | 1 |
-
-The `md` total includes `./AGENTS.md`, `.beads/README.md`, the per-domain specs in `docs/domains/`, the per-domain evaluations in `docs/evaluation/`, the QA checklists in `docs/qa/`, `packages/styles/README.md`, and the wiki pages under `droid-wiki/`. The `jsonl` file is `.beads/issues.jsonl`; the `yaml` file is `.beads/config.yaml`.
-
-## Workspaces and packages
+## Tracked files
 
 | Metric | Value |
 | --- | --- |
-| Workspace declaration | `./package.json` (`packages/*`) |
-| Packages | 4 (`packages/core`, `packages/react`, `packages/server`, `packages/styles`) |
+| Tracked files (`git ls-files`) | 413 |
+| `ts` / `tsx` | 159 / 124 |
+| `md` | 42 |
+| `json` | 26 |
+| `css` | 23 |
+| `mjs` | 19 |
+| `png` | 11 |
+| `html` | 3 |
+
+## Packages and apps
+
+| Metric | Value |
+| --- | --- |
+| Packages with code | 5 (`core`, `react`, `server`, `styles`, `fx`) |
+| Placeholder packages | 2 (`svelte`, `vue`: empty `src/`) |
 | Reference apps | 1 (`apps/workspace`) |
-| Reference examples | 2 (`examples/server-node`, `examples/slice-1`) |
-| Domain specs | 5 (composer, transcript, agent-execution, navigation, platform — see `docs/domains/`) |
-| QA checklists | 4 (backend-wire, chat-ui, corpus-alignment, design-system — see `docs/qa/`) |
+| Examples | 2 (`examples/server-node`, `examples/slice-1`) |
+| Unit tests passing | core 16, react 28, server 4, workspace 188 |
+| Workspace server test files | 28 (`apps/workspace/server/*.test.ts`) |
+| Workspace e2e suites | 13 (`apps/workspace/e2e/*.mjs`) |
+| Agent tools in the workspace | 55 custom (see `apps/workspace/AGENTS.md`) plus Pi's `read grep find ls write edit bash` |
 
-## Corpus
+## Docs and corpus
 
 | Metric | Value |
 | --- | --- |
-| Screens analysed | 1,262 |
-| Products surveyed | 4 (Devin, Manus, Lovable, Cofounder) |
-| Source | `docs/CORPUS.md` |
-| Comparative evaluations | `docs/evaluation/` (seven files: `docs/evaluation/prior-art.md`, `docs/evaluation/CRITERIA.md`, plus one per domain and `docs/evaluation/transport.md`) |
+| Domain specs | 5 (`docs/domains/`) |
+| Evaluations | 8 files (`docs/evaluation/`: one per domain, `transport`, `prior-art`, `CRITERIA`) |
+| QA notes | 4 (`docs/qa/`) |
+| Decisions | D1–D14 (`docs/DECISIONS.md`) |
+| Screens analysed | 1,262 across 4 products (`docs/CORPUS.md`) |

@@ -1,7 +1,11 @@
 # Lore
 
-`aicl` is the repository for an open-source AI chat UI library designed against a corpus survey of 1,262 screens across four shipping agentic-chat products (Devin, Manus, Lovable, Cofounder). The single snapshot on `main` is commit `118f39478dcecd5de413e5ae97680b2c17e2badb`, contributed by `Ameno` on 2026-10-05.
+`aicl` is an open-source AI chat UI library designed against a corpus survey of 1,262 screens across four shipping agentic-chat products (Devin, Manus, Lovable, Cofounder). The architecture splits a chat UI into conversation semantics, framework bindings, and visual design, and turns the split into a code rule: `@aicl/core` cannot import a framework and cannot touch `document` (see `docs/ARCHITECTURE.md`).
 
-The architecture splits a chat UI along three concerns that change at different rates — conversation semantics, framework bindings, and visual design — and enforces the split as a code rule: `@aicl/core` cannot import a framework and cannot touch `document` (see `docs/ARCHITECTURE.md`). The corpus-grounded design rules are recorded in `docs/DECISIONS.md`, the per-domain specs in `docs/domains/`, and the comparative evaluations in `docs/evaluation/` that supersede the specs where evidence changed.
+The history in `git log` runs in phases:
 
-Beyond the commit graph and the docs, no further history surfaced. The repository was bootstrapped as a single squashed snapshot, and the wiki generation run on 2026-10-05 recorded the values in [By the numbers](by-the-numbers.md).
+1. **Corpus and contract (from 2026-09-21).** Corpus labelling, per-domain specs (`docs/domains/`), comparative evaluations that corrected them (`docs/evaluation/`), decisions D1–D14 (`docs/DECISIONS.md`), the blueprint (`docs/BLUEPRINT.md`), and the first slices of `@aicl/core`, `@aicl/react`, `@aicl/server` and `@aicl/styles`. These tasks were tracked in Beads (`.beads/`).
+2. **The workspace, in waves (AICL-10 onward, tracked in Linear).** A shared tldraw scratchpad driven by a Pi agent (M1); the "moi computer" runtime of sessions, applets, a shell and a canvas agent (wave 1); human-in-the-loop, live plans and terminals, agent nodes and the canvas graph (wave 2); `@aicl/fx`, provider kits and the full chat application (wave 3); live surfaces, multi-agent swarms, MCP, the Sideshow bridge, and the canvas as a shared design space (wave 4).
+3. **One design (AICL-44/45).** The kit picker was dropped, so the app renders one assistant design and the kits remain as presets for screens designed on the canvas.
+
+Code comments still carry the ticket (`AICL-41`) and wave labels of the work that introduced them.

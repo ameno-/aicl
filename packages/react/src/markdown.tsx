@@ -4,7 +4,7 @@
  * Kept off the main entry so the core adapter ships no parser (ARCHITECTURE
  * non-goal); consumers who want rich replies register it:
  *
- *   createPartRegistry({ text: MarkdownTextPart })
+ *   createPartRegistry({ ...markdownRenderers })
  *
  * Built on react-markdown + remark-gfm rather than a bespoke parser. Raw HTML
  * is never rendered (react-markdown's default), so model output cannot inject

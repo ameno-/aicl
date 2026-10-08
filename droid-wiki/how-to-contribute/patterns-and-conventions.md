@@ -2,35 +2,38 @@
 
 ## Style
 
-- TypeScript with `strict` enabled (see `packages/core/tsconfig.json` and the per-package `packages/*/tsconfig.json` files). Optional properties use exact shapes; `toFilePart` in `packages/core/src/types.ts` is a worked example of avoiding `undefined` on the wire.
-- ES modules only. Every package declares `"type": "module"` and `"sideEffects": false` so a tree-shaking bundler can drop unused exports.
-- Named exports; barrel files re-export from `./<file>.js`. The barrel for `@aicl/core` is `packages/core/src/index.ts`.
-- Comments document the *why*, not the *what*. The architecture files (`packages/core/src/types.ts`, `packages/core/src/chat.ts`) use them heavily because they encode corpus-derived design rules that aren't obvious from the types alone.
+- TypeScript `strict` with `noUncheckedIndexedAccess`. Optional fields are omitted rather than set to `undefined` on the wire (see `toFilePart` in `packages/core/src/types.ts`).
+- ES modules only. Library packages are `"sideEffects": false` (except CSS).
+- Named exports through barrel files (`src/index.ts`).
+- Library source imports with `.js` extensions (compiled by `tsc`). `apps/workspace` imports with `.ts` extensions and `import type` (it runs under strip-types).
+- Comments explain *why*, often citing the corpus rule, a decision (`D12`), or a ticket (`AICL-41`). Keep them accurate when you change behaviour.
 
 ## Error handling
 
-- **Engine.** Recoverable errors become a `status: 'error'` transition rather than a thrown exception. The catch in `packages/core/src/chat.ts` (`run`) wraps anything that bubbles up.
-- **Abort.** `signal` is honoured cooperatively. A user-initiated `stop()` never gets overwritten with `error`; the `controller` is held locally as well as on the instance so the catch can distinguish a user abort from a transport failure.
-- **Handler.** Declared errors throw `ChatHandlerError` with a `status` and a `retryable` flag (see `packages/server/src/handler.ts`). Anything else becomes a wire-level `{ type: 'error', error }` `StreamEvent` frame.
+- **Engine.** Failures become `status: 'error'`, not exceptions. A user's `stop()` is never overwritten by the resulting transport error.
+- **Handler.** `ChatHandlerError(status, message, retryable)` before streaming sets the HTTP status. Other errors while streaming become an in-band `error` frame.
+- **Workspace.** `SessionError` and `BrowseError` carry a status. Tool failures return an error result to the model and do not crash the server.
 
 ## Framework agnosticism
 
-`@aicl/core` must not import a framework and must not touch `document` or `window`. `@aicl/styles` must not either; it emits CSS only. The rule is enforced by convention and code review at this stage (no CI workflow exists).
+`@aicl/core` must not import a framework or touch `document`/`window`. `@aicl/styles` is CSS only. Enforced by review.
 
 ## Renderer extension
 
-New part types register with the renderer registry rather than forking the transcript. A consumer can register an exact match (`'data-invoice'`) or a wildcard (`'data-'`) that covers a family. Unknown types fall back to a registered handler rather than throwing, so a server that adds a part type cannot white-screen an older client. See `packages/core/src/registry.ts`.
+Add domain parts as `data-*` types and register a renderer, without forking the transcript. In React, register each type by its **exact** name: `PartRenderer` ignores a registry's `data-` wildcard and fallback (`docs/ADOPTION.md` §5). Unknown types render as `UnknownPart` and never throw.
+
+## Workspace extension
+
+New capability arrives as a feature module (`apps/workspace/server/feature.ts`): routes, tools, a prompt fragment, Pi extensions, hidden per-session context, and WebSocket upgrades. Contracts that both sides need live in `apps/workspace/shared/`. Recipes: `apps/workspace/AGENTS.md#recipes`.
 
 ## Cross-cutting concerns
 
-- **Issue tracking.** Cross-cutting work goes through Beads (`bd`); do not use markdown TODO lists or in-tree `TODO` blocks for cross-cutting work. Local `TODO`s inside a function body are fine.
-- **Decisions.** Decisions that change the public API get a bead and an entry in `docs/DECISIONS.md`. The DECISIONS file already references D9 (agent surfaces stay in the chat packages), D10 (platform pages are recipes, not API), D11 (session metadata is its own model), and D12 (`createComboboxModel` is the single listbox contract behind `TriggerMenu`, `SessionSearch`, and `Select`).
-- **Persistence.** The transcript is stored as a normalised node map plus an id array, not a nested tree. Appending a token to the last message must not create a new array of all messages, or long conversations degrade quadratically. See `packages/core/src/chat.ts`.
-- **IME and accessibility.** Composers must check `composingRef` and `nativeEvent.isComposing` before treating `Enter` as submit. A streaming transcript needs `aria-live="polite"` on a container that is not recreated per token, or screen readers re-announce the entire conversation on every delta. See `packages/react/src/Composer.tsx` and `packages/react/src/Transcript.tsx`.
+- **Tracking.** Linear for work (`AICL-*`), `docs/DECISIONS.md` for contract changes.
+- **Persistence.** The transcript is a normalised node map plus an id array. Appending a token must not copy every message.
+- **IME and accessibility.** Check `isComposing` before Enter submits. Keep one `aria-live` container for the life of the transcript.
 
 ## Naming
 
-- Package names are scoped `@aicl/<name>`.
-- Public types are `PascalCase`; factories and pure functions are `camelCase`; constants are `UPPER_SNAKE_CASE` (for example `BUSY` in `packages/core/src/chat.ts`).
-- File names mirror the main export: `packages/core/src/chat.ts` exports `ChatController`, `packages/react/src/composer-surface.tsx` exports the composer surface.
-- Test files end in `*.test.ts` or `*.test.tsx`; end-to-end scripts end in `*.mjs`.
+- Packages: `@aicl/<name>`. Types: `PascalCase`. Functions and factories: `camelCase` (`createX`). Constants: `UPPER_SNAKE_CASE`.
+- Test files: `*.test.ts(x)` beside the code. E2E scripts: `*.mjs`.
+- DOM hooks: `data-aicl="<primitive>"` plus state attributes (`data-state`, `data-role`, `data-status`, `data-part`).
