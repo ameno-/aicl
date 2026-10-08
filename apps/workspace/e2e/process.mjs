@@ -76,8 +76,11 @@ await check('browser surface opens the detected port', async () => {
 await check('process view shows running state, port button and logs; Stop ends it', async () => {
   await p.evaluate((id) => {
     const ed = window.__aiclEditor;
-    ed.createShape({ id: 'shape:proc1', type: 'aicl-component', x: 0, y: 0, props: { w: 620, h: 340, component: 'surface', title: 'Process', props: { kind: 'process', id } } });
-    ed.select('shape:proc1');
+    // The session's work frame may already hold a card for this process (AICL-41); reuse it.
+    const existing = ed.getCurrentPageShapes().find((s) => s.props.component === 'surface' && s.props.props?.kind === 'process' && s.props.props?.id === id);
+    const shapeId = existing?.id ?? 'shape:proc1';
+    if (!existing) ed.createShape({ id: shapeId, type: 'aicl-component', x: 0, y: 0, props: { w: 620, h: 340, component: 'surface', title: 'Process', props: { kind: 'process', id } } });
+    ed.select(shapeId);
     ed.zoomToSelection({ animation: { duration: 0 } });
     ed.selectNone();
   }, proc.id);

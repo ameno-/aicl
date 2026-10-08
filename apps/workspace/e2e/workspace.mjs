@@ -126,7 +126,8 @@ await check('external agent CLI drives the open canvas', async () => {
   if (!/canvas_arrange/.test(tools)) throw new Error('canvas_arrange missing from CLI tool list');
   cli(['add', JSON.stringify([{ kind: 'note', id: 'cli-a', text: 'from the CLI', x: 0, y: 900 }, { kind: 'note', id: 'cli-b', text: 'external agent', x: 400, y: 1100 }])]);
   cli(['call', 'canvas_arrange', JSON.stringify({ ids: ['cli-a', 'cli-b'], mode: 'stack-horizontal' })]);
-  const ys = await p.evaluate(() => ['shape:cli-a', 'shape:cli-b'].map((id) => Math.round(window.__aiclEditor.getShape(id)?.y ?? NaN)));
+  // Page coordinates: a note dropped inside a frame (e.g. a session's work frame) is parented to it.
+  const ys = await p.evaluate(() => ['shape:cli-a', 'shape:cli-b'].map((id) => Math.round(window.__aiclEditor.getShapePageBounds(id)?.y ?? NaN)));
   if (ys[0] !== ys[1]) throw new Error(`not stacked: ${ys}`);
   return `notes stacked at y=${ys[0]}`;
 });

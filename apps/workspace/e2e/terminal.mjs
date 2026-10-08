@@ -101,11 +101,7 @@ await check('agent terminal_run: approval, live lines in the agent terminal, rep
   const approval = dock().locator('[data-hitl=approval]').last();
   await approval.waitFor({ timeout: 120000 });
   await shot('terminal-approval');
-  const agentId = await p.evaluate(async () => {
-    const { surfaces } = await (await fetch('/api/surfaces')).json();
-    return surfaces.find((s) => s.title === 'agent')?.id ?? null;
-  });
-  if (agentId) throw new Error('agent terminal existed before approval');
+  // A reused workspace may already have the agent terminal; the run reuses it.
   await approval.getByRole('button', { name: 'Approve' }).click();
   let aid = null;
   for (let i = 0; i < 40 && !aid; i++) {
