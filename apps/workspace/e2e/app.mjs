@@ -145,8 +145,10 @@ for (const kit of KITS) {
       const done = await panel.locator('[data-fx-component=AnimatedPlan]').getAttribute('data-total');
       if (!Number(done)) throw new Error('empty plan');
       await panel.getByRole('tab', { name: 'Files' }).click();
-      await panel.locator('[data-entry="notes.md"]').waitFor({ timeout: 10000 });
-      await panel.locator('[data-entry="notes.md"]').click();
+      // The tree (@pierre/trees) renders in an open shadow root; text locators reach into it.
+      const entry = panel.locator('[data-pane=files]').getByText('notes.md', { exact: true }).first();
+      await entry.waitFor({ timeout: 10000 });
+      await entry.click();
       // Whatever notes.md says, its last line shows in the viewer.
       const { text: notes } = await (await fetch(`${API}/api/file/text?path=notes.md`)).json();
       const line = notes.trim().split('\n').pop().replace(/^[-#\s]+/, '').slice(0, 40);
