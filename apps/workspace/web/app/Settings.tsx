@@ -1,8 +1,7 @@
-/** Settings dialog (kit, appearance, model, motion) and the shortcuts help. */
+/** Settings dialog (appearance, model, motion) and the shortcuts help. */
 import { Dialog, SegmentedControl, Switch } from '@aicl/react';
 import { Kbd } from '@aicl/fx';
-import { KIT_IDS, KITS, type ProviderKit } from '../../shared/kits.ts';
-import { setKit } from '../kits/index.tsx';
+import type { ProviderKit } from '../../shared/kits.ts';
 import { useActiveSessionId } from '../sessionsApi.ts';
 import { useSessionModel } from './models.ts';
 import { setOverlay, useOverlay } from './overlays.ts';
@@ -18,32 +17,13 @@ export function SettingsDialog({ kit }: { kit: ProviderKit }) {
       <Dialog.Title>Settings</Dialog.Title>
       <div className="settings" data-aicl-settings="">
         <section className="settings-section">
-          <h3>Kit</h3>
-          <p className="settings-hint">How the whole app looks, reads and moves. Switching is instant.</p>
-          <div className="kit-grid" role="radiogroup" aria-label="Kit">
-            {KIT_IDS.map((id) => {
-              const k = KITS[id];
-              return (
-                <button key={id} type="button" role="radio" aria-checked={kit.id === id} className="kit-card" data-kit-option={id} onClick={() => setKit(id)}>
-                  <span className="kit-swatch" aria-hidden="true" style={{ background: k.tokens.bg, borderColor: k.tokens.border }}>
-                    <i style={{ background: k.tokens.accent }} />
-                    <i style={{ background: k.tokens.surface, borderColor: k.tokens.border }} />
-                  </span>
-                  <span className="kit-name">{k.label}</span>
-                  <span className="kit-tag">{k.tagline}</span>
-                </button>
-              );
-            })}
-          </div>
-        </section>
-        <section className="settings-section">
           <h3>Appearance</h3>
           <SegmentedControl<ThemeMode>
             ariaLabel="Appearance"
             value={prefs.theme}
             onValueChange={(theme) => setPrefs({ theme })}
             options={[
-              { value: 'kit', label: 'Kit default' },
+              { value: 'kit', label: 'Default' },
               { value: 'light', label: 'Light' },
               { value: 'dark', label: 'Dark' },
               { value: 'system', label: 'System' },

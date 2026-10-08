@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
-import { MotionConfig, animate } from 'motion/react';
+import { useEffect, useState } from 'react';
+import { MotionConfig } from 'motion/react';
 import { ToastRegion } from '@aicl/react';
 import { ChatPanel } from '../ChatPanel.tsx';
 import { ConnectionBanner } from '../ConnectionBanner.tsx';
@@ -49,23 +49,6 @@ function useDockOpen(): [boolean, () => void] {
   ];
 }
 
-/** A colour wash in the new kit's background: the app restyles instantly, this makes it read as a transition. */
-function useKitTransition(kitId: string, bg: string, spring: { stiffness: number; damping: number }, reduced: boolean) {
-  const wash = useRef<HTMLDivElement>(null);
-  const first = useRef(true);
-  useEffect(() => {
-    if (first.current) {
-      first.current = false;
-      return;
-    }
-    const el = wash.current;
-    if (!el || reduced) return;
-    const controls = animate(el, { opacity: [0.9, 0] }, { type: 'spring', ...spring, restDelta: 0.01 });
-    return () => controls.stop();
-  }, [kitId]); // eslint-disable-line react-hooks/exhaustive-deps
-  return <div ref={wash} className="kit-wash" aria-hidden="true" style={{ background: bg }} />;
-}
-
 export function Shell() {
   const baseKit = useKit();
   const prefs = usePrefs();
@@ -82,12 +65,10 @@ export function Shell() {
     root.style.colorScheme = kit.tokens.mode;
     root.dataset['theme'] = kit.tokens.mode;
   }, [kit.tokens]);
-  const wash = useKitTransition(baseKit.id, kit.tokens.bg, kit.motion.spring, prefs.reducedMotion);
   return (
     <MotionConfig reducedMotion={prefs.reducedMotion ? 'always' : 'user'}>
       <KitScope kit={kit} className="app-root">
         <ShellBody kit={kit} prefersDark={prefersDark} />
-        {wash}
       </KitScope>
     </MotionConfig>
   );
@@ -102,7 +83,8 @@ function ShellBody({ kit, prefersDark }: { kit: ReturnType<typeof withTheme>; pr
   useEffect(() => onServerEvent('navigate', (e) => navigate(e.address)), []);
 
   const views = applets.filter((a) => a.kind === 'view');
-  const dockVisible = route.tab !== 'agent';
+  // The copilot belongs to the canvas: other pages have their own single input (AICL-52).
+  const dockVisible = route.tab === 'canvas';
   const canvasActive = route.tab === 'canvas';
   // Canvas-first mode: the canvas fills the window and the chat floats over it.
   const focusMode = useFocusMode();
@@ -117,7 +99,7 @@ function ShellBody({ kit, prefersDark }: { kit: ReturnType<typeof withTheme>; pr
           {/* Always mounted: agent canvas ops run in this editor. */}
           <div className={canvasActive ? 'shell-pane' : 'shell-pane shell-pane-hidden'} aria-hidden={!canvasActive} data-pane="canvas">
             <main className="canvas" aria-label="Scratchpad">
-              <Scratchpad />
+              <Scratchpad active={canvasActive} />
             </main>
             {canvasActive ? <CanvasToolbar /> : null}
           </div>

@@ -37,9 +37,15 @@ const uiComponents = { StylePanel: SelectionStylePanel, InFrontOfTheCanvas: Agen
  * The shared canvas. Loads the workspace snapshot, saves every document
  * change back to disk, and executes the agent's ops as they arrive.
  */
-export function Scratchpad() {
+export function Scratchpad({ active = true }: { active?: boolean }) {
   const [editor, setEditor] = useState<Editor | null>(null);
   useEffect(() => () => registerCanvasEditor(null), []);
+  // The canvas stays mounted on other tabs (agent ops run in it). There it must not be the
+  // focused editor, or its shortcuts (N, E, X, …) eat keystrokes meant for other inputs —
+  // notably inputs inside shadow roots, which tldraw cannot recognise as "typing".
+  useEffect(() => {
+    editor?.updateInstanceState({ isFocused: active });
+  }, [editor, active]);
   const [loaded, setLoaded] = useState(false);
 
   // Load once, then start saving. Saving before the load lands would write an

@@ -16,6 +16,7 @@ import { createLive } from './live.ts';
 import { createNodes } from './nodes.ts';
 import { createGraph } from './graph.ts';
 import { createSwarm } from './swarm.ts';
+import { createConnections } from './connections.ts';
 import { createSurfaceRegistry } from './surfaces/registry.ts';
 import { createWorkframes } from './workframes.ts';
 import type { SurfaceContext } from './surfaces/context.ts';
@@ -68,6 +69,9 @@ const featureContext: FeatureContext = {
     return hubRef;
   },
 };
+// External clients (MCP bridges, CLI) seen by the server, for the sidebar (AICL-46).
+const connections = createConnections(relay);
+
 // Wave 4 surfaces (shared/surfaces.ts): one service per kind, one shared index.
 // Agent-opened surfaces become cards in the session's work frame on the canvas (AICL-41).
 const workframes = createWorkframes({ relay, session: (id) => hubRef?.get(id) });
@@ -80,6 +84,7 @@ const features: FeatureModule[] = [
   createGraph(featureContext),
   createSwarm(featureContext),
   { routes: surfaces.routes, tools: [] },
+  { routes: connections.routes(), tools: [] },
   createTerminalSurface(surfaceContext),
   createBrowserSurface(surfaceContext),
   createFilesSurface(surfaceContext),
@@ -165,8 +170,37 @@ const sessionRoutes: RouteTable = {
     json(res, 200, { session: await hub.create(body) });
   },
   'PATCH /api/sessions/:id': async (req, res, { params }) => {
-    const body = await readJson<{ title?: string }>(req);
-    json(res, 200, { session: await hub.rename(params['id']!, body.title ?? '') });
+    const body = await readJson<{ title?: string; folder?: string; pinned?: boolean; archived?: boolean }>(req);
+    const id = params['id']!;
+    let session = body.title !== undefined ? await hub.rename(id, body.title) : undefined;
+    if (body.folder !== undefined || body.pinned !== undefined || body.archived !== undefined) {
+      session = await hub.organize(id, {
+        ...(body.folder !== undefined ? { folder: body.folder } : {}),
+        ...(body.pinned !== undefined ? { pinned: body.pinned } : {}),
+        ...(body.archived !== undefined ? { archived: body.archived } : {}),
+      });
+    }
+    if (!session) return json(res, 400, { message: 'Nothing to change.' });
+    json(res, 200, { session });
+  },
+  // Sidebar folders (AICL-46): saved paths like "Work/Research"; sessions carry their folder.
+  'GET /api/session-folders': async (_req, res) => json(res, 200, { folders: await hub.folders() }),
+  'POST /api/session-folders': async (req, res) => {
+    const body = await readJson<{ path?: string }>(req);
+    const folders = await hub.addFolder(body.path ?? '');
+    relay.broadcast({ type: 'session-folders', folders });
+    json(res, 200, { folders });
+  },
+  'PATCH /api/session-folders': async (req, res) => {
+    const body = await readJson<{ from?: string; to?: string }>(req);
+    const folders = await hub.renameFolder(body.from ?? '', body.to ?? '');
+    relay.broadcast({ type: 'session-folders', folders });
+    json(res, 200, { folders });
+  },
+  'DELETE /api/session-folders': async (_req, res, { url }) => {
+    const folders = await hub.deleteFolder(url.searchParams.get('path') ?? '');
+    relay.broadcast({ type: 'session-folders', folders });
+    json(res, 200, { folders });
   },
   'DELETE /api/sessions/:id': async (_req, res, { params }) => {
     await hub.remove(params['id']!);
@@ -240,6 +274,7 @@ async function handleChat(req: IncomingMessage, res: ServerResponse): Promise<vo
 const server = createServer((req, res) => {
   const url = new URL(req.url ?? '/', 'http://local');
   const route = `${req.method} ${url.pathname}`;
+  connections.touch(req, url);
 
   void (async () => {
     switch (route) {

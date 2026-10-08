@@ -4,8 +4,7 @@
  */
 import { useEffect, useMemo } from 'react';
 import { CommandMenu, type CommandItem } from '@aicl/fx';
-import { KIT_IDS, KITS, type ProviderKit } from '../../shared/kits.ts';
-import { setKit } from '../kits/index.tsx';
+import type { ProviderKit } from '../../shared/kits.ts';
 import { navigate } from '../router.ts';
 import { MAIN_SESSION_ID } from '../../shared/runtime.ts';
 import { sendToSession, setActiveSession, useActiveSessionId, useSessionChat, useSessions } from '../sessionsApi.ts';
@@ -81,7 +80,6 @@ export function CommandPalette({ kit, prefersDark }: { kit: ProviderKit; prefers
       { id: 'go-agents', group: 'Go to', label: 'Go to agents', onSelect: () => navigate({ tab: 'agents' }) },
       ...WORKFLOWS.map((w) => ({ id: `wf-${w.id}`, group: 'Workflows', label: w.label, onSelect: () => (navigate({ tab: 'agents' }), sendToSession(w.prompt, MAIN_SESSION_ID)) })),
       { id: 'go-overview', group: 'Go to', label: 'Go to Overview', onSelect: () => navigate({ tab: 'overview' }) },
-      ...KIT_IDS.map((id) => ({ id: `kit-${id}`, group: 'Kit', label: `Switch kit: ${KITS[id].label}${id === kit.id ? ' (current)' : ''}`, onSelect: () => setKit(id) })),
       ...sessions.map((x) => ({ id: `s-${x.id}`, group: kit.vocabulary.sessions, label: `Open ${s}: ${x.title}`, onSelect: () => (setActiveSession(x.id), openSession(x.id)) })),
       ...models.map((m) => ({ id: `m-${m.id}`, group: 'Model', label: `Switch model: ${m.label}`, onSelect: () => void setSessionModel(activeId, m.id) })),
     ];

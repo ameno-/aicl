@@ -43,12 +43,28 @@ export interface SessionInfo {
   finishedAt?: number;
   /** The latest run was stopped by a user or a parent. */
   stopped?: boolean;
+  /** Sidebar organisation (AICL-46): a folder path like "Work/Research", pinned to the top, or archived. */
+  folder?: string;
+  pinned?: boolean;
+  archived?: boolean;
 }
 
 export interface SessionUsage {
   inputTokens: number;
   outputTokens: number;
   costUsd?: number;
+}
+
+/** An external client using the workspace (MCP bridge, CLI): GET /api/connections. */
+export interface ClientConnection {
+  /** "mcp:claude-code", "mcp", "cli"… */
+  name: string;
+  kind: 'mcp' | 'cli' | 'other';
+  firstSeen: number;
+  lastSeen: number;
+  /** Tool calls made. */
+  calls: number;
+  lastTool?: string;
 }
 
 /** One entry of GET /api/models → { models: ModelOption[], default: string | null }. */
@@ -230,4 +246,6 @@ export type ServerEvent =
   | { type: 'terminal'; chunk: TerminalChunk }
   | { type: 'surface'; surface: SurfaceInfo }
   | { type: 'surface-removed'; kind: SurfaceKind; id: string }
+  | { type: 'session-folders'; folders: string[] }
+  | { type: 'connection'; connection: ClientConnection }
   | { type: 'swarm'; event: SwarmEvent };
