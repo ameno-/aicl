@@ -20,6 +20,7 @@ const views: Partial<Record<SurfaceKind, LazyExoticComponent<ComponentType<Surfa
   file: lazy(() => import('./file.tsx')),
   diff: lazy(() => import('./diff.tsx')),
   review: lazy(() => import('./review.tsx')),
+  sideshow: lazy(() => import('./sideshow.tsx')),
 };
 
 export function SurfaceView({ kind, id, variant }: { kind: SurfaceKind; id: string; variant: SurfaceVariant }) {
