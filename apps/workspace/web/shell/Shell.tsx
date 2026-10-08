@@ -12,7 +12,10 @@ import { SettingsDialog, ShortcutsDialog } from '../app/Settings.tsx';
 import { themeVars } from '../ui/theme.ts';
 import { usePrefs, usePrefersDark, withTheme } from '../app/prefs.ts';
 import { onServerEvent } from '../events.ts';
-import { navigate, useRoute } from '../router.ts';
+import { navigate, useFocusMode, useRoute } from '../router.ts';
+import { CanvasToolbar } from '../workspace/CanvasToolbar.tsx';
+import { FloatingChat } from '../workspace/FloatingChat.tsx';
+import '../workspace/workspace.css';
 import { useApplets, useWorkspaceConfig } from '../applets/index.tsx';
 import { AgentPage } from './AgentPage.tsx';
 import { OverviewPage } from './OverviewPage.tsx';
@@ -101,11 +104,14 @@ function ShellBody({ kit, prefersDark }: { kit: ReturnType<typeof withTheme>; pr
   const views = applets.filter((a) => a.kind === 'view');
   const dockVisible = route.tab !== 'agent';
   const canvasActive = route.tab === 'canvas';
+  // Canvas-first mode: the canvas fills the window and the chat floats over it.
+  const focusMode = useFocusMode();
+  const focus = canvasActive && focusMode;
 
   return (
-    <div className="shell" data-aicl-root="" data-route={route.tab} data-kit-nav={kit.layout.nav}>
+    <div className="shell" data-aicl-root="" data-route={route.tab} data-kit-nav={kit.layout.nav} data-focus={focus}>
       <ConnectionBanner />
-      <TopBar kit={kit} name={config.name} route={route} views={views} dockVisible={dockVisible} dockOpen={dockOpen} onToggleDock={toggleDock} />
+      {focus ? null : <TopBar kit={kit} name={config.name} route={route} views={views} dockVisible={dockVisible} dockOpen={dockOpen} onToggleDock={toggleDock} />}
       <div className="shell-body">
         <div className="shell-stage">
           {/* Always mounted: agent canvas ops run in this editor. */}
@@ -113,6 +119,7 @@ function ShellBody({ kit, prefersDark }: { kit: ReturnType<typeof withTheme>; pr
             <main className="canvas" aria-label="Scratchpad">
               <Scratchpad />
             </main>
+            {canvasActive ? <CanvasToolbar /> : null}
           </div>
           {route.tab === 'agent' ? (
             <div className="shell-pane" data-pane="agent">
@@ -135,9 +142,13 @@ function ShellBody({ kit, prefersDark }: { kit: ReturnType<typeof withTheme>; pr
             </div>
           ) : null}
         </div>
-        <div className="shell-dock" data-open={dockVisible && dockOpen} aria-hidden={!(dockVisible && dockOpen)}>
-          <ChatPanel kit={kit} />
-        </div>
+        {focus ? (
+          <FloatingChat kit={kit} />
+        ) : (
+          <div className="shell-dock" data-open={dockVisible && dockOpen} aria-hidden={!(dockVisible && dockOpen)}>
+            <ChatPanel kit={kit} />
+          </div>
+        )}
       </div>
       <CommandPalette kit={kit} prefersDark={prefersDark} />
       <FilePickerHost />

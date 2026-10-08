@@ -1,0 +1,185 @@
+/* Canvas as shared design space (AICL-41): agent presence, canvas toolbar, floating chat. */
+
+.presence-layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 50;
+}
+.presence-glow {
+  position: absolute;
+  border-radius: 12px;
+  box-shadow: 0 0 0 2px var(--presence), 0 0 26px 4px color-mix(in srgb, var(--presence) 45%, transparent);
+  animation: presence-pulse 1.8s ease-in-out infinite;
+}
+@keyframes presence-pulse {
+  50% {
+    box-shadow: 0 0 0 2px var(--presence), 0 0 38px 8px color-mix(in srgb, var(--presence) 25%, transparent);
+  }
+}
+.presence-cursor {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 2px;
+}
+.presence-cursor svg {
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.35));
+  flex: none;
+}
+.presence-label {
+  margin-top: 12px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--presence);
+  color: #fff;
+  font: 600 11px/1.5 system-ui, sans-serif;
+  white-space: nowrap;
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+.presence-label em {
+  font-style: normal;
+  font-weight: 500;
+  opacity: 0.85;
+}
+@media (prefers-reduced-motion: reduce) {
+  .presence-glow {
+    animation: none;
+  }
+}
+
+/* The little bar over the canvas: follow, tidy, focus. */
+.canvas-toolbar {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 60;
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--aicl-border, #e7e7e5);
+  border-radius: 10px;
+  background: var(--aicl-surface, #fff);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+}
+.canvas-toolbar button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 9px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: inherit;
+  font: 500 12px/1.4 inherit;
+  cursor: pointer;
+}
+.canvas-toolbar button:hover {
+  background: var(--aicl-surface-tint, #f3f3f1);
+}
+.canvas-toolbar button[aria-pressed='true'] {
+  background: var(--aicl-accent, #3b5bdb);
+  color: var(--aicl-accent-fg, #fff);
+}
+
+/* Canvas-first mode: the canvas fills the window, chat floats. */
+.shell[data-focus='true'] .shell-body {
+  position: absolute;
+  inset: 0;
+}
+.floating-chat {
+  position: absolute;
+  /* Above tldraw's own panels (style panel, menus). */
+  z-index: 500;
+  width: 380px;
+  height: min(560px, calc(100% - 32px));
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--aicl-border, #e7e7e5);
+  border-radius: 14px;
+  background: var(--aicl-surface, #fff);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.22);
+  overflow: hidden;
+}
+.floating-chat[data-collapsed='true'] {
+  display: none;
+}
+.floating-chat__bar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px 4px 10px;
+  border-bottom: 1px solid var(--aicl-border, #e7e7e5);
+  font: 600 11px/1.4 inherit;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  opacity: 0.8;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+}
+.floating-chat__bar:active {
+  cursor: grabbing;
+}
+.floating-chat__bar span {
+  flex: 1;
+}
+.floating-chat .chat {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  height: auto;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+.floating-chat .chat-empty,
+.floating-chat .chat-composer [data-suggestions] {
+  display: none;
+}
+.floating-chat-pill {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  z-index: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1px solid var(--aicl-border, #e7e7e5);
+  border-radius: 999px;
+  background: var(--aicl-surface, #fff);
+  color: inherit;
+  font: 600 12px/1.4 inherit;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+}
+.shell[data-focus='true'] .canvas-toolbar {
+  top: 12px;
+}
+
+/* "Open in app" in a surface card's header. */
+.aicl-card__open {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  padding: 1px 7px;
+  border: 1px solid var(--aicl-border, #e7e7e5);
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  font: 500 11px/1.5 inherit;
+  cursor: pointer;
+}
+.aicl-card__open:hover {
+  background: var(--aicl-surface-tint, #f3f3f1);
+}
