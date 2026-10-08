@@ -213,7 +213,8 @@ test('layoutRun lays children out as a tree under the root', () => {
   assert.equal(at['ag-a1']!.parent, 'ag-a');
   assert.ok(at['ag-a1']!.y > at['ag-a']!.y && at['ag-a']!.y > at['rt-main']!.y);
   assert.ok(at['ag-b']!.x > at['ag-a']!.x);
-  assert.equal(at['ag-a']!.label, 'task a');
+  assert.equal(at['ag-a']!.label, undefined, 'arrows stay unlabelled so side-by-side labels cannot overlap');
+  assert.match(at['ag-a']!.role ?? '', /task a/);
   assert.equal(statusOf({ ...root, status: 'running' }), 'running');
 });
 

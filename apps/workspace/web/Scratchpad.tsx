@@ -16,6 +16,8 @@ import { shapeUtils } from './ComponentShape.tsx';
 import { InsertMenu } from './InsertMenu.tsx';
 import { registerCanvasEditor } from './chatStore.ts';
 import { startGraphTracker } from './graph.ts';
+import { AgentPresence } from './workspace/AgentPresence.tsx';
+import { trackUserMoves } from './workspace/frames.ts';
 
 const SAVE_DEBOUNCE_MS = 400;
 
@@ -29,7 +31,7 @@ function SelectionStylePanel(props: TLUiStylePanelProps) {
   return hasSelection ? <DefaultStylePanel {...props} /> : null;
 }
 
-const uiComponents = { StylePanel: SelectionStylePanel };
+const uiComponents = { StylePanel: SelectionStylePanel, InFrontOfTheCanvas: AgentPresence };
 
 /**
  * The shared canvas. Loads the workspace snapshot, saves every document
@@ -107,6 +109,7 @@ export function Scratchpad() {
           // The chat sends the current canvas selection with every prompt.
           registerCanvasEditor(mounted);
           startGraphTracker(mounted);
+          trackUserMoves(mounted);
           // Dev-only handle for browser tests and console debugging.
           if ((import.meta as { env?: { DEV?: boolean } }).env?.DEV) {
             (window as unknown as { __aiclEditor?: Editor }).__aiclEditor = mounted;

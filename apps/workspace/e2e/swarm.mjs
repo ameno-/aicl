@@ -118,7 +118,11 @@ await shot('canvas-run-frame');
 
 await p.goto(`${WEB}/#/agents`);
 await check('stopping one child from the Agents view stops it, the root continues', async () => {
-  const data = rows().filter({ hasText: 'Data' }).first();
+  // Stop the Data child of THIS run (a reused workspace lists earlier runs' children too).
+  const running = rows().and(p.locator('[data-state=running]')).filter({ hasText: 'Data' }).first();
+  await until(async () => (await running.count()) > 0, 20000, 'a running Data child');
+  const sid = await running.getAttribute('data-session-id');
+  const data = p.locator(`[data-swarm=row][data-session-id="${sid}"]`);
   await data.click();
   const stop = p.locator('[data-swarm=stop]');
   await until(async () => !(await stop.isDisabled()), 20000, 'Data still running');
@@ -159,7 +163,9 @@ await check('after reload lineage and usage persist', async () => {
   await until(async () => (await rows().count()) >= 3, 15000, 'rows after reload');
   const kids = (await sessions()).filter((s) => s.parentId === 'main');
   if (kids.length < 3) throw new Error(`${kids.length} children`);
-  if (!kids.every((k) => k.usage && k.usage.inputTokens > 0 && k.role && k.task)) throw new Error('missing usage/role/task');
+  if (!kids.every((k) => k.usage && k.role && k.task)) throw new Error('missing usage/role/task');
+  // The child the test stops may never have produced a token; the others must have.
+  if (kids.filter((k) => k.usage.inputTokens > 0).length < 2) throw new Error('usage missing on children that ran');
   const usageShown = await rows().locator('[data-swarm=usage]').count();
   if (usageShown < 3) throw new Error(`usage shown on ${usageShown} rows`);
   return kids.map((k) => `${k.title}:${k.usage.inputTokens + k.usage.outputTokens}tok`).join(', ');

@@ -51,6 +51,29 @@ interface Term {
   chain: Promise<unknown>;
   lastData: number;
   gotData: boolean;
+  /** 'hooks': zsh/bash report command boundaries through invisible OSC marks; 'legacy': printf sentinels. */
+  mode?: 'hooks' | 'legacy';
+  setup?: Promise<void>;
+  /** While the hook setup line runs its echo and prompt are held back from every view. */
+  muted: boolean;
+  mutedBuf: string;
+  onReady?: () => void;
+}
+
+/** OSC 777 marks printed by the shell hooks. Terminals ignore unknown OSC, so users never see them. */
+const MARK_B = '\u001b]777;aicl;B\u0007';
+const MARK_READY = '\u001b]777;aicl;R\u0007';
+const MARK_D = /\u001b\]777;aicl;D;(\d+)\u0007/;
+
+/** The one-time (muted) line that installs the hooks, or undefined for shells we cannot hook. */
+export function hookSetup(shell: string): string | undefined {
+  const name = path.basename(shell);
+  const mark = (c: string, arg = '') => `printf '\\033]777;aicl;${c}${arg}\\a'`;
+  if (name === 'zsh')
+    return ` setopt HIST_IGNORE_SPACE; PROMPT_EOL_MARK=''; __aicl_pre(){ ${mark('B')}; }; __aicl_post(){ printf '\\033]777;aicl;D;%s\\a' $?; }; preexec_functions+=(__aicl_pre); precmd_functions=(__aicl_post $precmd_functions); ${mark('R')}`;
+  if (name === 'bash')
+    return ` HISTCONTROL=ignoreboth; PS0=$'\\033]777;aicl;B\\a'; PROMPT_COMMAND='printf "\\033]777;aicl;D;%s\\a" $?'"\${PROMPT_COMMAND:+;$PROMPT_COMMAND}"; ${mark('R')}`;
+  return undefined;
 }
 
 export interface TerminalManagerOptions {
@@ -124,7 +147,7 @@ export function createTerminalManager(options: TerminalManagerOptions) {
       cols,
       rows,
       cwd,
-      env: { ...process.env, TERM: 'xterm-256color', COLORTERM: 'truecolor', AICL_TERMINAL: id } as Record<string, string>,
+      env: { ...process.env, TERM: 'xterm-256color', COLORTERM: 'truecolor', AICL_TERMINAL: id, PROMPT_EOL_MARK: '' } as Record<string, string>,
     });
     const t: Term = {
       info: { id, title: opts.title?.trim() || `terminal ${terms.size + 1}`, cwd, cols, rows, busy: false, exited: false },
@@ -136,13 +159,31 @@ export function createTerminalManager(options: TerminalManagerOptions) {
       chain: Promise.resolve(),
       lastData: 0,
       gotData: false,
+      muted: false,
+      mutedBuf: '',
     };
     terms.set(id, t);
+    const deliver = (data: string) => {
+      append(t, data);
+      for (const l of [...t.listeners]) l.output(data);
+    };
     pty.onData((data) => {
       t.lastData = Date.now();
       t.gotData = true;
-      append(t, data);
-      for (const l of [...t.listeners]) l.output(data);
+      if (!t.muted) return deliver(data);
+      t.mutedBuf += data;
+      // Held back until the setup command finished AND its precmd mark arrived: the shell is then back at a prompt.
+      const at = t.mutedBuf.indexOf(MARK_READY);
+      if (at < 0) return;
+      const after = t.mutedBuf.slice(at + MARK_READY.length);
+      const d = MARK_D.exec(after);
+      if (!d) return;
+      const rest = after.slice(d.index + d[0].length);
+      t.muted = false;
+      t.mutedBuf = '';
+      // The old prompt stays on screen while its replacement is redrawn on the same line.
+      deliver(`\r\u001b[K${rest}`);
+      t.onReady?.();
     });
     pty.onExit(({ exitCode }) => {
       t.info.exited = true;
@@ -241,12 +282,42 @@ export function createTerminalManager(options: TerminalManagerOptions) {
     return result;
   }
 
+  /** Installs the shell hooks once per terminal (muted, so nobody sees the setup); legacy printf sentinels when the shell is not hookable. */
+  function ensureMode(t: Term): Promise<void> {
+    t.setup ??= (async () => {
+      const line = hookSetup(options.shell ?? process.env['SHELL'] ?? '/bin/zsh');
+      if (!line) {
+        t.mode = 'legacy';
+        return;
+      }
+      await ready(t.info.id);
+      await new Promise<void>((resolve) => {
+        const timer = setTimeout(() => {
+          t.muted = false;
+          t.mutedBuf = '';
+          t.mode = 'legacy';
+          resolve();
+        }, 4000);
+        t.onReady = () => {
+          clearTimeout(timer);
+          t.mode = 'hooks';
+          resolve();
+        };
+        t.muted = true;
+        t.pty.write(`${line}\r`);
+      });
+    })();
+    return t.setup;
+  }
+
   async function execRun(t: Term, command: string, opts: { timeoutMs?: number; signal?: AbortSignal; maxChars?: number }): Promise<RunResult> {
+    await ensureMode(t);
+    const hooks = t.mode === 'hooks';
     const timeoutMs = Math.min(Math.max(opts.timeoutMs ?? 120_000, 1000), 600_000);
     const maxChars = opts.maxChars ?? 20_000;
     const nonce = randomBytes(5).toString('hex');
     const begin = `__AICL_B_${nonce}`;
-    const done = new RegExp(`__AICL_D_${nonce}_(\\d+)`);
+    const done = hooks ? MARK_D : new RegExp(`__AICL_D_${nonce}_(\\d+)`);
     let raw = '';
     const listener: TerminalListener = {
       output: (d) => {
@@ -265,7 +336,7 @@ export function createTerminalManager(options: TerminalManagerOptions) {
         resolve({ code, timedOut });
       };
       check = () => {
-        const m = done.exec(stripAnsi(raw));
+        const m = done.exec(hooks ? raw : stripAnsi(raw));
         if (m) finish(Number(m[1]), false);
       };
     });
@@ -278,9 +349,8 @@ export function createTerminalManager(options: TerminalManagerOptions) {
     t.info.lastCommand = command;
     changed(t);
     const oneLine = command.replace(/\s*\n\s*/g, '; ');
-    t.pty.write(
-      `printf '\\n__AICL_B_%s\\n' ${nonce}; ${oneLine} ; printf '\\n__AICL_D_%s_%s\\n' ${nonce} $?\r`,
-    );
+    // Hooks mode types just the command (a leading space keeps it out of history); legacy wraps it in visible sentinels.
+    t.pty.write(hooks ? ` ${oneLine}\r` : `printf '\\n__AICL_B_%s\\n' ${nonce}; ${oneLine} ; printf '\\n__AICL_D_%s_%s\\n' ${nonce} $?\r`);
     const { code, timedOut } = await outcome;
     clearTimeout(timer);
     opts.signal?.removeEventListener('abort', onAbort);
@@ -288,16 +358,29 @@ export function createTerminalManager(options: TerminalManagerOptions) {
     t.info.busy = false;
     changed(t);
 
-    let text = stripAnsi(raw);
-    const b = text.indexOf(`${begin}\n`);
-    if (b >= 0) text = text.slice(b + begin.length + 1);
-    else {
-      // The begin marker's echo never matched (shell died or timed out early): show what we have, minus the typed line.
-      const nl = text.indexOf('\n');
-      text = nl >= 0 ? text.slice(nl + 1) : '';
+    let text: string;
+    if (hooks) {
+      const bAt = raw.indexOf(MARK_B);
+      const dAt = raw.search(done);
+      if (bAt >= 0) text = stripAnsi(raw.slice(bAt + MARK_B.length, dAt >= 0 ? dAt : undefined));
+      else {
+        // No start mark (a parse error, or bash without PS0): skip the echoed command line.
+        text = stripAnsi(raw.slice(0, dAt >= 0 ? dAt : undefined));
+        const nl = text.indexOf('\n');
+        text = nl >= 0 ? text.slice(nl + 1) : '';
+      }
+    } else {
+      text = stripAnsi(raw);
+      const b = text.indexOf(`${begin}\n`);
+      if (b >= 0) text = text.slice(b + begin.length + 1);
+      else {
+        // The begin marker's echo never matched (shell died or timed out early): show what we have, minus the typed line.
+        const nl = text.indexOf('\n');
+        text = nl >= 0 ? text.slice(nl + 1) : '';
+      }
+      const d = text.search(done);
+      if (d >= 0) text = text.slice(0, d);
     }
-    const d = text.search(done);
-    if (d >= 0) text = text.slice(0, d);
     text = text.replace(/^\n/, '').trimEnd();
     let truncated = false;
     if (text.length > maxChars) {

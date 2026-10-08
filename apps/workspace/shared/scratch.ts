@@ -74,7 +74,9 @@ export type ScratchOp =
   /** Animate the USER's camera to these shapes or page bounds. */
   | { op: 'focus'; ids?: string[]; bounds?: { x: number; y: number; w: number; h: number } }
   /** Create or update one swarm run frame (agent cards + arrows); the layout is the server's. */
-  | { op: 'swarm'; run: SwarmRun };
+  | { op: 'swarm'; run: SwarmRun }
+  /** Put a surface card in the session's work frame (created on first use); a surface already on the canvas is left alone. */
+  | { op: 'workframe'; sessionId: string; title: string; surface: { kind: string; id: string; title: string } };
 
 export type SwarmStatus = 'idle' | 'running' | 'done' | 'error' | 'stopped';
 
@@ -147,7 +149,8 @@ export type ScratchResult =
   | { op: 'view'; png: string | null }
   | { op: 'add' | 'update' | 'delete' | 'clear' | 'ui_set' | 'arrange' | 'focus'; ids: string[] }
   | { op: 'ui_get'; spec: unknown }
-  | { op: 'swarm'; ids: string[] };
+  | { op: 'swarm'; ids: string[] }
+  | { op: 'workframe'; ids: string[]; placed: boolean };
 
 /** Agent-facing ids drop tldraw's `shape:` prefix. */
 export const shortId = (id: string): string => (id.startsWith('shape:') ? id.slice(6) : id);

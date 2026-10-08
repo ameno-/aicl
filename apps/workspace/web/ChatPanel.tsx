@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { SuggestionChips } from '@aicl/react';
-import { Check, ChevronDown, SquarePen, X } from 'lucide-react';
+import { Check, ChevronDown, Locate, SquarePen, X } from 'lucide-react';
 import type { SessionInfo } from '../shared/runtime.ts';
 import type { ProviderKit } from '../shared/kits.ts';
 import { useConversation } from './app/Conversation.tsx';
@@ -9,6 +9,7 @@ import { clearCanvasSelection, newWorkspaceChat, screenName, useSelectedShapeIds
 import { HitlStrip } from './agentic/hitl.tsx';
 import { removePendingContext, setActiveSession, useActiveSessionId, usePendingContext, useSessions } from './sessionsApi.ts';
 import { setUiSelection, useUiSelection } from './ui/selection.ts';
+import { toggleFollow, useFollow } from './workspace/presence.ts';
 
 const STARTERS = [
   { id: 'arch', label: 'Sketch the architecture of this project' },
@@ -110,7 +111,8 @@ function SessionSwitcher({ kit }: { kit: ProviderKit }) {
 }
 
 /** The chat docked beside the canvas, driven by the workspace's Pi agent. */
-export function ChatPanel({ kit }: { kit: ProviderKit }) {
+export function ChatPanel({ kit, compact = false }: { kit: ProviderKit; compact?: boolean }) {
+  const following = useFollow();
   const activeSessionId = useActiveSessionId();
   const { chat, composerProps, retry } = useConversation(activeSessionId, kit);
   const model = composerProps.model?.value ?? null;
@@ -122,11 +124,13 @@ export function ChatPanel({ kit }: { kit: ProviderKit }) {
   const chip = uiSelection
     ? `Editing ${uiSelection.nodeId} in ${screenName(uiSelection.shapeId) ?? 'screen'}`
     : selectedShapes.length
-      ? `${selectedShapes.length} shape${selectedShapes.length === 1 ? '' : 's'} selected`
+      ? compact
+        ? `About: ${selectedShapes.length} card${selectedShapes.length === 1 ? '' : 's'}`
+        : `${selectedShapes.length} shape${selectedShapes.length === 1 ? '' : 's'} selected`
       : null;
 
   return (
-    <aside className="chat" aria-label="Agent chat">
+    <aside className="chat" aria-label="Agent chat" data-compact={compact || undefined}>
       <header className="chat-header">
         <div>
           <SessionSwitcher kit={kit} />
@@ -134,6 +138,17 @@ export function ChatPanel({ kit }: { kit: ProviderKit }) {
             {model ?? '…'}
           </span>
         </div>
+        <button
+          type="button"
+          className="icon-button"
+          aria-label="Follow agent"
+          aria-pressed={following}
+          title={following ? 'Following the agent on the canvas (click to stop)' : 'Follow the agent on the canvas'}
+          style={following ? { color: 'var(--aicl-accent, #3b5bdb)' } : undefined}
+          onClick={toggleFollow}
+        >
+          <Locate size={16} aria-hidden="true" />
+        </button>
         <button type="button" className="icon-button" aria-label={kit.vocabulary.newSession} title={kit.vocabulary.newSession} onClick={newWorkspaceChat}>
           <SquarePen size={16} aria-hidden="true" />
         </button>
@@ -178,7 +193,7 @@ export function ChatPanel({ kit }: { kit: ProviderKit }) {
             </button>
           </div>
         ))}
-        {empty ? (
+        {empty && !compact ? (
           <SuggestionChips suggestions={STARTERS} behavior="send" onSelect={(s) => void chat.send(s.label)} />
         ) : null}
         <HitlStrip sessionId={activeSessionId} />
