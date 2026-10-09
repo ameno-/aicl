@@ -1,0 +1,51 @@
+/* Live chat elements. Colours, radii and fonts come from the --aicl-* variables
+   set on the screen root (theme.css), so restyling is a variables change. */
+
+.aicl-thread { display: flex; flex-direction: column; gap: inherit; min-height: 0; }
+.aicl-msg { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.aicl-msg[data-role='user'] { align-items: flex-end; }
+.aicl-bubble { max-width: 80%; padding: 8px 14px; border-radius: var(--aicl-radius-lg); background: var(--aicl-bubble-user); white-space: pre-wrap; overflow-wrap: anywhere; }
+.aicl-md { line-height: 1.55; overflow-wrap: anywhere; }
+.aicl-md > :first-child { margin-top: 0; }
+.aicl-md > :last-child { margin-bottom: 0; }
+.aicl-md p, .aicl-md ul, .aicl-md ol { margin: 0 0 0.6em; }
+.aicl-md ul, .aicl-md ol { padding-left: 1.3em; }
+.aicl-md h3, .aicl-md h4, .aicl-md h5 { margin: 0.8em 0 0.4em; font-size: 1em; }
+.aicl-md code { font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 0.9em; padding: 1px 5px; border-radius: var(--aicl-radius-sm); background: var(--aicl-surface-inset); }
+.aicl-md pre { margin: 0 0 0.6em; padding: 10px 12px; overflow-x: auto; border: 1px solid var(--aicl-border); border-radius: var(--aicl-radius-md); background: var(--aicl-surface-inset); }
+.aicl-md pre code { padding: 0; background: none; }
+.aicl-md a { color: var(--aicl-accent); }
+
+.aicl-reasoning, .aicl-tool { color: var(--aicl-text-muted); font-size: 13px; }
+.aicl-reasoning > summary, .aicl-tool > summary { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; list-style: none; user-select: none; }
+.aicl-reasoning > summary::-webkit-details-marker, .aicl-tool > summary::-webkit-details-marker { display: none; }
+.aicl-reasoning > div, .aicl-tool > pre { margin: 6px 0 0 16px; padding-left: 10px; border-left: 2px solid var(--aicl-border); white-space: pre-wrap; }
+.aicl-tool > pre { font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 12px; }
+.aicl-dot { width: 7px; height: 7px; border-radius: 999px; background: var(--aicl-text-faint); flex-shrink: 0; }
+.aicl-tool[data-status='success'] .aicl-dot { background: #16a34a; }
+.aicl-tool[data-status='error'] .aicl-dot { background: #dc2626; }
+.aicl-tool[data-status='running'] .aicl-dot, .aicl-tool[data-status='pending'] .aicl-dot, .aicl-reasoning[data-streaming] .aicl-dot, .aicl-dot[data-status='running'] { background: var(--aicl-accent); animation: aicl-pulse 1s ease-in-out infinite; }
+.aicl-tool[data-status='error'] { color: #dc2626; }
+
+.aicl-artifact { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--aicl-border); border-radius: var(--aicl-radius-md); background: var(--aicl-surface); }
+.aicl-artifact-kind { padding: 1px 8px; border-radius: 999px; font-size: 11px; background: var(--aicl-surface-inset); color: var(--aicl-text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
+.aicl-artifact-title { flex: 1; min-width: 0; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.aicl-artifact-version { font-size: 12px; color: var(--aicl-text-muted); }
+
+.aicl-status { font-size: 13px; color: var(--aicl-text-faint); }
+.aicl-pending { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--aicl-text-muted); }
+.aicl-error { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border: 1px solid color-mix(in srgb, #dc2626 40%, var(--aicl-border)); border-radius: var(--aicl-radius-md); color: #dc2626; font-size: 13px; }
+.aicl-error button { margin-left: auto; }
+
+.aicl-composer { box-sizing: border-box; display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 760px; margin-inline: auto; padding: 0 16px 16px; }
+.aicl-composer[data-variant='hero'] { padding: 0; }
+.aicl-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.aicl-chip, .aicl-error button { padding: 4px 10px; border: 1px solid var(--aicl-border); border-radius: 999px; background: var(--aicl-surface); color: var(--aicl-text); font: inherit; font-size: 13px; cursor: pointer; }
+.aicl-input { display: flex; align-items: flex-end; gap: 8px; padding: 8px 8px 8px 14px; border: 1px solid var(--aicl-border); border-radius: var(--aicl-radius-xl); background: var(--aicl-surface); box-shadow: 0 1px 2px rgb(0 0 0 / 0.04); }
+.aicl-input:focus-within { border-color: color-mix(in srgb, var(--aicl-accent) 45%, var(--aicl-border)); }
+.aicl-input textarea { flex: 1; min-height: 24px; max-height: 200px; padding: 4px 0; border: 0; outline: 0; resize: none; background: transparent; color: var(--aicl-text); font: inherit; line-height: 1.5; }
+.aicl-send { display: grid; place-items: center; width: 32px; height: 32px; flex-shrink: 0; border: 0; border-radius: 999px; background: var(--aicl-accent); color: var(--aicl-accent-fg); font-size: 15px; cursor: pointer; }
+.aicl-send:disabled { opacity: 0.35; cursor: default; }
+
+@keyframes aicl-pulse { 50% { opacity: 0.35; } }
+@media (prefers-reduced-motion: reduce) { .aicl-dot { animation: none !important; } }

@@ -4,7 +4,7 @@
  * agents (Claude Code, Codex, pi) share the canvas with the user.
  * Zero dependencies. Talks to GET /api/tools and POST /api/tools/:name.
  */
-import { realpathSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, realpathSync, writeFileSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
 
 const HELP = `aicl [--url URL] [--json] <command>
@@ -15,6 +15,8 @@ const HELP = `aicl [--url URL] [--json] <command>
   view [--ids a,b] [--out f]  scratch_view: render to PNG (default aicl-view.png)
   add '<json shapes>'         scratch_add: JSON array of shapes (or {"shapes": [...]})
   screens                     list screen shapes (component "screen")
+  export <screen|spec.json> [--target T] [--out file.zip] [--dir folder]
+                              download a screen as a working app (react, react-tailwind, vue, svelte, html, json)
   open <address>              navigate the user (aicl:/canvas, aicl:/overview, ...)
   surface list                open surfaces (terminals, browsers, processes, files, diffs)
   surface open <kind> [arg]   terminal [title] | browser <url> | file <path[:line]> | diff [target]
@@ -28,7 +30,7 @@ URL defaults to $AICL_URL or http://127.0.0.1:5180.`;
 export function parseArgs(argv) {
   const flags = { json: false, help: false };
   const positional = [];
-  const valued = new Set(['url', 'out', 'ids', 'name', 'cwd', 'lines']);
+  const valued = new Set(['url', 'out', 'ids', 'name', 'cwd', 'lines', 'target', 'dir']);
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     if (arg.startsWith('--')) {
@@ -69,6 +71,11 @@ export function plan(command, args, flags) {
     }
     case 'screens':
       return { tool: 'scratch_read', params: {}, filter: 'screens' };
+    case 'export': {
+      if (!args[0]) throw new Error('usage: aicl export <screen-id | spec.json> [--target react] [--out file.zip] [--dir folder]');
+      const source = args[0].endsWith('.json') && existsSync(args[0]) ? { spec: parseJson(readFileSync(args[0], 'utf8'), args[0]) } : { id: args[0] };
+      return { tool: 'ui_export_project', params: { ...source, target: flags.target ?? 'react', ...(flags.dir ? { dir: flags.dir } : {}) }, download: true };
+    }
     case 'process': {
       const [sub, ...rest] = args;
       if (sub === 'start') {
@@ -184,6 +191,15 @@ export async function main(argv, out = (s) => console.log(s)) {
   if (!step) throw new Error(`Unknown command "${command}". Run aicl --help.`);
   const res = await request(base, 'POST', `/api/tools/${encodeURIComponent(step.tool)}`, { params: step.params });
   if (res.error) throw new Error(res.error);
+  if (step.download) {
+    const result = JSON.parse(res.content?.[0]?.text ?? '{}');
+    const file = flags.out ?? result.download.split('/').pop();
+    const zip = await fetch(base + result.download, { headers: { 'x-aicl-client': 'cli' } });
+    if (!zip.ok) throw new Error(`download failed: HTTP ${zip.status}`);
+    writeFileSync(file, Buffer.from(await zip.arrayBuffer()));
+    if (flags.json) return out(JSON.stringify({ ...result, savedTo: file }, null, 2));
+    return out([`wrote ${file} (${result.target}, ${result.files.length} files)`, ...(result.writtenTo ? [`wrote the project into ${result.writtenTo}/`] : []), `run: ${result.run}`].join('\n'));
+  }
   if (flags.json) return out(JSON.stringify(res, null, 2));
 
   const lines = [];

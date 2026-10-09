@@ -12,6 +12,7 @@ import {
   type UiNode,
 } from '../../shared/ui-spec.ts';
 import { toReactCode } from '../../shared/ui-ops.ts';
+import { EXPORT_TARGETS, TARGET_LABELS, type ExportTarget } from '../../shared/export-targets.ts';
 import { SpecRenderer } from '../ui/SpecRenderer.tsx';
 import { setUiSelection, useUiSelection } from '../ui/selection.ts';
 import type { ComponentRendererProps } from './types.ts';
@@ -43,6 +44,7 @@ export function ScreenRenderer({ props, width, height, shapeId, onPropsChange }:
   const [run, setRun] = useState(false);
   const [binding, setBinding] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [exporting, setExporting] = useState<'idle' | 'busy' | 'error'>('idle');
   const runSessionId = readRunSessionId(spec.root);
   const selection = useUiSelection();
   const selectedId = shapeId && selection?.shapeId === shapeId ? selection.nodeId : undefined;
@@ -78,6 +80,25 @@ export function ScreenRenderer({ props, width, height, shapeId, onPropsChange }:
       setTimeout(() => setCopied(false), 1500);
     } catch {
       /* clipboard unavailable: stay quiet */
+    }
+  };
+
+  /** Downloads the screen as a working app (POST /api/export → zip). */
+  const exportAs = async (target: ExportTarget) => {
+    setExporting('busy');
+    try {
+      const res = await fetch('/api/export', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ spec, target }) });
+      if (!res.ok) throw new Error(`export failed: ${res.status}`);
+      const name = /filename="([^"]+)"/.exec(res.headers.get('content-disposition') ?? '')?.[1] ?? `${target}.zip`;
+      const url = URL.createObjectURL(await res.blob());
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = name;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      setExporting('idle');
+    } catch {
+      setExporting('error');
     }
   };
 
@@ -146,6 +167,20 @@ export function ScreenRenderer({ props, width, height, shapeId, onPropsChange }:
         <button type="button" onClick={() => void copy()}>
           {copied ? 'Copied' : 'Copy code'}
         </button>
+        <select
+          aria-label="Export"
+          title="Download this screen as a working app"
+          value=""
+          disabled={exporting === 'busy'}
+          onChange={(e) => e.target.value && void exportAs(e.target.value as ExportTarget)}
+        >
+          <option value="">{exporting === 'busy' ? 'Exporting…' : exporting === 'error' ? 'Export failed, retry' : 'Export…'}</option>
+          {EXPORT_TARGETS.map((t) => (
+            <option key={t} value={t}>
+              {TARGET_LABELS[t]}
+            </option>
+          ))}
+        </select>
       </div>
       <div className="aicl-screen-stage">
         <div

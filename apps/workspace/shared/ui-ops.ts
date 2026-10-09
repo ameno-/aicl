@@ -28,7 +28,7 @@ export class UiSpecError extends Error {
 
 /* ── Small helpers ────────────────────────────────────────────────── */
 
-type Props = Record<string, unknown>;
+export type Props = Record<string, unknown>;
 
 const isObject = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v);
 const isFrame = (v: unknown): v is ScreenFrame => typeof v === 'string' && Object.hasOwn(FRAME_SIZES, v);
@@ -360,16 +360,16 @@ const FONTS: Record<ThemeTokens['font'], string> = {
   rounded: "ui-rounded, 'SF Pro Rounded', 'Nunito', system-ui, sans-serif",
 };
 
-const TOOL_STATUSES = ['pending', 'running', 'success', 'error', 'cancelled'];
-const PLAN_STATUSES = ['pending', 'running', 'done', 'error'];
-const ARTIFACT_KINDS = ['code', 'document', 'diff', 'preview', 'terminal', 'table', 'chart'];
+export const TOOL_STATUSES = ['pending', 'running', 'success', 'error', 'cancelled'];
+export const PLAN_STATUSES = ['pending', 'running', 'done', 'error'];
+export const ARTIFACT_KINDS = ['code', 'document', 'diff', 'preview', 'terminal', 'table', 'chart'];
 
-const str = (p: Props, k: string, d = ''): string => (typeof p[k] === 'string' ? (p[k] as string) : typeof p[k] === 'number' ? String(p[k]) : d);
-const num = (p: Props, k: string): number | undefined => (typeof p[k] === 'number' && Number.isFinite(p[k]) ? (p[k] as number) : undefined);
-const oneOf = (v: unknown, list: string[], d: string): string => (typeof v === 'string' && list.includes(v) ? v : d);
-const list = (p: Props, k: string): unknown[] => (Array.isArray(p[k]) ? (p[k] as unknown[]) : []);
-const objs = (p: Props, k: string): Props[] => list(p, k).map((x) => (isObject(x) ? x : {}));
-const strs = (p: Props, k: string): string[] => list(p, k).map((x) => (typeof x === 'string' || typeof x === 'number' ? String(x) : ''));
+export const str = (p: Props, k: string, d = ''): string => (typeof p[k] === 'string' ? (p[k] as string) : typeof p[k] === 'number' ? String(p[k]) : d);
+export const num = (p: Props, k: string): number | undefined => (typeof p[k] === 'number' && Number.isFinite(p[k]) ? (p[k] as number) : undefined);
+export const oneOf = (v: unknown, list: string[], d: string): string => (typeof v === 'string' && list.includes(v) ? v : d);
+export const list = (p: Props, k: string): unknown[] => (Array.isArray(p[k]) ? (p[k] as unknown[]) : []);
+export const objs = (p: Props, k: string): Props[] => list(p, k).map((x) => (isObject(x) ? x : {}));
+export const strs = (p: Props, k: string): string[] => list(p, k).map((x) => (typeof x === 'string' || typeof x === 'number' ? String(x) : ''));
 
 const lit = (v: unknown): string => JSON.stringify(v);
 const SIMPLE = /^[A-Za-z0-9 .,:;!?_\-/()]*$/;
@@ -393,7 +393,7 @@ function styleLit(style: Record<string, string | number>): string {
   return `{{ ${body} }}`;
 }
 
-function layoutStyle(node: UiNode): Record<string, string | number> {
+export function layoutStyle(node: UiNode): Record<string, string | number> {
   const p = node.props ?? {};
   const s: Record<string, string | number> = {
     display: 'flex',
@@ -436,7 +436,7 @@ function layoutStyle(node: UiNode): Record<string, string | number> {
   return s;
 }
 
-function themeEntries(spec: ScreenSpec): Record<string, string> {
+export function themeEntries(spec: ScreenSpec): Record<string, string> {
   const t = resolveTheme(spec.theme);
   const r = t.radius;
   return {
@@ -461,15 +461,15 @@ function themeEntries(spec: ScreenSpec): Record<string, string> {
   };
 }
 
-const STATUS_COLOR: Record<string, string> = {
+export const STATUS_COLOR: Record<string, string> = {
   running: 'var(--aicl-tool-running)',
   'awaiting-input': 'var(--aicl-warning)',
   error: 'var(--aicl-danger)',
   idle: 'var(--aicl-text-faint)',
 };
 const PART_CTX = 'message={message} index={0} streaming={false}';
-const TOAST_COLOR: Record<string, string> = { info: 'var(--aicl-info)', success: 'var(--aicl-success)', error: 'var(--aicl-danger)' };
-const ACTION_GLYPH: Record<string, string> = { share: '↗', more: '⋯', 'panel-right': '▥', settings: '⚙' };
+export const TOAST_COLOR: Record<string, string> = { info: 'var(--aicl-info)', success: 'var(--aicl-success)', error: 'var(--aicl-danger)' };
+export const ACTION_GLYPH: Record<string, string> = { share: '↗', more: '⋯', 'panel-right': '▥', settings: '⚙' };
 
 /**
  * A self-contained React + TypeScript module that renders the screen with
