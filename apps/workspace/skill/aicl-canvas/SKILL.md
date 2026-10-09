@@ -32,6 +32,14 @@ Run it as `node <repo>/apps/workspace/bin/aicl.mjs` (or `aicl` if linked). Serve
 - Short, stable ids ("gateway", "s1"); ids you pass are returned in results.
 - Tool failures come back as `aicl: <message>` with exit code 1; fix the input and retry.
 
+## Export a screen as a working app
+
+`aicl export <screen-id> --target react` downloads `<name>-react.zip` into the current folder. Targets: `react`, `react-tailwind`, `vue`, `svelte`, `html`, `json`. Each runnable export has the design's layout and theme, the designed conversation, a live composer, and `server/` with `anthropic`, `openai`-compatible and `echo` backends (`npm install && npm run dev`; `html` runs with `node server/index.js`).
+
+- No canvas open, or a spec you wrote yourself: `aicl export screen.json --target vue` (a `{ name, frame, theme, root }` spec; `ui_create_screen`'s description documents the element catalog).
+- Into the user's project: `--dir <folder>` writes the files inside the workspace after the user approves in the AICL UI.
+- Over MCP the same tool is `ui_export_project` (`{ id | spec, target, dir? }`); it returns a download URL under `/api/exports/`.
+
 ## Surfaces, processes and MCP
 
 The workspace also has live **surfaces**: terminals, a browser, files, diffs and background processes. They are shared with the user, who watches and can take over.

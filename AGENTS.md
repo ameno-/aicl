@@ -14,7 +14,7 @@ derived from a survey of 1,262 screens of four shipping agentic-chat products
 | `packages/styles` | `@aicl/styles`: optional CSS-variable theme over `[data-aicl]` | `packages/styles/README.md` |
 | `packages/fx` | `@aicl/fx`: animated, styled components (Tailwind v4, source-only) | `packages/fx/README.md` |
 | `packages/svelte`, `packages/vue` | **Empty placeholders.** No adapter exists yet | — |
-| `apps/workspace` | Reference app: Pi agent + tldraw canvas + live surfaces + CLI/MCP | `apps/workspace/AGENTS.md` |
+| `apps/workspace` | Reference app: Pi agent + tldraw canvas + live surfaces + CLI/MCP, and the screen exporter | `apps/workspace/AGENTS.md` |
 | `examples/slice-1` | Vite gallery of every React primitive in every state, plus e2e | — |
 | `examples/server-node` | Minimal `@aicl/server` handler on Node `http` | — |
 | `docs/` | Architecture, decisions, corpus method, per-domain specs, evaluations, QA notes | see below |
@@ -61,6 +61,7 @@ Node ≥ 22.6 (the app runs TypeScript with `--experimental-strip-types`). There
 | Server framing / error mapping | `packages/server/src/handler.ts` |
 | Anything in the app (tools, surfaces, canvas, chat product) | `apps/workspace/AGENTS.md` |
 | Integrating AICL into another app | `docs/ADOPTION.md` |
+| Exporting designed screens as apps (targets, templates, backends) | `apps/workspace/AGENTS.md#export-pipeline` |
 
 ## Docs index
 
