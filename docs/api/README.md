@@ -51,13 +51,18 @@ verbatim. The library is the wrong place to model providers.
 
 ### Response
 
-A 200 response streams newline-delimited JSON, one `StreamEvent` per line.
-The reference adapter uses Server-Sent Events with the SSE framing; a plain
-JSON-line stream is also valid.
+A 200 response is a Server-Sent Events stream: one `StreamEvent` as JSON per
+`data:` frame, terminated by `data: [DONE]`. That is what `@aicl/server`'s
+`ChatResponse.toSse()` writes and what `@aicl/core`'s `createSseTransport`
+reads. Another framing (JSON lines, WebSocket) needs its own `ChatTransport`,
+or a `parse` override when it is still SSE with a different payload.
 
-Non-2xx responses carry the same wire shape as the stream event `{ type:
-"error"; error: { message; retryable? } }`, surfaced as a `ChatStatus: 'error'`
-in the controller.
+A failure before the stream starts is a non-2xx response. The reference servers
+send a JSON body `{ "message": "...", "retryable": false }`. The SSE transport
+throws `Chat request failed: <status> <statusText> - <body>`, and the
+controller records `status: 'error'` with `retryable: true`, ignoring the body's
+`retryable` flag. A failure after the stream starts is an in-band
+`{ "type": "error", "error": { "message", "retryable" } }` frame.
 
 ## The handler contract
 
@@ -67,21 +72,25 @@ For backends that prefer to compose the stream rather than serialize SSE,
 ```ts
 import { createChatHandler } from '@aicl/server';
 
-export const POST = createChatHandler(async function* (req) {
+const chat = createChatHandler(async function* (req) {
   const { messages, body, signal } = req;
   const model = (body.model as string) ?? 'claude-sonnet-4';
 
   yield { type: 'message-start', id: crypto.randomUUID(), role: 'assistant' };
   yield { type: 'part-start', index: 0, part: { type: 'reasoning', text: 'Reading.' } };
 
-  // Stream text deltas as the model produces them.
+  // One part-start for the text part, then one part-delta per chunk.
+  yield { type: 'part-start', index: 1, part: { type: 'text', text: '' } };
   for await (const delta of streamModel({ model, messages, signal })) {
-    yield { type: 'part-start', index: 1, part: { type: 'text', text: '' } };
     yield { type: 'part-delta', index: 1, delta };
   }
+  yield { type: 'part-end', index: 1 };
 
   yield { type: 'message-end', finishReason: 'stop', usage: await usage() };
 });
+
+// chat(body, headers, signal) → Promise<ChatResponse>; you mount it:
+// see docs/ADOPTION.md §3 for fetch-style and Node `http` adapters.
 ```
 
 The handler receives the parsed request and an `AbortSignal`. It yields
@@ -104,9 +113,12 @@ export interface ChatHandlerRequest {
 }
 ```
 
-`createChatHandler` turns a `ChatHandler` into a request handler that any HTTP
-framework can mount. It owns the SSE framing, the JSON serialization, and the
-401/400 status codes. The handler itself stays framework-free.
+`createChatHandler` turns a `ChatHandler` into a framework-free function
+`(body, headers?, signal?, requestId?) => Promise<ChatResponse>`. It is not a
+`(Request) => Response` route handler. It validates `body.messages` (400),
+strips `messages` from `body`, owns the SSE framing and JSON serialization, and
+rejects with a `ChatHandlerError` whose `status` the caller maps to an HTTP
+response. The handler itself stays framework-free.
 
 ## Tool execution
 
@@ -130,6 +142,11 @@ error, a result body, and that's it. Approval is the host's responsibility.
 
 ## Connectors
 
+> **Status: design only.** None of the `@aicl/connect-*` packages below exist
+> yet. Today you write the translation inside your handler. The workspace app's
+> `apps/workspace/server/pi-mapper.ts` is a working example: it maps a coding
+> agent's event stream onto `StreamEvent`s and has tests.
+
 A connector is a function from "what a provider gives us" to "what the
 handler yields". Connectors live in their own packages so a backend can pick
 exactly one:
@@ -148,7 +165,7 @@ handler consumes:
 import { createChatHandler } from '@aicl/server';
 import { fromAnthropic } from '@aicl/connect-anthropic';
 
-export const POST = createChatHandler(async function* (req) {
+const chat = createChatHandler(async function* (req) {
   for await (const event of fromAnthropic({
     model: req.body.model as string,
     messages: toAnthropic(req.messages),
@@ -180,16 +197,22 @@ and signed requests are equally valid. The library does not read or write
 secrets (ADR-T2).
 
 ```ts
-const handler = createChatHandler(async function* (req) {
-  if (!isAuthorized(req.headers.authorization)) {
+const handler = createChatHandler(async (req) => {
+  if (!isAuthorized(req.headers['authorization'])) {
     throw new ChatHandlerError(401, 'unauthorized', false);
   }
-  // ...
+  return reply(req); // an async generator of StreamEvents
 });
 ```
 
 `@aicl/server` exports `ChatHandlerError` so a handler can declare a status
 code without depending on a specific framework.
+
+Check auth in a plain `async` function, as above, never inside an
+`async function*`. A generator body runs only once the response is already
+streaming, so a `ChatHandlerError` thrown there escapes from `toSse()` after
+the 200 has been sent. `createChatHandler` can turn it into an HTTP status only
+when it is thrown before the iterable is returned.
 
 ## Idempotency
 

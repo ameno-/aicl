@@ -2,26 +2,24 @@
 
 ## Pickup
 
-1. Run `bd ready` (or read `.beads/issues.jsonl`) for an open issue.
-2. Run `bd show <id>` to read the full description and any linked decision.
-3. Run `bd update <id> --status in_progress` to claim it. Use `bd close <id>` once the change lands.
-4. If no bead exists for the change you want to make, create one before opening a PR.
+1. Find or create the Linear issue: `linear issue list --team AICL` or `linear issue create --team AICL -t "…"` (workspace `acids`).
+2. Read the relevant guide: `./AGENTS.md` (repo), `apps/workspace/AGENTS.md` (app), `packages/<pkg>/README.md` (library), `docs/ADOPTION.md` (integration).
+3. If the change alters a public contract (part union, `StreamEvent`, `ChatStatus`, `data-*` attributes), read `docs/DECISIONS.md` and add an entry.
 
 ## PR process
 
-- Branch off `main`. Keep the diff focused: one ADR-sized concern per PR.
-- Add or update tests. The package scripts run `tsc -p tsconfig.test.json` then `node --test`; see [Testing](testing.md).
-- Run `npm run typecheck` and `npm run test` from the repo root before pushing. Both commands forward to every workspace that has the corresponding script (see `./package.json`).
-- Mention the bead id in the PR title or description so the issue stays traceable.
-- Reference the relevant spec or ADR: `docs/ARCHITECTURE.md`, `docs/DECISIONS.md`, or a domain spec in `docs/domains/`.
+- Branch `linear/AICL-<n>-<slug>` off `main`. Never commit to `main`.
+- Keep a PR to one concern. Put the issue key in commit subjects, for example `… (AICL-44)`.
+- Add or update tests next to the code (see [Testing](testing.md)).
+- Run the gates locally, since there is no CI: root `npm run build && npm run typecheck && npm test`, plus `apps/workspace` `npm run typecheck && npm test` when you touched the app or a package it uses.
+- Open the PR with `gh pr create` against `main`. List the commands you ran and their results.
 
 ## Review expectations
 
-- One reviewer is enough for a small fix or a docs change.
-- Changes that touch `@aicl/core` package boundaries (no DOM, no framework imports) need a second pair of eyes because they break every adapter if they regress.
-- Changes to `docs/ARCHITECTURE.md`, `docs/DECISIONS.md`, or any domain spec in `docs/domains/` need a bead reference and a fresh ADR entry when they alter a public contract.
-- Adapters (`@aicl/react`, future `@aicl/svelte`, future `@aicl/vue`) are review-light individually, but a change that leaks a framework import into `@aicl/core` is a hard fail.
+- Changes that touch `@aicl/core`'s boundaries (no DOM, no framework imports) need careful review, because a regression breaks every adapter.
+- A changed `data-aicl` attribute is a breaking change for `@aicl/styles` and consumer CSS.
+- Vendored files in `packages/fx/src/vendor` keep their source header and an `ATTRIBUTION.md` row.
 
 ## Session completion
 
-The repository's `./AGENTS.md` requires a final `git push`. Run `bd sync` first; `git status` should report `up to date with origin` before the session ends.
+Push the branch and confirm `git status` says it is up to date with its upstream. Update the Linear issue with the PR link, and file issues for any leftover work. See the "Landing the plane" section of `./AGENTS.md`.

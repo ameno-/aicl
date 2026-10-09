@@ -38,9 +38,14 @@ along those seams.
         +-- @aicl/styles   optional CSS-variable theme
 ```
 
-`@aicl/core` must never import a framework, and must never touch `document`. That rule is
-enforced in CI, because it is the constraint that makes every adapter cheap to write and
-the whole library testable in plain Node.
+`@aicl/core` must never import a framework, and must never touch `document`. That is the
+constraint that makes every adapter cheap to write and the whole library testable in plain
+Node. There is no CI yet, so the rule is enforced in review.
+
+**Status:** `@aicl/core`, `@aicl/react` and `@aicl/styles` exist, together with
+`@aicl/server` (handler + SSE framing) and `@aicl/fx` (optional animated components).
+`packages/svelte` and `packages/vue` are empty placeholders: the split is designed for them,
+but neither adapter has been written.
 
 ## The message model
 
@@ -97,6 +102,10 @@ means consumers extend it at runtime and the transcript renderer stays closed fo
 modification. Unknown part types fall back to a registered handler rather than throwing,
 so a server that adds a part type cannot white-screen an older client.
 
+Implementation gap: `@aicl/react`'s `PartRenderer` currently consults a consumer registry
+only for exact type names, so its `data-` wildcard and fallback are ignored there (unknown
+parts still render, through the built-in `UnknownPart`). See `docs/ADOPTION.md` §5.
+
 ## Transport boundary
 
 `@aicl/core` performs no I/O. It consumes a transport:
@@ -107,8 +116,8 @@ interface ChatTransport {
 }
 ```
 
-The library ships adapters for Server-Sent Events, plain JSON, and WebSocket, but the
-interface is the contract. This is what "pluggable" has to mean: you can drive the
+The library ships one adapter, Server-Sent Events (`createSseTransport`). Plain JSON and
+WebSocket transports are planned. The interface is the contract. This is what "pluggable" has to mean: you can drive the
 components from OpenAI-compatible endpoints, from your own backend, or from an in-memory
 mock in tests, without the components knowing.
 
@@ -173,7 +182,7 @@ Each adapter ships unstyled, accessible primitives that consume core state. They
 structure, ARIA semantics, focus management, and keyboard behaviour, and own no visual
 design:
 
-- `<Transcript>` — virtualised list, stick-to-bottom, `role="log"` with `aria-live`
+- `<Transcript>` — stick-to-bottom, `role="log"` with `aria-live` (not virtualised in v1; see D13)
 - `<MessageItem>` — provides message context to its children
 - `<PartRenderer>` — registry dispatch
 - `<Composer>` — autosizing textarea, Enter/Shift+Enter, IME-safe submit
@@ -205,6 +214,10 @@ library usable out of the box without making it hard to replace.
 | `@aicl/svelte` | core, svelte | svelte only | yes |
 | `@aicl/vue` | core, vue | vue only | yes |
 | `@aicl/styles` | nothing | no | CSS only |
+| `@aicl/server` | core | no | no |
+| `@aicl/fx` | react, motion, Tailwind v4 | react only | yes (styled; opt-in) |
+
+`@aicl/svelte` and `@aicl/vue` are not implemented yet.
 
 ## Deliberate non-goals
 
@@ -220,10 +233,7 @@ Resolved by corpus analysis (see `docs/DECISIONS.md` and `docs/domains/`): agent
 execution surfaces stay in the chat packages (D9), platform pages are recipes not
 API (D10), and session metadata is its own model (D11).
 
-Still open:
-
-1. Should artifact/canvas surfaces ship in v1, or as `@aicl/artifacts`? The corpus shows
-   them in three of four products, but they carry the largest surface area.
-2. Does virtualisation belong in core primitives or as an optional wrapper? It complicates
-   stick-to-bottom and find-in-page.
-3. Command palette: absent from the entire corpus. Implement in v1 or defer?
+Since resolved: the command palette is a recipe over one combobox contract (D12); there is
+no windowing inside `Transcript` or `SessionList` in v1 (D13); and artifacts ship in v1 as
+data plus a card renderer, with no `@aicl/artifacts` package (D14). The open questions that
+remain are listed at the end of `docs/DECISIONS.md`.

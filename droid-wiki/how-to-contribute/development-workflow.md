@@ -2,52 +2,33 @@
 
 ## Branch
 
-Branch off `main` with a short descriptive name:
-
 ```bash
-git checkout main
-git pull --rebase
-git checkout -b <short-name>
+git checkout main && git pull --rebase
+git checkout -b linear/AICL-<n>-<slug>
 ```
 
 ## Code
 
-- Place package code under `packages/<pkg>/src/`. Keep `packages/core/src/` framework-free; see `docs/ARCHITECTURE.md`.
-- Place app code under `apps/workspace/server/` (Node), `apps/workspace/web/` (Vite + React), or one of the `examples/` directories.
-- Place new docs under `docs/`, `docs/domains/`, `docs/evaluation/`, or `docs/qa/` depending on the audience.
-- Use full repo-root paths in commit messages and PR descriptions when referencing files (`packages/core/src/chat.ts`, not `packages/core/src/chat.ts`'s bare name).
+- Library code goes in `packages/<pkg>/src/`. Keep `packages/core/src/` framework- and DOM-free (`docs/ARCHITECTURE.md`).
+- App code goes in `apps/workspace/server/` (Node, run with strip-types), `apps/workspace/shared/` (pure, imported by both sides), or `apps/workspace/web/` (Vite + React). How to add a tool, feature module, canvas component or surface: `apps/workspace/AGENTS.md#recipes`.
+- Design docs go in `docs/`: decisions in `DECISIONS.md`, per-domain specs in `domains/`, corrections in `evaluation/`, QA notes in `qa/`.
+- Reference files by repo-root path in commits and PRs (`packages/core/src/chat.ts`).
+
+## Inner loop
+
+- Library + React: `cd examples/slice-1 && npm run dev`. Vite aliases resolve `@aicl/*` to sources, so edits hot-reload.
+- Workspace web: `npm run dev` in `apps/workspace`, which also hot-reloads package sources. The workspace **server** resolves `@aicl/server` from `packages/server/dist`, so re-run the root `npm run build` after changing `packages/server`.
+- Run a destructive app session on spare ports against a throwaway folder: `AICL_PORT=5192 AICL_WEB_PORT=5193 AICL_WORKSPACE=$(mktemp -d) npm run dev`.
 
 ## Test
 
-Run the package's test script before pushing:
+See [Testing](testing.md). Minimum before a PR: root `npm run build && npm run typecheck && npm test`, and `apps/workspace` `npm run typecheck && npm test` when relevant.
+
+## PR and merge
 
 ```bash
-# From packages/core or packages/server:
-npm run test
-# From packages/react:
-npm run test
-# From apps/workspace:
-npm run test
+git push -u origin linear/AICL-<n>-<slug>
+gh pr create --base main
 ```
 
-Each script compiles to `dist-test/` (or runs `node --experimental-strip-types` for `apps/workspace`) and then invokes `node --test`. See [Testing](testing.md) for the matrix and the E2E fixtures.
-
-## PR
-
-```bash
-bd sync
-git push -u origin <branch>
-```
-
-Open the PR with a one-paragraph summary, the bead id, and a list of test commands you ran locally.
-
-## Merge
-
-No CI workflow is configured in this repository (`.github/workflows/` does not exist). Reviewers must run the workspace commands locally before approval:
-
-```bash
-npm run typecheck
-npm run test
-```
-
-`npm run typecheck` is a forwarder; each package runs `tsc --noEmit`. `npm run test` compiles and runs `node --test` per workspace that defines the script.
+There is no CI workflow, so the PR description must list the gates you ran. PRs are merged on GitHub with a merge commit.

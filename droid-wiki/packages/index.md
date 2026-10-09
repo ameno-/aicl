@@ -1,19 +1,14 @@
 # Packages
 
-Four packages ship from `./package.json`'s `packages/*` workspace. Each is a separate npm package with its own `packages/*/package.json`, `packages/*/tsconfig.json`, and `packages/*/src/` directory.
+`./package.json` declares `packages/*` as npm workspaces. Each package has its own `package.json`, `tsconfig.json` and `src/`, and each now has a README with its API and known sharp edges.
 
-## `@aicl/core`
+| Package | Summary | README |
+| --- | --- | --- |
+| `@aicl/core` | Framework-agnostic engine: `ChatController`, the `Message`/`Part` model, `StreamEvent`, renderer registry, SSE transport, stores for sessions and toasts. Zero runtime dependencies | `packages/core/README.md` |
+| `@aicl/react` | `useChat`, `useReadable`, and unstyled accessible primitives: transcript, parts, composer and menus, sessions, dialogs, toasts, form controls. `@aicl/react/markdown` adds opt-in Markdown | `packages/react/README.md` |
+| `@aicl/server` | `createChatHandler`, which returns `(body, headers, signal) => Promise<ChatResponse>` with `toSse()` framing and `ChatHandlerError`. You mount it and map statuses | `packages/server/README.md` |
+| `@aicl/styles` | CSS-variable theme (light/dark) plus reset plus `[data-aicl]` component styles. CSS only | `packages/styles/README.md` |
+| `@aicl/fx` | Animated, styled components on AICL tokens (motion, Tailwind v4, WebGPU ambience). Source-only, needs a bundler | `packages/fx/README.md` |
+| `packages/svelte`, `packages/vue` | Empty placeholders | — |
 
-Framework-agnostic conversation engine. Exports `ChatController`, the `Message` and `Part` unions, `StreamEvent`, the renderer registry, the SSE transport, and the framework-free observable store. Zero runtime dependencies; the engine never imports a framework and never touches `document`. See `packages/core/src/`.
-
-## `@aicl/react`
-
-React adapter. Hooks (`useChat`, `useReadable`) and headless, accessible primitives (`Composer`, `Transcript`, `MessageItem`, `PartRenderer`, `composer-surface`, `sessions`, `platform`). Bundles `lucide-react`, `react-markdown`, and `remark-gfm`. Peer-depends on `react` and `react-dom` (`>=18`). See `packages/react/src/`.
-
-## `@aicl/server`
-
-Framework-free server-side helpers: `createChatHandler`, `ChatResponse` (SSE framing), `ChatHandlerError`, and the `ChatHandlerRequest` contract. Mount the wrapped handler in any HTTP framework; the wrapper owns SSE framing, JSON serialisation, and 400/401 mapping. Depends only on `@aicl/core`. See `packages/server/src/`.
-
-## `@aicl/styles`
-
-Optional CSS-variable theme. Two themes (`light`, `dark`) plus a chat-shell reset and the `[data-aicl]` selector surface. Consumes nothing from the other packages; the React adapter exposes matching `data-*` attributes for state. See `packages/styles/src/`.
+All packages are at `0.0.0` and unpublished. Consume them through `file:` links after `npm run build` (`docs/ADOPTION.md` §1).
