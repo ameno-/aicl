@@ -8,6 +8,11 @@ sharp edge, this guide says so and gives the workaround.
 For the design rationale read `docs/ARCHITECTURE.md` and `docs/DECISIONS.md`. For the wire
 contract read `docs/api/README.md`.
 
+Want a standalone app rather than a dependency? Design a screen in the workspace and export it
+(`aicl export <screen> --target react|react-tailwind|vue|svelte|html|json`). The export has no
+`@aicl/*` dependency, speaks the same wire, and ships Anthropic and OpenAI-compatible backends. See
+`apps/workspace/AGENTS.md#export-pipeline`.
+
 ## 0. What you get, and what you don't
 
 | Package | Use it for | Runtime deps |

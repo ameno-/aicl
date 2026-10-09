@@ -1,6 +1,6 @@
 # By the numbers
 
-Measured on 2026-10-08 against `main` at `c113e9b` (before the AICL-53 docs pass). Refresh with:
+Measured on 2026-10-08 against `main` at `c113e9b`; workspace tests, tools and e2e suites updated for AICL-58. Refresh with:
 
 ```bash
 git rev-list --count HEAD
@@ -42,10 +42,10 @@ git ls-files | sed -n 's/.*\.\([A-Za-z0-9]*\)$/\1/p' | sort | uniq -c | sort -rn
 | Placeholder packages | 2 (`svelte`, `vue`: empty `src/`) |
 | Reference apps | 1 (`apps/workspace`) |
 | Examples | 2 (`examples/server-node`, `examples/slice-1`) |
-| Unit tests passing | core 16, react 28, server 4, workspace 188 |
-| Workspace server test files | 28 (`apps/workspace/server/*.test.ts`) |
-| Workspace e2e suites | 13 (`apps/workspace/e2e/*.mjs`) |
-| Agent tools in the workspace | 55 custom (see `apps/workspace/AGENTS.md`) plus Pi's `read grep find ls write edit bash` |
+| Unit tests passing | core 16, react 28, server 4, workspace 212 (after AICL-58) |
+| Workspace server test files | 30 (`apps/workspace/server/*.test.ts`) |
+| Workspace e2e suites | 15 (`apps/workspace/e2e/*.mjs`) |
+| Agent tools in the workspace | 56 custom (see `apps/workspace/AGENTS.md`) plus Pi's `read grep find ls write edit bash` |
 
 ## Docs and corpus
 

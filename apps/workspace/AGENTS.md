@@ -59,6 +59,10 @@ server/            Node, run with strip-types (no build). One module per feature
   tools.ts, ui-tools.ts, canvas-tools.ts, references.ts, applets.ts, hitl.ts, live.ts,
   nodes.ts, graph.ts, swarm.ts, workframes.ts, connections.ts
   surfaces/        registry.ts + one service per kind (terminal, browser, files, git, process, sideshow)
+  exports.ts       ui_export_project + /api/export routes
+  export/          the exporter: build.ts (spec → app model), vnode.ts (printers), targets.ts (projects), zip.ts
+templates/         files copied into exports: shared/ (aicl-chat.js client, chat.css), server/ (ChatBackend + backends),
+                   react/, react-tailwind/, vue/, svelte/, html/ (live Thread + Composer per framework)
 shared/            Pure types/constants/functions imported by BOTH server and web. The contracts:
   runtime.ts       sessions, applets, addresses (aicl:/…), CanvasContext, ServerEvent union, HTTP index
   surfaces.ts      SurfaceKind, SurfaceInfo, addresses aicl:/surface/<kind>/<id>
@@ -85,7 +89,7 @@ e2e/               Playwright suites against a live server (see Testing)
 
 `sessions/` (Pi `.jsonl` transcripts + `index.json`), `scratchpad.json` (canvas snapshot),
 `applets/<id>.tsx` + `<id>.server.ts` (agent-written widgets, built into `.build/`),
-`workspace.json` (Overview layout), `hitl.json` (answered approvals and questions),
+`workspace.json` (Overview layout), `exports/` (zips from ui_export_project), `hitl.json` (answered approvals and questions),
 `plans/`, `terminal/`, `terminals/`, `reviews/`, `swarm-log.json`, `sideshow.json`,
 `sideshow-cards.json`. Point `AICL_WORKSPACE` at a temp dir for anything destructive.
 
@@ -134,6 +138,7 @@ built-in Pi tools `read grep find ls write edit bash` are in-app only.
 | `surfaces/git.ts` | `git_status diff_show review_open review_comment review_submit git_commit git_branch` |
 | `surfaces/process.ts` | `process_start process_list process_stop process_logs` |
 | `surfaces/sideshow.ts` | `sideshow_publish sideshow_comments` |
+| `exports.ts` | `ui_export_project` |
 
 ### Approvals (human in the loop)
 
@@ -179,6 +184,15 @@ Write `server/surfaces/<kind>.ts` as a feature module built with `SurfaceContext
 in `web/surfaces/index.tsx`. Add `aicl surface open <kind>` in `bin/aicl.mjs` if external agents
 should open it.
 
+## Export pipeline
+
+A canvas screen (a `ScreenSpec`, `shared/ui-spec.ts`) exports as a working app: `exportProject(spec, target)` in `server/export/targets.ts` for `react`, `react-tailwind`, `vue`, `svelte`, `html` or `json`.
+
+- `build.ts` turns the spec into a static element tree with two live slots. The **thread** is the container with the most conversation elements; its children become seed messages, and non-message elements become pre-rendered `html` parts. The **composer** is the first `composer` node. If either is missing, it is inserted.
+- `vnode.ts` prints that tree as JSX, a Vue or Svelte template (braces are escaped), HTML, or JSX with Tailwind classes (`styleToTailwind`). Layout and theme logic is shared with `toReactCode` through the helpers exported from `shared/ui-ops.ts`.
+- `templates/` holds the runtime files copied verbatim into every export: the dependency-free chat client (`shared/chat.js`, shipped as `aicl-chat.js`; never name it `chat.js` next to `Chat.tsx`, because case-insensitive filesystems collide), the live components for each framework, and `server/` (`ChatBackend` plus the `anthropic`, `openai` and `echo` backends, and the HTTP server). These files are **not** covered by the workspace `tsc`. They are verified by `server/export.test.ts` (unit) and `e2e/export.mjs` (install, typecheck, build and chat in Chromium for every target).
+- To add a target, add it to `shared/export-targets.ts`, write a project function in `targets.ts`, put its runtime files under `templates/<target>/`, and extend `e2e/export.mjs`.
+
 ## Conventions
 
 - **Server and shared code must stay strip-types compatible**: import with explicit `.ts`
@@ -200,7 +214,8 @@ should open it.
 | Command | What | Needs |
 |---|---|---|
 | `npm run typecheck` | `tsc` over `server`, `shared`, `web` | nothing |
-| `npm test` | `node --test server/*.test.ts` (188 tests, fakes for Pi) | nothing |
+| `npm test` | `node --test server/*.test.ts` (212 tests, fakes for Pi) | nothing |
+| `node e2e/export.mjs [--dir=… --only=react,html --shots=…]` | every export target installs, typechecks, builds, and chats on the echo backend | network for `npm install`; no model |
 | `node --experimental-strip-types --no-warnings e2e/codegen-check/check.ts` | generated screen code typechecks against `@aicl/react` | nothing |
 | `node e2e/<suite>.mjs <flag>` | Playwright against a live server | live `npm run dev`, real model, throwaway `AICL_WORKSPACE`, Chromium |
 
@@ -219,6 +234,7 @@ into the workspace:
 | `workspace-canvas.mjs` | `--clears-canvas` | work frames, presence, follow, canvas-first mode |
 | `chaos.mjs` | `--clears-canvas` | starts and kills its own server, offline, renderer crash |
 | `terminal.mjs`, `process.mjs`, `mcp.mjs`, `sideshow.mjs` | — | surfaces, MCP bridge with an approval (sideshow needs `E2E_CARD`) |
+| `showcase.mjs` | `--scratch-workspace` (`--skip-agent`, `--out=`) | regenerates the README screenshots in `docs/screenshots/` |
 
 Run them on spare ports so you don't touch the user's instance, for example
 `AICL_PORT=5192 AICL_WEB_PORT=5193 AICL_WORKSPACE=$(mktemp -d) npm run dev`, then
@@ -238,4 +254,5 @@ launched lazily on the first `browser_open`.
 | `409 The agent is still working` | One run per session. Stop it (`POST /api/sessions/:id/stop`) or wait |
 | `posix_spawnp failed` from terminals | node-pty helper lost its execute bit. Re-run `npm install` (postinstall) |
 | A gated CLI/MCP call hangs | It is waiting for an approval card in the UI |
+| An exported app says the `anthropic` backend needs `@anthropic-ai/sdk` | `ANTHROPIC_API_KEY` is set but the export has not run `npm install`. It falls back to echo until then |
 | `logs/` directories everywhere | Written by local Claude Code hooks and git-ignored. Ignore them |
