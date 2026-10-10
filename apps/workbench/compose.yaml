@@ -17,7 +17,9 @@ services:
     volumes:
       - rivet-engine-data:/var/lib/rivet-engine
     ports:
-      - "6420:6420"
+      # Loopback only: this is the admin-token API. RIVET_PORT moves the host
+      # side when 6420 is taken (e.g. another engine on the host).
+      - "127.0.0.1:${RIVET_PORT:-6420}:6420"
     healthcheck:
       # 6421 is the engine's api-peer port; /health lives there
       # (engine/packages/config/src/defaults.rs + upstream compose).
@@ -39,6 +41,10 @@ services:
       # daemon, so the runner needs the host $HOME (the worker's own $HOME is
       # its container). Only ~/.codex/auth.json is ever read from it.
       HOST_HOME: ${HOME}
+    # Runner reaches sandbox ports via host.docker.internal; built into Docker
+    # Desktop/OrbStack, needs this mapping on Linux.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       rivet-engine:
         condition: service_healthy
