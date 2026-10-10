@@ -160,3 +160,35 @@ Prerequisites:
 - `codex login` (ChatGPT) on the host for `codex-native` (`~/.codex/auth.json`).
 - `/var/run/docker.sock` is mounted into the `worker` service — the worker can
   control host Docker and starts/stops sandbox containers on it.
+
+## Durability drill
+
+```bash
+npm run drill          # ~8 minutes; kills/restarts the worker and the engine
+```
+
+`scripts/drill.ts` proves M1 durability on any host by breaking the stack
+mid-run and asserting the durable outcome, printing PASS/FAIL per scenario and
+exiting non-zero on any FAIL. Every key is unique per run (`drill-<runId>`), so
+it is safe to re-run, and it destroys its own runner sandbox at the end.
+
+1. **Nasir, hard kill**: SIGKILL the worker mid-run — the run must resume and
+   settle exactly once (one user message, one complete final answer; retried
+   attempts show up as short tool-call preambles, not duplicate answers).
+2. **Nasir, graceful redeploy**: rebuild + replace the worker (`compose up -d
+   --build --wait worker`) mid-run — same criteria.
+3. **Runner, hard kill**: SIGKILL the worker while a command runs in the
+   sandbox — the command's side effect must be exactly-once and the sandbox
+   container must survive unchanged.
+4. **Engine**: `compose restart rivet-engine` — the ping count continues and a
+   fresh Nasir answers.
+5. **Cleanup**: destroy the scenario-3 runner; no sandbox containers from this
+   run remain.
+
+It controls Docker via `docker compose`, so run it when nothing else uses the
+stack.
+
+Runner turns are at-most-once across a worker crash: the client retries an
+interrupted `say`, and the runner rejects that retry ("previous turn was
+interrupted…") instead of re-sending a command that may already have run in
+the still-running sandbox. Check `history`, then send again if needed.

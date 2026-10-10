@@ -372,6 +372,10 @@ export const runner = actor({
 	state: {
 		sandboxId: null as string | null,
 		sessionId: null as string | null,
+		// Prompt of the turn in flight; still set on wake means the worker died
+		// mid-turn. The caller (rivetkit client or engine) retries the action,
+		// so without this a non-idempotent command would run twice.
+		pending: null as string | null,
 		persist: { sessions: {}, events: {} } as PersistData,
 	},
 	// Runtime-only (not persisted); recreated on every wake.
@@ -384,6 +388,15 @@ export const runner = actor({
 		say: async (c, text: string) => {
 			const prompt = text?.trim();
 			if (!prompt) throw new Error("text is required");
+
+			if (c.state.pending !== null) {
+				c.state.pending = null;
+				throw new UserError(
+					"previous turn was interrupted by a worker restart and was not re-sent; check history, then send again if needed",
+				);
+			}
+			c.state.pending = prompt;
+			await c.saveState({ immediate: true });
 
 			// RivetKit hides non-UserError messages as "internal error"; surface
 			// sandbox/harness failures to the caller.
@@ -425,6 +438,8 @@ export const runner = actor({
 				throw new UserError(
 					error instanceof Error ? error.message : String(error),
 				);
+			} finally {
+				c.state.pending = null;
 			}
 		},
 
@@ -463,6 +478,7 @@ export const runner = actor({
 			c.vars.agent = undefined;
 			c.state.sandboxId = null;
 			c.state.sessionId = null;
+			c.state.pending = null;
 			c.state.persist = { sessions: {}, events: {} };
 			return { destroyed: sandboxId };
 		},

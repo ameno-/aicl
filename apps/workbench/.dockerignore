@@ -1,0 +1,7 @@
+# Build context for the worker image (Dockerfile COPYs only package.json,
+# package-lock.json, tsconfig.json, src/, nasir/). Without this the ~3 GB
+# node_modules tree is shipped to the daemon on every build.
+node_modules
+logs
+web
+.env*
