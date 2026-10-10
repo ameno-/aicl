@@ -14,7 +14,7 @@
 //   4. engine-restart  `compose restart rivet-engine`; ping count continues, a
 //                      fresh nasir agent answers.
 //   5. cleanup         destroy the scenario-3 runner; no sandbox containers from
-//                      this run remain.
+//                      this run remain; delete this run's actors.
 //
 // Docker control: `docker compose ...` via execFileSync with explicit timeouts
 // (cwd = this package). Exits non-zero if any scenario FAILs.
@@ -30,8 +30,11 @@ const SANDBOX_IMAGE = process.env.SANDBOX_IMAGE ?? "workbench-sandbox:codex-0.16
 const OCTO = "Write a numbered list of 40 short facts about octopuses.";
 
 const endpoint = process.env.RIVET_ENDPOINT ?? "http://localhost:6420";
-const client = createClient<typeof registry>({ endpoint, token: process.env.RIVET_TOKEN });
+const token = process.env.RIVET_TOKEN;
+const client = createClient<typeof registry>({ endpoint, token });
 const runId = `d${Date.now().toString(36)}`;
+/** Actor ids this run created; scenario 5 deletes them. */
+const created: string[] = [];
 
 const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
@@ -205,6 +208,7 @@ function scan(context: ContextView, prompt: string) {
 
 async function nasirScenario(mode: "kill" | "redeploy", ev: string[]) {
 	const nasir = client.nasir.getOrCreate(["me", `drill-${runId}-${mode}`]);
+	created.push(await nasir.resolve());
 	const root = await nasir.harness.root();
 	// Non-blocking submit, exactly like web/useAgentChat.ts `send`.
 	const submission = await nasir.conversation.submit(root.id, {
@@ -225,12 +229,18 @@ async function nasirScenario(mode: "kill" | "redeploy", ev: string[]) {
 		docker(["up", "-d", "--build", "--wait", "worker"], 900_000);
 	}
 	await waitWorkerReady(180_000);
+	const workerReadyAt = Date.now();
 
-	const settled = await until(180_000, 3_000, async () => {
+	// The actor can stay unreachable for minutes after the worker returns (a
+	// mid-run drain plus engine reschedule backoff, AICL-95), so keep asking and
+	// report how long it took rather than failing on the first timeout.
+	const settled = await until(360_000, 3_000, async () => {
 		const status: SubmissionRecord | undefined = await nasir.submission.status(submission.id);
 		return status && (status.status === "done" || status.status === "unanswered") ? status : undefined;
 	});
-	const context = await nasir.conversation.context(root.id);
+	const context = await until(60_000, 3_000, () => nasir.conversation.context(root.id));
+	if (!context) throw new Error("conversation context unreachable after the run settled");
+	ev.push(`settled ${Math.round((Date.now() - workerReadyAt) / 1000)}s after the worker was back`);
 	const { userCount, assistant, kinds, toolCallEntries } = scan(context, OCTO);
 	// The settled submission's `answer` points at THE final answer entry; retried
 	// attempts appear as short tool-call preambles, not duplicate answers.
@@ -260,6 +270,7 @@ async function nasirScenario(mode: "kill" | "redeploy", ev: string[]) {
 async function runnerScenario(ev: string[]) {
 	const rid = `drill-${runId}`;
 	const runner = client.runner.getOrCreate(["me", rid, "codex-opencode"]);
+	created.push(await runner.resolve());
 	const known = new Set(sandboxIds());
 
 	// Fire without awaiting: the call fails when the worker dies mid-command.
@@ -337,6 +348,7 @@ async function engineScenario(ev: string[]) {
 	const first = await ping.ping();
 	const second = await ping.ping();
 	const nasir = client.nasir.getOrCreate(["me", `drill-eng-${runId}`]);
+	created.push(await nasir.resolve());
 	const reply = await withTimeout(nasir.prompt("Reply with exactly: engine-ok"), 180_000, "nasir prompt");
 	const pingOk = first.count >= 1 && second.count === first.count + 1;
 	const nasirOk = reply.status === "done" && (reply.text ?? "").includes("engine-ok");
@@ -366,6 +378,19 @@ async function cleanupScenario(ev: string[]) {
 		`sandbox containers (${SANDBOX_IMAGE}) remaining: ${remaining.length}; from this run: ${leaked.length}`,
 	);
 	if (!gone) throw new Error(`drill sandbox containers still present: ${leaked.join(",")}`);
+
+	// Delete this run's actors, or every run leaves awake Nasirs (each with a
+	// heartbeat cron calling the model) and runners behind (engine admin API).
+	const statuses: number[] = [];
+	for (const actorId of created) {
+		const res = await fetch(`${endpoint}/actors/${actorId}?namespace=default`, {
+			method: "DELETE",
+			headers: { Authorization: `Bearer ${token}` },
+		});
+		statuses.push(res.status);
+	}
+	ev.push(`deleted ${created.length} drill actors (HTTP ${[...new Set(statuses)].join(",") || "-"})`);
+	if (statuses.some((status) => status !== 200)) throw new Error("failed to delete drill actors");
 }
 
 // --- harness -------------------------------------------------------------------
@@ -382,7 +407,7 @@ async function scenario(name: string, run: (ev: string[]) => Promise<void>) {
 		pass = false;
 		ev.push(`error: ${error instanceof Error ? error.message : String(error)}`);
 	}
-	results.push({ name, pass, evidence: ev.slice(0, 4) });
+	results.push({ name, pass, evidence: ev.slice(0, 5) });
 }
 
 async function main() {

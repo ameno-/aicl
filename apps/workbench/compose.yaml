@@ -41,6 +41,8 @@ services:
       # daemon, so the runner needs the host $HOME (the worker's own $HOME is
       # its container). Only ~/.codex/auth.json is ever read from it.
       HOST_HOME: ${HOME}
+      # Sandbox resolvers (see src/runner.ts SANDBOX_DNS); empty = Docker default.
+      SANDBOX_DNS: ${SANDBOX_DNS:-}
     # Runner reaches sandbox ports via host.docker.internal; built into Docker
     # Desktop/OrbStack, needs this mapping on Linux.
     extra_hosts:

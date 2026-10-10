@@ -32,6 +32,7 @@ import { docker } from "sandbox-agent/docker";
 import { credentials } from "./credentials.ts";
 import Docker from "dockerode";
 import { loadoutFromId, type RunnerLoadout } from "./loadouts.ts";
+import { Agent, fetch as undiciFetch } from "undici";
 
 // sandbox-agent/dist/providers/docker.js hard-codes image and dials the
 // published host port at `http://${host}:${port}` (docker.js:8 and :78). From
@@ -44,6 +45,13 @@ const SANDBOX_HOST = process.env.SANDBOX_AGENT_HOST ?? "host.docker.internal";
 // create API does not auto-pull, so ensureImagePulled() pulls missing images.
 const SANDBOX_IMAGE =
 	process.env.SANDBOX_IMAGE ?? "workbench-sandbox:codex-0.162.1";
+// Resolvers for sandbox containers, comma-separated (unset: Docker's default).
+// On a Linux host whose daemon DNS cannot resolve the tailnet gateway, use
+// Tailscale's MagicDNS first, e.g. "100.100.100.100,1.1.1.1".
+const SANDBOX_DNS = (process.env.SANDBOX_DNS ?? "")
+	.split(",")
+	.map((server) => server.trim())
+	.filter(Boolean);
 // Codex config for the litellm loadout (Codex config.toml format,
 // openai/codex docs: model_provider + [model_providers.<id>] base_url /
 // env_key / wire_api).
@@ -52,13 +60,27 @@ const GATEWAY_BASE_URL = "https://hostinger-gateway.tail98db32.ts.net:8449/v1";
 // docker/runtime/Dockerfile.full:150-152), and the Docker daemon creates
 // bind-mount parents as root, so codex could not write into a mounted
 // ~/.codex. Instead the host auth.json is mounted read-only into a scratch
-// dir and copied (over the stock fs API) to /home/sandbox/.codex/auth.json,
-// which codex then owns.
+// dir and copied to /home/sandbox/.codex/auth.json, which codex then owns.
+// The copy runs as root (docker exec): on Linux the mount keeps the host
+// owner and mode 600, which the `sandbox` user cannot read.
 const CODEX_AUTH_MOUNT = "/home/sandbox/.codex-host/auth.json";
 const CODEX_AUTH = "/home/sandbox/.codex/auth.json";
 const CODEX_CONFIG = "/home/sandbox/.codex/config.toml";
 
 const dockerClient = new Docker({ socketPath: "/var/run/docker.sock" });
+
+// ACP over HTTP holds a prompt's POST open for the whole Codex turn. Pi sets a
+// global undici dispatcher with a 300s headers timeout, which would fail (and,
+// unhandled inside acp-http-client, crash the worker) on any longer turn.
+const sandboxDispatcher = new Agent({ headersTimeout: 0, bodyTimeout: 0 });
+const sandboxFetch = ((
+	input: Parameters<typeof undiciFetch>[0],
+	init?: Parameters<typeof undiciFetch>[1],
+) =>
+	undiciFetch(input, {
+		...init,
+		dispatcher: sandboxDispatcher,
+	})) as unknown as typeof fetch;
 
 // The narrow slice of a rivetkit action context the runner helpers need.
 // client() mirrors rivetkit's own signature (src/actor/config.ts:447 and :66,
@@ -66,7 +88,7 @@ const dockerClient = new Docker({ socketPath: "/var/run/docker.sock" });
 type RunnerActionContext = {
 	key: readonly string[];
 	state: RunnerState;
-	vars: { agent?: AgentBundle };
+	vars: { agent?: AgentBundle; running: boolean };
 	client<T = any>(): T extends Registry<any> ? Client<T> : T;
 };
 
@@ -143,7 +165,25 @@ function buildProvider(
 		...base,
 		async create() {
 			await ensureImagePulled();
-			return base.create();
+			if (SANDBOX_DNS.length === 0) return base.create();
+			// Same container as the stock provider's create() (sandbox-agent
+			// providers/docker.js), plus Dns: its createContainerOptions would
+			// replace HostConfig wholesale. Docker picks the host port; the stock
+			// getUrl() reads it back from inspect.
+			const container = await dockerClient.createContainer({
+				Image: SANDBOX_IMAGE,
+				Cmd: ["server", "--no-token", "--host", "0.0.0.0", "--port", "3000"],
+				Env: await env(),
+				ExposedPorts: { "3000/tcp": {} },
+				HostConfig: {
+					AutoRemove: true,
+					Binds: binds(),
+					PortBindings: { "3000/tcp": [{ HostPort: "" }] },
+					Dns: SANDBOX_DNS,
+				},
+			});
+			await container.start();
+			return container.id;
 		},
 	};
 }
@@ -314,6 +354,7 @@ async function getAgent(c: RunnerContext): Promise<AgentBundle> {
 			),
 			sandboxId: c.state.sandboxId ?? undefined,
 			persist: new ActorStatePersistDriver(c.state),
+			fetch: sandboxFetch,
 		});
 
 	let sdk: SandboxAgent;
@@ -343,11 +384,22 @@ async function ensureSetup(bundle: AgentBundle): Promise<void> {
 			codexConfigToml(bundle.loadout),
 		);
 	} else {
-		const mounted = await bundle.sdk.readFsFile({ path: CODEX_AUTH_MOUNT });
-		await bundle.sdk.writeFsFile(
-			{ path: CODEX_AUTH },
-			new TextDecoder().decode(mounted),
-		);
+		const containerId = (bundle.sdk.sandboxId ?? "").replace(/^docker\//, "");
+		const exec = await dockerClient.getContainer(containerId).exec({
+			User: "root",
+			Cmd: ["install", "-D", "-o", "sandbox", "-g", "sandbox", "-m", "600", CODEX_AUTH_MOUNT, CODEX_AUTH],
+			AttachStdout: true,
+			AttachStderr: true,
+		});
+		const stream = await exec.start({});
+		await new Promise((resolve) => {
+			stream.on("end", resolve);
+			stream.resume();
+		});
+		const { ExitCode } = await exec.inspect();
+		if (ExitCode !== 0) {
+			throw new Error(`copying Codex auth.json into the sandbox failed (exit ${ExitCode})`);
+		}
 	}
 	bundle.setupDone = true;
 }
@@ -379,7 +431,10 @@ export const runner = actor({
 		persist: { sessions: {}, events: {} } as PersistData,
 	},
 	// Runtime-only (not persisted); recreated on every wake.
-	createVars: () => ({ agent: undefined as AgentBundle | undefined }),
+	createVars: () => ({
+		agent: undefined as AgentBundle | undefined,
+		running: false,
+	}),
 	// Codex turns can take minutes (and the first say also starts/pulls the
 	// sandbox); rivetkit's default actionTimeout is 60s
 	// (rivetkit/src/actor/config.ts:1309). Same override Foundry uses.
@@ -389,6 +444,13 @@ export const runner = actor({
 			const prompt = text?.trim();
 			if (!prompt) throw new Error("text is required");
 
+			// A retry of a still-running say (the engine gateway gives up on an
+			// action after 300s and the client resends it) must not start a second turn.
+			if (c.vars.running) {
+				throw new UserError(
+					"a turn is still running in this runner; check history before sending again",
+				);
+			}
 			if (c.state.pending !== null) {
 				c.state.pending = null;
 				throw new UserError(
@@ -396,6 +458,7 @@ export const runner = actor({
 				);
 			}
 			c.state.pending = prompt;
+			c.vars.running = true;
 			await c.saveState({ immediate: true });
 
 			// RivetKit hides non-UserError messages as "internal error"; surface
@@ -440,6 +503,7 @@ export const runner = actor({
 				);
 			} finally {
 				c.state.pending = null;
+				c.vars.running = false;
 			}
 		},
 

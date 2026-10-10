@@ -28,7 +28,8 @@
 		"react": "19.3.0",
 		"react-dom": "19.3.0",
 		"rivetkit": "2.3.26",
-		"sandbox-agent": "0.5.2"
+		"sandbox-agent": "0.5.2",
+		"undici": "8.10.2"
 	},
 	"devDependencies": {
 		"@standard-schema/spec": "1.0.0",

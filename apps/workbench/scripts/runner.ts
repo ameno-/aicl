@@ -1,8 +1,13 @@
 // Host-side runner client: say / history / destroy for one runner actor at
 // key ["me", <runnerId>, <loadout>].
 import { createClient } from "rivetkit/client";
+import { Agent, setGlobalDispatcher } from "undici";
 import type { registry } from "../src/registry.ts";
 import { DEFAULT_LOADOUT, LOADOUTS, type LoadoutId } from "../src/loadouts.ts";
+
+// A say lasts as long as the Codex turn (up to the actor's 10 min
+// actionTimeout); Node's fetch would give up on headers after 300s.
+setGlobalDispatcher(new Agent({ headersTimeout: 0, bodyTimeout: 0 }));
 
 const endpoint = process.env.RIVET_ENDPOINT ?? "http://localhost:6420";
 const client = createClient<typeof registry>({

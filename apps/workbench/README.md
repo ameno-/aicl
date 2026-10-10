@@ -22,6 +22,19 @@ npm run logs           # follow compose logs
 npm run typecheck
 ```
 
+Host-specific settings (all optional, read from the shell env or `.env`):
+
+| Variable | Default | When to set it |
+|---|---|---|
+| `RIVET_PORT` | `6420` | Host port for the engine API (always bound to 127.0.0.1). Set it when 6420 is taken, and point `RIVET_ENDPOINT` at it. |
+| `SANDBOX_DNS` | Docker's default | Runner sandbox resolvers, comma-separated. On Linux, sandboxes cannot resolve the tailnet LiteLLM gateway with the daemon's DNS: use `100.100.100.100,1.1.1.1` (Tailscale MagicDNS first). |
+
+On ai-lab the stack lives in `~/dev/nasir-workbench`. A `wb` function in `~/.zshrc`
+holds `RIVET_TOKEN`, `RIVET_PORT=6440`, `RIVET_ENDPOINT` and `SANDBOX_DNS`, so that
+host's other engine on 6420 is unaffected. Run every command through it, e.g.
+`wb npm run up`, `wb npm run drill`. Save model keys from a machine that has them by
+piping each one over SSH stdin into `npm run creds -- save-env <provider>`.
+
 ## What is pinned where
 
 | Thing | Value | Where |
@@ -164,26 +177,28 @@ Prerequisites:
 ## Durability drill
 
 ```bash
-npm run drill          # ~8 minutes; kills/restarts the worker and the engine
+npm run drill          # ~10 minutes; kills/restarts the worker and the engine
 ```
 
 `scripts/drill.ts` proves M1 durability on any host by breaking the stack
 mid-run and asserting the durable outcome, printing PASS/FAIL per scenario and
 exiting non-zero on any FAIL. Every key is unique per run (`drill-<runId>`), so
-it is safe to re-run, and it destroys its own runner sandbox at the end.
+it is safe to re-run, and at the end it destroys its runner sandbox and deletes
+the actors it created.
 
 1. **Nasir, hard kill**: SIGKILL the worker mid-run — the run must resume and
    settle exactly once (one user message, one complete final answer; retried
    attempts show up as short tool-call preambles, not duplicate answers).
 2. **Nasir, graceful redeploy**: rebuild + replace the worker (`compose up -d
-   --build --wait worker`) mid-run — same criteria.
+   --build --wait worker`) mid-run — same criteria. It also reports how long
+   Nasir took to answer after the worker was back (minutes today: AICL-95).
 3. **Runner, hard kill**: SIGKILL the worker while a command runs in the
    sandbox — the command's side effect must be exactly-once and the sandbox
    container must survive unchanged.
 4. **Engine**: `compose restart rivet-engine` — the ping count continues and a
    fresh Nasir answers.
-5. **Cleanup**: destroy the scenario-3 runner; no sandbox containers from this
-   run remain.
+5. **Cleanup**: destroy the scenario-3 runner (no sandbox containers from this
+   run remain) and delete this run's actors.
 
 It controls Docker via `docker compose`, so run it when nothing else uses the
 stack.
@@ -192,3 +207,8 @@ Runner turns are at-most-once across a worker crash: the client retries an
 interrupted `say`, and the runner rejects that retry ("previous turn was
 interrupted…") instead of re-sending a command that may already have run in
 the still-running sandbox. Check `history`, then send again if needed.
+
+A `say` is one HTTP action, and the engine gateway cuts actions at 300 s. For a
+longer Codex turn the caller gets an error and the client's retry is rejected
+("a turn is still running"), but the turn finishes and shows up in `history`.
+A non-blocking `say` is AICL-96.
