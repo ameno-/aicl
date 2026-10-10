@@ -3,6 +3,7 @@ import { pi } from "@rivet-dev/pi";
 import { type Registry, actor, setup } from "rivetkit";
 import { credentials } from "./credentials.ts";
 import { nasir } from "./nasir.ts";
+import { runner } from "./runner.ts";
 
 export const ping = actor({
 	state: {
@@ -28,4 +29,4 @@ const agent = pi({
 	},
 });
 
-export const registry = setup({ use: { credentials, ping, agent, nasir } });
+export const registry = setup({ use: { credentials, ping, agent, nasir, runner } });

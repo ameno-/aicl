@@ -99,3 +99,45 @@ npm run nasir -- last [--key nasir]   # last assistant reply of the root convers
 `--new-conversation` prompts in a fresh `ownerless` conversation, which only
 knows the persona sections and `MEMORY.md` — handy for proving memory
 durability.
+
+## Runner
+
+The `runner` actor (`src/runner.ts`) is one Codex harness per actor key
+`["me", <runnerId>, <loadout>]`, running via Sandbox Agent
+(`sandbox-agent` SDK, ACP) in a local Docker container (`docker` provider).
+Loadouts (`src/loadouts.ts`, plain data) pick how Codex gets credentials:
+
+- `codex-opencode` (default): Codex talks to the LiteLLM gateway
+  (OpenAI Responses API) with model `opencode-gpt-6-luna`. The gateway key is
+  read from the `credentials` actor at sandbox-creation time and passed as
+  `LITELLM_API_KEY`; a `~/.codex/config.toml` is written into the sandbox.
+- `codex-native`: Codex uses your own ChatGPT-subscription login. The host's
+  `~/.codex/auth.json` is bind-mounted read-only (source resolved by the host
+  daemon, hence `HOST_HOME=${HOME}` in compose.yaml) and copied to
+  `/home/sandbox/.codex/auth.json`; default Codex model.
+
+Sandboxes run the `workbench-sandbox:codex-0.162.1` image, which
+`npm run up` builds from `sandbox/Dockerfile`: the stock Sandbox Agent image
+plus a pinned Codex release. The stock image's Codex 0.116.0 is rejected by
+ChatGPT accounts. Both loadouts use ACP mode `agent-full-access` (the
+container is the boundary); without it Codex is read-only and every command
+waits on a permission request.
+
+The sandbox container and the session transcript survive a worker restart
+(session records + events persist in actor state; the SDK resumes the session
+in the still-running container).
+
+```bash
+npm run creds -- save-env litellm    # gateway key, once (reads LITELLM_API_KEY from the shell)
+npm run runner -- say "Create proof.txt with: ok. Then print it." --id r1
+npm run runner -- say "Reply with exactly: native-ok" --id r2 --loadout codex-native
+npm run runner -- history --id r1
+npm run runner -- destroy --id r1    # stops/removes the sandbox container
+```
+
+Prerequisites:
+
+- `npm run creds -- save-env litellm` for `codex-opencode`.
+- `codex login` (ChatGPT) on the host for `codex-native` (`~/.codex/auth.json`).
+- `/var/run/docker.sock` is mounted into the `worker` service — the worker can
+  control host Docker and starts/stops sandbox containers on it.

@@ -35,12 +35,27 @@ services:
       RIVET_TOKEN: ${RIVET_TOKEN:?set RIVET_TOKEN in .env or shell env}
       # Heartbeat cron for the nasir agent (non-secret; read by onCreate).
       NASIR_HEARTBEAT_CRON: '${NASIR_HEARTBEAT_CRON:-*/30 * * * *}'
+      # Runner sandboxes: docker() bind sources are resolved by the HOST
+      # daemon, so the runner needs the host $HOME (the worker's own $HOME is
+      # its container). Only ~/.codex/auth.json is ever read from it.
+      HOST_HOME: ${HOME}
     depends_on:
       rivet-engine:
         condition: service_healthy
+    volumes:
+      # Runner sandboxes: the worker creates/controls host Docker containers
+      # (sandbox-agent's docker provider dials /var/run/docker.sock).
+      - /var/run/docker.sock:/var/run/docker.sock
     # Runners need up to 30 minutes to drain actors on shutdown, plus overhead
     # (upstream self-host/workers/docker-compose/compose.yaml).
     stop_grace_period: 35m
+
+  # Runner sandbox image (built only, never run by compose): the worker starts
+  # containers from it through docker.sock. See sandbox/Dockerfile.
+  sandbox-image:
+    build: ./sandbox
+    image: workbench-sandbox:codex-0.162.1
+    profiles: ["images"]
 
 volumes:
   rivet-engine-data:
