@@ -5,6 +5,7 @@ dist-test/
 .DS_Store
 .env
 .env.*
+!apps/workbench/.env.example
 
 # beads: track the portable JSONL + config, ignore local db/daemon state
 .beads/*

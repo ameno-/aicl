@@ -1,0 +1,46 @@
+# Self-hosted Rivet engine + RivetKit worker.
+# Engine image and rivetkit package are pinned to the same version (2.3.26).
+# Env-var config follows upstream self-host/control-plane/docker-compose/.
+
+services:
+  rivet-engine:
+    image: rivetdev/engine:full-2.3.26
+    restart: unless-stopped
+    # Image entrypoint is /usr/bin/rivet-engine with default cmd `start`
+    # (upstream self-host compose overrides it only because its image is built
+    # from the repo Dockerfile without those defaults).
+    environment:
+      # Engine config reads env with prefix RIVET and separator __
+      # (engine/packages/config/src/lib.rs), so auth.admin_token is:
+      RIVET__AUTH__ADMIN_TOKEN: ${RIVET_TOKEN:?set RIVET_TOKEN in .env or shell env}
+      RIVET__FILE_SYSTEM__PATH: /var/lib/rivet-engine
+    volumes:
+      - rivet-engine-data:/var/lib/rivet-engine
+    ports:
+      - "6420:6420"
+    healthcheck:
+      # 6421 is the engine's api-peer port; /health lives there
+      # (engine/packages/config/src/defaults.rs + upstream compose).
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:6421/health"]
+      interval: 2s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+
+  worker:
+    build: .
+    restart: unless-stopped
+    environment:
+      RIVET_ENDPOINT: http://rivet-engine:6420
+      RIVET_TOKEN: ${RIVET_TOKEN:?set RIVET_TOKEN in .env or shell env}
+      # Heartbeat cron for the nasir agent (non-secret; read by onCreate).
+      NASIR_HEARTBEAT_CRON: '${NASIR_HEARTBEAT_CRON:-*/30 * * * *}'
+    depends_on:
+      rivet-engine:
+        condition: service_healthy
+    # Runners need up to 30 minutes to drain actors on shutdown, plus overhead
+    # (upstream self-host/workers/docker-compose/compose.yaml).
+    stop_grace_period: 35m
+
+volumes:
+  rivet-engine-data:

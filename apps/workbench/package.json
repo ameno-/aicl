@@ -1,0 +1,28 @@
+{
+	"name": "aicl-workbench",
+	"private": true,
+	"type": "module",
+	"description": "Self-hosted Rivet engine (Docker) + RivetKit worker with a trivial ping actor.",
+	"scripts": {
+		"up": "docker compose up -d --build --wait && docker compose ps",
+		"down": "docker compose down",
+		"reset": "docker compose down -v",
+		"logs": "docker compose logs -f",
+		"smoke": "node --experimental-strip-types --no-warnings --env-file-if-exists=.env scripts/smoke.ts",
+		"creds": "node --experimental-strip-types --no-warnings --env-file-if-exists=.env scripts/creds.ts",
+		"agent-smoke": "node --experimental-strip-types --no-warnings --env-file-if-exists=.env scripts/agent-smoke.ts",
+		"nasir": "node --experimental-strip-types --no-warnings --env-file-if-exists=.env scripts/nasir.ts",
+		"typecheck": "tsc -p tsconfig.json"
+	},
+	"dependencies": {
+		"@earendil-works/pi-ai": "1.1.0",
+		"@earendil-works/pi-coding-agent": "1.1.0",
+		"@earendil-works/pi-durable": "1.1.0",
+		"@rivet-dev/pi": "0.5.2",
+		"rivetkit": "2.3.26"
+	},
+	"devDependencies": {
+		"@types/node": "22.20.4",
+		"typescript": "5.9.3"
+	}
+}
