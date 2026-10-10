@@ -13,21 +13,30 @@
 		"agent-smoke": "node --experimental-strip-types --no-warnings --env-file-if-exists=.env scripts/agent-smoke.ts",
 		"nasir": "node --experimental-strip-types --no-warnings --env-file-if-exists=.env scripts/nasir.ts",
 		"runner": "node --experimental-strip-types --no-warnings --env-file-if-exists=.env scripts/runner.ts",
-		"typecheck": "tsc -p tsconfig.json"
+		"typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.web.json",
+		"web": "vite"
 	},
 	"dependencies": {
 		"@earendil-works/pi-ai": "1.1.0",
 		"@earendil-works/pi-coding-agent": "1.1.0",
 		"@earendil-works/pi-durable": "1.1.0",
 		"@rivet-dev/pi": "0.5.2",
+		"@rivetkit/react": "2.3.26",
 		"dockerode": "4.0.8",
 		"get-port": "7.1.0",
+		"react": "19.3.0",
+		"react-dom": "19.3.0",
 		"rivetkit": "2.3.26",
 		"sandbox-agent": "0.5.2"
 	},
 	"devDependencies": {
+		"@standard-schema/spec": "1.0.0",
 		"@types/dockerode": "4.0.2",
 		"@types/node": "22.20.4",
-		"typescript": "5.9.3"
+		"@types/react": "19.3.0",
+		"@types/react-dom": "19.3.0",
+		"@vitejs/plugin-react": "5.2.0",
+		"typescript": "5.9.3",
+		"vite": "7.3.7"
 	}
 }

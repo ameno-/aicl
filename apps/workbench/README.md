@@ -100,6 +100,25 @@ npm run nasir -- last [--key nasir]   # last assistant reply of the root convers
 knows the persona sections and `MEMORY.md` — handy for proving memory
 durability.
 
+## Chat UI
+
+Browser chat with the `nasir` actor (`["me", "nasir"]`), built from the stock
+Rivet Agents React SDK example (`examples/docs/react-sdk`):
+
+```bash
+npm run up             # engine + worker must be healthy
+npm run web            # vite dev server
+open http://127.0.0.1:5190
+```
+
+Live streaming replies, history on reload (from the conversation snapshot),
+and a Stop button (`conversation.abort`). The engine admin token
+(`RIVET_TOKEN`) and endpoint (`RIVET_ENDPOINT`) are inlined into the dev
+bundle by Vite's env handling — local browser only, single-user localhost
+(scoping is M4 AICL-88). If the browser cannot reach the engine directly
+(e.g. CORS), unset `RIVET_ENDPOINT` and the app falls back to the Vite dev
+proxy at `/rivet` → `http://localhost:6420` (`vite.config.ts`).
+
 ## Runner
 
 The `runner` actor (`src/runner.ts`) is one Codex harness per actor key
