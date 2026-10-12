@@ -1,8 +1,11 @@
 # workbench
 
-Smallest repeatable Rivet stack: self-hosted Rivet engine in Docker plus a
-RivetKit worker running one `ping` actor, rebuilt from config on any host with
-Docker + Node ≥ 22.6.
+Nasir Workbench, rebuilt from config on any host with Docker + Node ≥ 22.6: a
+self-hosted Rivet engine in Docker plus a RivetKit worker running Nasir (a
+stock `pi()` agent with persona, memory and heartbeat), the `credentials`
+actor, a Codex `runner` in Docker sandboxes, and a `ping` smoke actor. Status,
+runbook and next steps live in Notion (Nasir Workbench — status and handoff,
+AICL-62).
 
 ## Prerequisites
 
@@ -34,6 +37,10 @@ holds `RIVET_TOKEN`, `RIVET_PORT=6440`, `RIVET_ENDPOINT` and `SANDBOX_DNS`, so t
 host's other engine on 6420 is unaffected. Run every command through it, e.g.
 `wb npm run up`, `wb npm run drill`. Save model keys from a machine that has them by
 piping each one over SSH stdin into `npm run creds -- save-env <provider>`.
+
+ai-lab is the live Nasir (its engine volume was copied from the Mac on
+2026-10-12); keep the Mac stack as the test stack. The drill restarts the stack it
+runs on, and `reset` wipes Nasir, so do neither on ai-lab casually.
 
 ## What is pinned where
 

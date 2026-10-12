@@ -15,6 +15,7 @@ derived from a survey of 1,262 screens of four shipping agentic-chat products
 | `packages/fx` | `@aicl/fx`: animated, styled components (Tailwind v4, source-only) | `packages/fx/README.md` |
 | `packages/svelte`, `packages/vue` | **Empty placeholders.** No adapter exists yet | — |
 | `apps/workspace` | Reference app: Pi agent + tldraw canvas + live surfaces + CLI/MCP, and the screen exporter | `apps/workspace/AGENTS.md` |
+| `apps/workbench` | Nasir Workbench: self-hosted Rivet engine + RivetKit worker (Nasir `pi()` agent, credentials, Codex runner in Docker sandboxes), chat UI, durability drill. Runs live on ai-lab | `apps/workbench/README.md` |
 | `examples/slice-1` | Vite gallery of every React primitive in every state, plus e2e | — |
 | `examples/server-node` | Minimal `@aicl/server` handler on Node `http` | — |
 | `docs/` | Architecture, decisions, corpus method, per-domain specs, evaluations, QA notes | see below |
@@ -31,6 +32,9 @@ npm test               # node --test per package (core, react, server)
 
 cd apps/workspace && npm install    # the app is NOT a root workspace; it has its own lockfile
 npm run typecheck && npm test       # app: tsc over server/shared/web; node --test server/*.test.ts
+
+cd apps/workbench && npm install    # also NOT a root workspace; needs Docker
+npm run typecheck                   # then `npm run up` + `npm run drill` for actor lifecycle changes
 ```
 
 Node ≥ 22.6 (the app runs TypeScript with `--experimental-strip-types`). There is **no CI**
@@ -93,7 +97,7 @@ Node ≥ 22.6 (the app runs TypeScript with `--experimental-strip-types`). There
 Work is complete only when the PR is pushed:
 
 1. File Linear issues for anything left over.
-2. Run the gates above (root and, if touched, `apps/workspace`).
+2. Run the gates above (root and, if touched, `apps/workspace` or `apps/workbench`).
 3. Update the Linear issue (state and a comment with the PR link).
 4. Push your branch and confirm `git status` says it is up to date with its upstream, then open
    or update the PR.
