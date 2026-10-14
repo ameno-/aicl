@@ -2,7 +2,9 @@
 
 AICL is an open-source, framework-agnostic UI component library for AI chat applications,
 derived from a survey of 1,262 screens of four shipping agentic-chat products
-(`docs/CORPUS.md`). The repo also contains a large reference application built on it.
+([`docs/CORPUS.md`](docs/CORPUS.md)). The repo also ships a large reference application
+(`apps/workspace`) that uses the library, but the library is the product; the application is a
+worked example, not a starting point for your own chat UI.
 
 ## Repo map
 
@@ -14,12 +16,15 @@ derived from a survey of 1,262 screens of four shipping agentic-chat products
 | `packages/styles` | `@aicl/styles`: optional CSS-variable theme over `[data-aicl]` | `packages/styles/README.md` |
 | `packages/fx` | `@aicl/fx`: animated, styled components (Tailwind v4, source-only) | `packages/fx/README.md` |
 | `packages/svelte`, `packages/vue` | **Empty placeholders.** No adapter exists yet | — |
-| `apps/workspace` | Reference app: Pi agent + tldraw canvas + live surfaces + CLI/MCP, and the screen exporter | `apps/workspace/AGENTS.md` |
+| `apps/workspace` | Reference application built on the library: chat + tldraw canvas + live tools + exporter | `apps/workspace/AGENTS.md` |
 | `examples/slice-1` | Vite gallery of every React primitive in every state, plus e2e | — |
 | `examples/server-node` | Minimal `@aicl/server` handler on Node `http` | — |
 | `docs/` | Architecture, decisions, corpus method, per-domain specs, evaluations, QA notes | see below |
-| `droid-wiki/` | Contributor wiki (refreshed against `c113e9b` in AICL-53; may lag the code, and the guides above win) | — |
+| `droid-wiki/` | Contributor wiki (may lag the code; the guides above win) | — |
 | `pipeline/` | Empty (corpus pipeline lives outside this repo; see `docs/CORPUS.md`) | — |
+
+When you are about to work in `apps/workspace`, switch into that subtree: it has its own
+lockfile, its own `npm run` scripts, and its own conventions (`apps/workspace/AGENTS.md`).
 
 ## Commands (all verified)
 
@@ -36,7 +41,9 @@ npm run typecheck && npm test       # app: tsc over server/shared/web; node --te
 Node ≥ 22.6 (the app runs TypeScript with `--experimental-strip-types`). There is **no CI**
 (`.github/` does not exist), so run these gates yourself before opening a PR.
 
-## Invariants
+## Invariants (library)
+
+These hold for the `packages/*` library and **never** for `apps/workspace`:
 
 1. `@aicl/core` never imports a framework and never touches `document`/`window`. Enforced by
    review only.
@@ -53,13 +60,17 @@ Node ≥ 22.6 (the app runs TypeScript with `--experimental-strip-types`). There
 
 ## Where to change things
 
+Start with the library. Move to the app only when the change is about that specific app.
+
 | Task | Start here |
 |---|---|
 | Message/part model, stream reduction, branching | `packages/core/src/types.ts`, `packages/core/src/chat.ts` |
 | A React primitive's markup, ARIA, keyboard | `packages/react/src/*.tsx`, then `examples/slice-1` to see it |
 | Default theme / tokens | `packages/styles/src/tokens.css`, `components.css` |
 | Server framing / error mapping | `packages/server/src/handler.ts` |
-| Anything in the app (tools, surfaces, canvas, chat product) | `apps/workspace/AGENTS.md` |
+| Animated/styled components | `packages/fx/src/components/*`, then the gallery at `apps/workspace/web/gallery.html` |
+| A new framework adapter | create `packages/<framework>/` next to `packages/react` and follow the same layout |
+| The reference app (tools, surfaces, canvas, chat product) | `apps/workspace/AGENTS.md` |
 | Integrating AICL into another app | `docs/ADOPTION.md` |
 | Exporting designed screens as apps (targets, templates, backends) | `apps/workspace/AGENTS.md#export-pipeline` |
 
