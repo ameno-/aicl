@@ -1279,7 +1279,7 @@
   border-radius: var(--aicl-radius-lg);
   box-shadow: var(--aicl-shadow-3);
   outline: none;
-  animation: aicl-dialog-in var(--aicl-anim) var(--aicl-ease-out);
+  animation: aicl-dialog-in var(--aicl-anim-slow) var(--aicl-ease-out);
 }
 
 [data-aicl='dialog'][data-size='sm'],

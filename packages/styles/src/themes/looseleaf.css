@@ -1,0 +1,291 @@
+/**
+ * The LooseLeaf skin.
+ *
+ * Paper instead of chrome. LooseLeaf is a set of React components that look
+ * drawn by hand: every surface is a sheet of paper, every line is a pen
+ * stroke, colour is a highlighter rather than a fill. The charm is
+ * decoration; the semantics are ordinary.
+ *
+ * What is ported here is the **token vocabulary**, not the artwork. The
+ * vocabulary is the part worth keeping: a warm umber shadow ladder instead
+ * of black alpha, a tight radius instead of a soft one, a dense space ladder,
+ * a highlighter-yellow hover instead of a grey wash, and a handwriting face
+ * with a real monospace for code.
+ *
+ * What is not ported: the drawn SVG outlines and the mascot. Those are the
+ * "ink layer" — a separate, opt-in concern that a future `@aicl/ink` package
+ * would own. This skin changes how AICL *looks*, not what AICL *does*.
+ *
+ * Use it by putting the skin and the mode on the same element:
+ *
+ *   <div data-aicl-root data-aicl-theme="looseleaf" data-theme="dark">
+ *
+ * Without `data-theme`, the mode follows the system.
+ */
+
+/* ─── Light ─────────────────────────────────────────────────────── */
+
+/* The light values. `:not([data-theme='dark'])` keeps this rule from
+   fighting the dark rules below. */
+[data-aicl-theme='looseleaf']:not([data-theme='dark']) {
+  color-scheme: light;
+
+  /* Surfaces. A desk, then paper laid on it. */
+  --aicl-bg: #a8c8bb;
+  --aicl-surface: #f8f5ee;
+  --aicl-surface-elevated: #fbf8f1;
+  --aicl-surface-inset: #ece6da;
+  --aicl-surface-tint: #fbf6e9;
+  --aicl-sidebar: #f8f2de;
+  --aicl-overlay: rgb(58 44 30 / 0.34);
+
+  /* Ink. */
+  --aicl-text: #2a2420;
+  --aicl-text-muted: #4a433c;
+  --aicl-text-faint: #8e887f;
+  --aicl-text-link: #2c4f9e;
+  --aicl-text-inverse: #fbf8f1;
+
+  /* Pen marks. */
+  --aicl-border: #8e887f;
+  --aicl-border-strong: #6b6660;
+  --aicl-border-focus: #2c4f9e;
+
+  /* Marker orange is the one saturated colour: it is the accent, the
+     primary action, the risograph ink. */
+  --aicl-accent: #df6b3c;
+  --aicl-accent-soft: color-mix(in srgb, #f8dc4c 62%, #f8f5ee);
+  --aicl-accent-strong: #c4551f;
+  --aicl-accent-fg: #fbf8f1;
+
+  /* Meaning. */
+  --aicl-success: #3b7a4b;
+  --aicl-warning: #a4502a;
+  --aicl-danger: #c2412d;
+  --aicl-info: #2c4f9e;
+  --aicl-tool-pending: #8e887f;
+  --aicl-tool-running: #4a433c;
+  --aicl-tool-success: #3b7a4b;
+  --aicl-tool-error: #c2412d;
+  --aicl-tool-cancelled: #8e887f;
+
+  /* Code and terminal. */
+  --aicl-code-bg: #f4f7ef;
+  --aicl-code-fg: #2a2420;
+  --aicl-code-border: #dcc8a3;
+  --aicl-code-comment: #6b6660;
+  --aicl-code-keyword: #c2412d;
+  --aicl-code-string: #3b7a4b;
+  --aicl-code-number: #a4502a;
+  --aicl-code-tag: #2c4f9e;
+  --aicl-terminal-bg: #2a2420;
+  --aicl-terminal-fg: #f8f5ee;
+  --aicl-terminal-prompt: #8e887f;
+
+  --aicl-bubble-user: #fbf6e9;
+  --aicl-ring: #2c4f9e;
+
+  /* Elevation. Warm, never black: a shadow on paper is the paper's own
+     colour going dark, so the umber is kept and the alpha does the work. */
+  --aicl-shadow-1: 0 1px 1.5px rgb(58 44 30 / 0.16);
+  --aicl-shadow-2: 0 1px 2px rgb(58 44 30 / 0.12), 0 6px 16px -2px rgb(58 44 30 / 0.12);
+  --aicl-shadow-3: 0 1px 1.5px rgb(58 44 30 / 0.2), 0 2px 5px -1px rgb(58 44 30 / 0.1),
+                   0 12px 22px -8px rgb(58 44 30 / 0.2);
+  --aicl-focus-ring: 0 0 0 3px color-mix(in srgb, #2c4f9e 30%, transparent);
+  --aicl-selection-bg: color-mix(in srgb, #f8dc4c 62%, transparent);
+
+  /* Type. The hand-drawn face reads larger than a UI face, so the scale
+     steps up a notch. Kevin Sans is optional: install it and it is used,
+     leave it out and the stack falls back to whatever handwriting face the
+     system has. */
+  --aicl-font-sans: 'Kevin Sans', 'Bradley Hand', 'Chalkboard SE', 'Segoe Print',
+                    ui-rounded, system-ui, -apple-system, sans-serif;
+  --aicl-font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  --aicl-text-xs:   12px;
+  --aicl-text-sm:   14px;
+  --aicl-text-base: 16px;
+  --aicl-text-md:   17px;
+  --aicl-text-lg:   19px;
+
+  --aicl-leading-tight:  1.25;
+  --aicl-leading-snug:   1.4;
+  --aicl-leading-normal: 1.55;
+
+  /* Cut paper, not a rounded card. */
+  --aicl-radius-sm: 2px;
+  --aicl-radius-md: 3px;
+  --aicl-radius-lg: 4px;
+  --aicl-radius-xl: 6px;
+
+  /* A denser ladder than the default: paper layouts are tighter. */
+  --aicl-space-1: 4px;
+  --aicl-space-2: 8px;
+  --aicl-space-3: 12px;
+  --aicl-space-4: 16px;
+  --aicl-space-5: 20px;
+  --aicl-space-6: 26px;
+  --aicl-space-7: 34px;
+
+  /* The hover is a highlighter swipe, not a grey wash. */
+  --aicl-hover-bg: color-mix(in srgb, #f8dc4c 45%, transparent);
+  --aicl-hover-bg-strong: color-mix(in srgb, #f8dc4c 70%, transparent);
+}
+
+/* ─── Dark ──────────────────────────────────────────────────────── */
+
+/* The desk in lamplight: the same green, taken down; the paper, warmed to
+   a low lamp rather than turned to grey. */
+@media (prefers-color-scheme: dark) {
+  [data-aicl-theme='looseleaf']:not([data-theme='light']) {
+    color-scheme: dark;
+
+    --aicl-bg: #232b27;
+    --aicl-surface: #35332d;
+    --aicl-surface-elevated: #3d3a33;
+    --aicl-surface-inset: #26241f;
+    --aicl-surface-tint: #403c34;
+    --aicl-sidebar: #2b2a25;
+    --aicl-overlay: rgb(12 10 8 / 0.6);
+
+    --aicl-text: #f0ead9;
+    --aicl-text-muted: #bdb5a3;
+    --aicl-text-faint: #8d8676;
+    --aicl-text-link: #9db8f0;
+    --aicl-text-inverse: #232b27;
+
+    --aicl-border: #57534a;
+    --aicl-border-strong: #6f6a5e;
+    --aicl-border-focus: #9db8f0;
+
+    --aicl-accent: #e8854f;
+    --aicl-accent-soft: color-mix(in srgb, #f8dc4c 28%, #35332d);
+    --aicl-accent-strong: #f0976a;
+    --aicl-accent-fg: #232b27;
+
+    --aicl-success: #7fbf8c;
+    --aicl-warning: #e0a463;
+    --aicl-danger: #e8776a;
+    --aicl-info: #9db8f0;
+    --aicl-tool-pending: #8d8676;
+    --aicl-tool-running: #bdb5a3;
+    --aicl-tool-success: #7fbf8c;
+    --aicl-tool-error: #e8776a;
+    --aicl-tool-cancelled: #8d8676;
+
+    --aicl-code-bg: #232120;
+    --aicl-code-fg: #ece6d9;
+    --aicl-code-border: #3a372f;
+    --aicl-code-comment: #8f949d;
+    --aicl-code-keyword: #f6957d;
+    --aicl-code-string: #abd98f;
+    --aicl-code-number: #f7c370;
+    --aicl-code-tag: #80d6c6;
+    --aicl-terminal-bg: #1b1a18;
+    --aicl-terminal-fg: #ece6d9;
+    --aicl-terminal-prompt: #8f949d;
+
+    --aicl-bubble-user: #403c34;
+    --aicl-ring: #9db8f0;
+
+    --aicl-shadow-1: 0 1px 1.5px rgb(0 0 0 / 0.4);
+    --aicl-shadow-2: 0 1px 2px rgb(0 0 0 / 0.36), 0 6px 16px -2px rgb(0 0 0 / 0.44);
+    --aicl-shadow-3: 0 1px 1.5px rgb(0 0 0 / 0.44), 0 2px 5px -1px rgb(0 0 0 / 0.3),
+                     0 12px 22px -8px rgb(0 0 0 / 0.5);
+    --aicl-focus-ring: 0 0 0 3px color-mix(in srgb, #9db8f0 32%, transparent);
+    --aicl-selection-bg: color-mix(in srgb, #f8dc4c 32%, transparent);
+
+    --aicl-radius-sm: 2px;
+    --aicl-radius-md: 3px;
+    --aicl-radius-lg: 4px;
+    --aicl-radius-xl: 6px;
+
+    --aicl-space-1: 4px;
+    --aicl-space-2: 8px;
+    --aicl-space-3: 12px;
+    --aicl-space-4: 16px;
+    --aicl-space-5: 20px;
+    --aicl-space-6: 26px;
+    --aicl-space-7: 34px;
+
+    --aicl-hover-bg: color-mix(in srgb, #f8dc4c 20%, transparent);
+    --aicl-hover-bg-strong: color-mix(in srgb, #f8dc4c 32%, transparent);
+  }
+}
+
+/* The same dark values, chosen explicitly. Sits after the media query so it
+   wins the tie when both match. */
+[data-aicl-theme='looseleaf'][data-theme='dark'] {
+  color-scheme: dark;
+
+  --aicl-bg: #232b27;
+  --aicl-surface: #35332d;
+  --aicl-surface-elevated: #3d3a33;
+  --aicl-surface-inset: #26241f;
+  --aicl-surface-tint: #403c34;
+  --aicl-sidebar: #2b2a25;
+  --aicl-overlay: rgb(12 10 8 / 0.6);
+
+  --aicl-text: #f0ead9;
+  --aicl-text-muted: #bdb5a3;
+  --aicl-text-faint: #8d8676;
+  --aicl-text-link: #9db8f0;
+  --aicl-text-inverse: #232b27;
+
+  --aicl-border: #57534a;
+  --aicl-border-strong: #6f6a5e;
+  --aicl-border-focus: #9db8f0;
+
+  --aicl-accent: #e8854f;
+  --aicl-accent-soft: color-mix(in srgb, #f8dc4c 28%, #35332d);
+  --aicl-accent-strong: #f0976a;
+  --aicl-accent-fg: #232b27;
+
+  --aicl-success: #7fbf8c;
+  --aicl-warning: #e0a463;
+  --aicl-danger: #e8776a;
+  --aicl-info: #9db8f0;
+  --aicl-tool-pending: #8d8676;
+  --aicl-tool-running: #bdb5a3;
+  --aicl-tool-success: #7fbf8c;
+  --aicl-tool-error: #e8776a;
+  --aicl-tool-cancelled: #8d8676;
+
+  --aicl-code-bg: #232120;
+  --aicl-code-fg: #ece6d9;
+  --aicl-code-border: #3a372f;
+  --aicl-code-comment: #8f949d;
+  --aicl-code-keyword: #f6957d;
+  --aicl-code-string: #abd98f;
+  --aicl-code-number: #f7c370;
+  --aicl-code-tag: #80d6c6;
+  --aicl-terminal-bg: #1b1a18;
+  --aicl-terminal-fg: #ece6d9;
+  --aicl-terminal-prompt: #8f949d;
+
+  --aicl-bubble-user: #403c34;
+  --aicl-ring: #9db8f0;
+
+  --aicl-shadow-1: 0 1px 1.5px rgb(0 0 0 / 0.4);
+  --aicl-shadow-2: 0 1px 2px rgb(0 0 0 / 0.36), 0 6px 16px -2px rgb(0 0 0 / 0.44);
+  --aicl-shadow-3: 0 1px 1.5px rgb(0 0 0 / 0.44), 0 2px 5px -1px rgb(0 0 0 / 0.3),
+                   0 12px 22px -8px rgb(0 0 0 / 0.5);
+  --aicl-focus-ring: 0 0 0 3px color-mix(in srgb, #9db8f0 32%, transparent);
+  --aicl-selection-bg: color-mix(in srgb, #f8dc4c 32%, transparent);
+
+  --aicl-radius-sm: 2px;
+  --aicl-radius-md: 3px;
+  --aicl-radius-lg: 4px;
+  --aicl-radius-xl: 6px;
+
+  --aicl-space-1: 4px;
+  --aicl-space-2: 8px;
+  --aicl-space-3: 12px;
+  --aicl-space-4: 16px;
+  --aicl-space-5: 20px;
+  --aicl-space-6: 26px;
+  --aicl-space-7: 34px;
+
+  --aicl-hover-bg: color-mix(in srgb, #f8dc4c 20%, transparent);
+  --aicl-hover-bg-strong: color-mix(in srgb, #f8dc4c 32%, transparent);
+}

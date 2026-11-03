@@ -197,6 +197,13 @@ body {
   color: var(--aicl-accent-fg);
 }
 
+.theme-switcher-divider {
+  width: 1px;
+  align-self: stretch;
+  margin: 2px 2px;
+  background: var(--aicl-border);
+}
+
 /* Components page */
 .components .row {
   display: flex;

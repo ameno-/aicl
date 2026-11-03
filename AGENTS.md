@@ -13,7 +13,8 @@ worked example, not a starting point for your own chat UI.
 | `packages/core` | `@aicl/core`: message model, `ChatController`, SSE transport. No DOM, no deps | `packages/core/README.md` |
 | `packages/react` | `@aicl/react`: `useChat` + unstyled accessible primitives | `packages/react/README.md` |
 | `packages/server` | `@aicl/server`: `createChatHandler`, SSE framing | `packages/server/README.md` |
-| `packages/styles` | `@aicl/styles`: optional CSS-variable theme over `[data-aicl]` | `packages/styles/README.md` |
+| `packages/styles` | `@aicl/styles`: the token contract + component surfaces over `[data-aicl]`, plus skins in `src/themes/` | `packages/styles/README.md` |
+| `packages/motion` | `@aicl/motion`: the motion system — spring tiers, fluid hover, weight without reflow | `packages/motion/README.md` |
 | `packages/fx` | `@aicl/fx`: animated, styled components (Tailwind v4, source-only) | `packages/fx/README.md` |
 | `packages/svelte`, `packages/vue` | **Empty placeholders.** No adapter exists yet | — |
 | `apps/workspace` | Reference application built on the library: chat + tldraw canvas + live tools + exporter | `apps/workspace/AGENTS.md` |
@@ -66,7 +67,8 @@ Start with the library. Move to the app only when the change is about that speci
 |---|---|
 | Message/part model, stream reduction, branching | `packages/core/src/types.ts`, `packages/core/src/chat.ts` |
 | A React primitive's markup, ARIA, keyboard | `packages/react/src/*.tsx`, then `examples/slice-1` to see it |
-| Default theme / tokens | `packages/styles/src/tokens.css`, `components.css` |
+| Default theme / tokens / a skin | `packages/styles/src/contract.css`, `packages/styles/src/themes/*.css`, `components.css` |
+| Springs, easings, hover, weight | `packages/motion/src/springs.ts` (the source of truth), `scripts/generate-motion-css.mjs` |
 | Server framing / error mapping | `packages/server/src/handler.ts` |
 | Animated/styled components | `packages/fx/src/components/*`, then the gallery at `apps/workspace/web/gallery.html` |
 | A new framework adapter | create `packages/<framework>/` next to `packages/react` and follow the same layout |
@@ -78,8 +80,9 @@ Start with the library. Move to the app only when the change is about that speci
 
 - `docs/ADOPTION.md`: wiring AICL into an app, with verified examples and every known sharp
   edge. **Read this before writing integration code.**
-- `docs/ARCHITECTURE.md`: the three-layer split and why. `docs/DECISIONS.md`: D1–D14
-  (binding).
+- `docs/DESIGN-SYSTEM.md`: the four layers — protocol, behaviour, system, skin — the token
+  contract, the motion system, and the shipping model. `docs/ARCHITECTURE.md`: the layer split
+  and why. `docs/DECISIONS.md`: D1–D18 (binding).
 - `docs/api/README.md`: the wire contract and handler conventions.
 - `docs/BLUEPRINT.md`: target-state component inventory and token contract (design, partly
   ahead of the code).
