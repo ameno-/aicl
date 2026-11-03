@@ -46,6 +46,10 @@ export type {
   RejectReason,
 } from './composer-surface.js';
 export { useReadable } from './useReadable.js';
+export { Icon, IconProvider, useIcon, useIcons, iconDefaults } from './icons.js';
+export type { IconSlot, IconComponent, IconOverrides, IconProps, IconGlyphProps } from './icons.js';
+export { primitives, sharedSlots, allSlots, primitivesForSlot, iconRoles } from './contract.js';
+export type { PrimitiveContract, SharedContract } from './contract.js';
 export { SessionList, SessionListItem, SessionSearch, SidebarNav, relativeTime, resolveSecondary } from './sessions.js';
 export type {
   SessionListProps,

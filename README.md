@@ -110,7 +110,18 @@ picked by the size of the thing that moves, with exits a tier quicker. The sprin
 springs, encoded as CSS `linear()` easing functions and generated from the tokens, so there is
 no animation runtime in the critical path.
 
+Two more systems make the library skinnable:
+
+- **Icon slots.** A primitive never imports an icon. It asks for the role it plays — `close`,
+  `spinner`, `send` — and the role resolves through `IconProvider`. The default set is Lucide; an
+  app that wants another set wraps its tree once and every primitive follows.
+- **The component contract.** Every primitive publishes its slots (`data-aicl="composer"`) and its
+  states (`data-state="streaming"`), and `packages/react/src/contract.ts` is the single place
+  that says what they are. The generated [component contract](docs/components.md) is the list a
+  skin author reads; a test fails when it drifts from the implementation.
+
 The full model, and where it comes from, is in [`docs/DESIGN-SYSTEM.md`](docs/DESIGN-SYSTEM.md).
+How the library is organised, and what is planned, is in [`docs/LIBRARY.md`](docs/LIBRARY.md).
 
 ## The rest of the repo
 
@@ -120,6 +131,10 @@ The full model, and where it comes from, is in [`docs/DESIGN-SYSTEM.md`](docs/DE
 | `examples/server-node` | Minimal `@aicl/server` handler on Node `http` |
 | `apps/workspace` | Reference application built on the library: a chat, an infinite canvas, live tools and an exporter. Not part of the library API. |
 | `docs/` | Architecture, decisions, corpus method, per-domain specs, evaluations, adoption guide |
+| `docs/DESIGN-SYSTEM.md` | The four layers, the token contract, the motion system, the skin model |
+| `docs/LIBRARY.md` | How the library is organised: systems, components, blocks, and what is planned |
+| `docs/components.md` | The component contract: every slot and every state (generated) |
+| `docs/llms.txt` | The library, indexed for an agent |
 | `droid-wiki/` | Contributor wiki, regenerated on demand; may lag the code |
 
 The reference application is useful as a worked example of the library in a large app, but it

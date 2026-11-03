@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import type { Message, Part } from '@aicl/core';
-import { Check, Copy, Pencil, RotateCcw, ThumbsDown, ThumbsUp, type LucideIcon } from 'lucide-react';
-import { Icon } from './icons.js';
+import { Icon, type IconSlot } from './icons.js';
 
 const LABEL: Record<MessageAction, string> = {
   copy: 'Copy',
@@ -10,12 +9,12 @@ const LABEL: Record<MessageAction, string> = {
   retry: 'Retry',
   edit: 'Edit',
 };
-const GLYPH: Record<MessageAction, LucideIcon> = {
-  copy: Copy,
-  'thumbs-up': ThumbsUp,
-  'thumbs-down': ThumbsDown,
-  retry: RotateCcw,
-  edit: Pencil,
+const GLYPH: Record<MessageAction, IconSlot> = {
+  copy: 'copy',
+  'thumbs-up': 'thumb-up',
+  'thumbs-down': 'thumb-down',
+  retry: 'retry',
+  edit: 'edit',
 };
 
 export type MessageAction = 'copy' | 'thumbs-up' | 'thumbs-down' | 'retry' | 'edit';
@@ -73,7 +72,7 @@ export function MessageActions({
             onAction?.(action, message);
           }}
         >
-          <Icon as={action === 'copy' && copied ? Check : GLYPH[action]} size={15} />
+          <Icon name={action === 'copy' && copied ? 'check' : GLYPH[action]} size={15} />
         </button>
       ))}
     </div>

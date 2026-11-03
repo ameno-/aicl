@@ -23,6 +23,8 @@ Peer deps: `react`/`react-dom` ≥ 18. Wiring it to a backend: `docs/ADOPTION.md
 | Composer | `Composer` (+ `ComposerHandle` ref: `focus`, `clear`), `TriggerMenu`, `SlashMenu`, `MentionMenu`, `findTrigger`, `SuggestionChips`, `AttachmentChip`, `AttachmentDropzone`, `useAttachmentPicker`, `matchesAccept` | `Composer.tsx`, `composer-surface.tsx` |
 | Sessions | `SessionList`, `SessionListItem`, `SessionSearch`, `SidebarNav`, `relativeTime`, `resolveSecondary` | `sessions.tsx` |
 | Platform | `Dialog` (+ `.Title`, `.Description`, `.Close`), `AlertDialog`, `Drawer`, `Toast`, `ToastRegion`, `Field`, `Switch`, `Select`, `SegmentedControl` | `platform.tsx` |
+| Icons | `Icon`, `IconProvider`, `useIcon`, `useIcons`, `iconDefaults` | `icons.tsx` |
+| Contract | `primitives`, `sharedSlots`, `allSlots`, `primitivesForSlot`, `iconRoles` | `contract.ts` |
 
 Working examples of nearly every primitive in every state: `examples/slice-1/Components.tsx`
 and `examples/slice-1/Gallery.tsx` (`cd examples/slice-1 && npm install && npm run dev`).
@@ -60,11 +62,37 @@ These are verified against the current source. Work around them, or fix them wit
   then shows a "Jump to latest" button.
 - `ToolCallDisclosure` force-opens on `status: 'error'` and shows `argsText` while args stream.
 - Every primitive marks itself with `data-aicl="<name>"`. Treat the attribute names as public
-  API, because `@aicl/styles` and consumer CSS select on them.
+  API, because `@aicl/styles` and consumer CSS select on them. The full list, with every state
+  a primitive exposes, is the **component contract**: `docs/components.md`, generated from
+  `src/contract.ts`. A test fails when the contract and the implementation drift apart.
+
+## Icons
+
+A primitive never imports an icon. It asks for the *role* the icon plays — `close`, `spinner`,
+`send`, `retry` — and the role resolves through `IconProvider`. The default set is Lucide; an
+app that wants another set wraps its tree once and every primitive follows.
+
+```tsx
+import { IconProvider } from '@aicl/react';
+
+<IconProvider icons={{ spinner: () => <MySpinner /> }}>
+  <App />
+</IconProvider>
+```
+
+An override is a diff, not a replacement: a slot the provider does not name keeps its default.
+Icons are decoration — the control's accessible name lives on the control, never on the icon —
+so a slot can be swapped for anything, including a drawn glyph, without touching an accessible
+name.
 
 ## Develop
 
 ```bash
 npm run build
 npm test        # react-test-renderer; src/*.test.tsx
+
+node scripts/generate-component-docs.mjs   # rewrites docs/components.md and docs/llms.txt
 ```
+
+The generated docs are committed so they can be read without running anything, and a test fails
+when they drift from the contract.

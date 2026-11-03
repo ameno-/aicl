@@ -15,7 +15,6 @@ import {
   type ReactNode,
 } from 'react';
 import { createComboboxModel, type SessionMeta } from '@aicl/core';
-import { PanelLeft, Search } from 'lucide-react';
 import { Icon } from './icons.js';
 import { useReadable } from './useReadable.js';
 
@@ -370,7 +369,7 @@ export function SessionSearch({
       data-loading={loading || undefined}
     >
       <span data-aicl="session-search-icon">
-        <Icon as={Search} />
+        <Icon name="search" />
       </span>
       <input
         type="search"
@@ -482,7 +481,7 @@ export function SidebarNav({
         aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         onClick={toggle}
       >
-        <Icon as={PanelLeft} />
+        <Icon name="panel-left" />
       </button>
       <ul id={listId} data-aicl="sidebar-nav-list">
         {items.map((item) => {

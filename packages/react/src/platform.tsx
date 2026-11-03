@@ -24,8 +24,7 @@ import {
 } from 'react';
 import { createPortal } from 'react-dom';
 import { createComboboxModel, type ToastQueue, type ToastState } from '@aicl/core';
-import { Check, ChevronDown, CircleAlert, CircleCheck, Info, X, type LucideIcon } from 'lucide-react';
-import { Icon } from './icons.js';
+import { Icon, type IconSlot } from './icons.js';
 import { useReadable } from './useReadable.js';
 
 /* -------------------------------------------------------------------------- */
@@ -284,7 +283,7 @@ function DialogClose({ children, ariaLabel = 'Close' }: { children?: ReactNode; 
   const { close } = useDialog();
   return (
     <button type="button" data-aicl="dialog-close" aria-label={children ? undefined : ariaLabel} onClick={() => close('close-button')}>
-      {children ?? <Icon as={X} />}
+      {children ?? <Icon name="close" />}
     </button>
   );
 }
@@ -507,7 +506,7 @@ export interface ToastProps {
   renderAction?: (toast: ToastState) => ReactNode;
 }
 
-const TOAST_ICON: Record<ToastState['variant'], LucideIcon> = { info: Info, success: CircleCheck, error: CircleAlert };
+const TOAST_ICON: Record<ToastState['variant'], IconSlot> = { info: 'info', success: 'success', error: 'alert' };
 
 export function Toast({ toast, onDismiss, renderAction }: ToastProps) {
   // Errors that need action interrupt; everything else waits its turn.
@@ -527,7 +526,7 @@ export function Toast({ toast, onDismiss, renderAction }: ToastProps) {
       }}
     >
       <span data-aicl="toast-icon">
-        <Icon as={TOAST_ICON[toast.variant]} />
+        <Icon name={TOAST_ICON[toast.variant]} />
       </span>
       <div data-aicl="toast-title">{toast.title}</div>
       {toast.description ? <div data-aicl="toast-description">{toast.description}</div> : null}
@@ -548,7 +547,7 @@ export function Toast({ toast, onDismiss, renderAction }: ToastProps) {
             )
           : null}
       <button type="button" data-aicl="toast-dismiss" aria-label="Dismiss notification" onClick={() => onDismiss(toast.id)}>
-        <Icon as={X} size={14} />
+        <Icon name="close" size={14} />
       </button>
     </div>
   );
@@ -807,7 +806,7 @@ export function Select<T>({
         onBlur={() => model.close()}
       >
         <span data-aicl="select-value">{selected?.label ?? placeholder}</span>
-        <Icon as={ChevronDown} />
+        <Icon name="chevron-down" />
       </button>
       <ul id={listId} role="listbox" hidden={!state.open} data-aicl="select-listbox">
         {options.map((o, i) => (
@@ -829,7 +828,7 @@ export function Select<T>({
             <span data-aicl="select-option-label">{o.label}</span>
             {i === selectedIndex ? (
               <span data-aicl="select-option-check">
-                <Icon as={Check} size={14} />
+                <Icon name="check" size={14} />
               </span>
             ) : null}
             {o.description ? <span data-aicl="select-option-description">{o.description}</span> : null}
