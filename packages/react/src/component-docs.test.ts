@@ -48,6 +48,8 @@ test('llms.txt points at the docs an agent needs', () => {
   for (const page of [
     './docs/DESIGN-SYSTEM.md',
     './docs/LIBRARY.md',
+    './docs/INVENTORY.md',
+    './docs/ROADMAP.md',
     './docs/components.md',
     './docs/DECISIONS.md',
     './docs/ADOPTION.md',

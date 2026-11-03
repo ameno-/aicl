@@ -108,6 +108,10 @@ const llms = `# AICL — an open-source UI component library for AI chat applica
   contract, the motion system, the skin model, the shipping model.
 - [Library](./docs/LIBRARY.md): how the library is organised, and what is
   planned.
+- [Inventory](./docs/INVENTORY.md): the deep inventory of LooseLeaf and
+  Fluid Functionalism, and the shape vocabulary the plan is written in.
+- [Roadmap](./docs/ROADMAP.md): what to create, expose and refactor, and
+  in what order.
 - [Component contract](./docs/components.md): every slot and every state.
 - [Decisions](./docs/DECISIONS.md): the binding decisions, D1–D18.
 - [Adoption](./docs/ADOPTION.md): wiring AICL into an app, with every known

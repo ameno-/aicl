@@ -23,6 +23,7 @@ Peer deps: `react`/`react-dom` ≥ 18. Wiring it to a backend: `docs/ADOPTION.md
 | Composer | `Composer` (+ `ComposerHandle` ref: `focus`, `clear`), `TriggerMenu`, `SlashMenu`, `MentionMenu`, `findTrigger`, `SuggestionChips`, `AttachmentChip`, `AttachmentDropzone`, `useAttachmentPicker`, `matchesAccept` | `Composer.tsx`, `composer-surface.tsx` |
 | Sessions | `SessionList`, `SessionListItem`, `SessionSearch`, `SidebarNav`, `relativeTime`, `resolveSecondary` | `sessions.tsx` |
 | Platform | `Dialog` (+ `.Title`, `.Description`, `.Close`), `AlertDialog`, `Drawer`, `Toast`, `ToastRegion`, `Field`, `Switch`, `Select`, `SegmentedControl` | `platform.tsx` |
+| Button | `Button` (+ `.Icon`) | `Button.tsx` |
 | Icons | `Icon`, `IconProvider`, `useIcon`, `useIcons`, `iconDefaults` | `icons.tsx` |
 | Contract | `primitives`, `sharedSlots`, `allSlots`, `primitivesForSlot`, `iconRoles` | `contract.ts` |
 
@@ -65,6 +66,51 @@ These are verified against the current source. Work around them, or fix them wit
   API, because `@aicl/styles` and consumer CSS select on them. The full list, with every state
   a primitive exposes, is the **component contract**: `docs/components.md`, generated from
   `src/contract.ts`. A test fails when the contract and the implementation drift apart.
+
+## Buttons
+
+AICL had no button primitive: every button was a raw `<button>` styled by
+whatever CSS happened to be around. `Button` is a flat primitive with three
+axes — `variant`, `size`, `loading` — and the glyphs are **icon slots**, so
+an app that swaps the icon set gets its buttons swapped too.
+
+```tsx
+<Button variant="secondary" icon="plus">New task</Button>
+<Button loading>Working</Button>
+<Button icon="plus" aria-label="Add" />
+```
+
+`type` defaults to `button`: a button inside a form that submits it must
+say so, because an implicit submit is the most common way a chat app sends
+a message twice. A `loading` button is `aria-busy` but **not** `disabled` —
+a disabled button cannot be found by a screen reader in a busy state.
+
+## The composer is compound
+
+The composer is a compound component, so a consumer can arrange it without
+re-implementing the keyboard semantics, the autosizing or the submission
+guards.
+
+```tsx
+<Composer value={draft} onChange={setDraft} onSubmit={send} status={status}>
+  <Composer.Body>
+    <Composer.Attach onClick={pick} />
+    <Composer.Input placeholder="Ask the agent…" />
+  </Composer.Body>
+  <Composer.Suggestions />
+  <Composer.Submit />
+</Composer>
+```
+
+The subparts: `Composer.Body`, `Composer.Input`, `Composer.Submit`,
+`Composer.Attach`, `Composer.Attachments`, `Composer.Suggestions`,
+`Composer.Hint`, `Composer.DisabledReason`. `useComposer()` reads the live
+state from inside one.
+
+**Children replace the default arrangement.** With no children, the
+composer renders exactly what it always rendered. A **function** child
+behaves as it always has: it receives the live state and owns *everything*,
+including the wrapper.
 
 ## Icons
 

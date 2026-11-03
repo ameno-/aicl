@@ -766,7 +766,131 @@
   fill: currentColor;
 }
 
-/* Suggestion chips: quiet pills above the field. */
+/* ─── Button ────────────────────────────────────────────────────── */
+
+/* The button primitive. A flat control with three axes — variant, size
+   and loading — published as attributes so a skin can restyle it
+   without touching the component. */
+[data-aicl='button'] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--aicl-control-gap);
+  height: var(--aicl-control-height);
+  padding: 0 var(--aicl-control-padding-x);
+  border: 1px solid transparent;
+  border-radius: var(--aicl-radius-md);
+  background: var(--aicl-accent);
+  color: var(--aicl-accent-fg);
+  font: inherit;
+  font-size: var(--aicl-type-secondary);
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background var(--aicl-anim-fast) var(--aicl-ease),
+    border-color var(--aicl-anim-fast) var(--aicl-ease),
+    color var(--aicl-anim-fast) var(--aicl-ease),
+    opacity var(--aicl-anim-fast) var(--aicl-ease);
+}
+
+[data-aicl='button'][data-variant='secondary'] {
+  background: var(--aicl-surface);
+  border-color: var(--aicl-border);
+  color: var(--aicl-text);
+}
+
+[data-aicl='button'][data-variant='outline'] {
+  background: transparent;
+  border-color: var(--aicl-border-strong);
+  color: var(--aicl-text);
+}
+
+[data-aicl='button'][data-variant='ghost'] {
+  background: transparent;
+  color: var(--aicl-text);
+}
+
+[data-aicl='button'][data-variant='link'] {
+  background: transparent;
+  color: var(--aicl-text-link);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+[data-aicl='button'][data-variant='destructive'] {
+  background: var(--aicl-danger);
+  color: var(--aicl-surface);
+}
+
+[data-aicl='button'][data-size='sm'] {
+  height: 28px;
+  padding: 0 var(--aicl-space-2);
+  font-size: var(--aicl-type-caption);
+}
+
+[data-aicl='button'][data-size='lg'] {
+  height: 44px;
+  padding: 0 var(--aicl-space-5);
+  font-size: var(--aicl-type-body);
+}
+
+[data-aicl='button']:not(:disabled):hover {
+  opacity: 0.88;
+}
+
+[data-aicl='button']:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+[data-aicl='button'][data-loading] {
+  cursor: progress;
+  opacity: 0.7;
+}
+
+[data-aicl='button-icon'] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+[data-aicl='button-label'] {
+  min-width: 0;
+}
+
+/* An icon-only button is a circle. */
+[data-aicl='button']:not(:has([data-aicl='button-label'])) {
+  width: var(--aicl-control-height);
+  padding: 0;
+  border-radius: var(--aicl-radius-pill);
+}
+
+/* ─── Composer, compound ─────────────────────────────────────────── */
+
+/* The field area. The default arrangement does not use it; a consumer
+   who arranges the composer puts the attach action and the field here. */
+[data-aicl='composer-body'] {
+  grid-area: input;
+  display: flex;
+  align-items: flex-end;
+  gap: var(--aicl-space-2);
+  min-width: 0;
+}
+
+[data-aicl='composer-body'] [data-aicl='composer-input'] {
+  flex: 1;
+  min-width: 0;
+}
+
+[data-aicl='composer-hint'] {
+  margin: 0;
+  color: var(--aicl-text-faint);
+  font-size: var(--aicl-text-caption);
+  line-height: var(--aicl-leading-caption);
+}
+
+/* ─── Suggestion chips: quiet pills above the field. ─────────────── */
 [data-aicl='suggestion-chips'] {
   display: flex;
   flex-wrap: wrap;

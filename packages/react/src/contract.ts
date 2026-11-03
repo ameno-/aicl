@@ -76,6 +76,18 @@ export const sharedSlots: SharedContract = {
  */
 export const primitives: readonly PrimitiveContract[] = [
   {
+    name: 'Button',
+    summary: 'A button. Variant, size and loading, with the glyphs as icon slots.',
+    source: ['Button.tsx'],
+    slots: ['button', 'button-label', 'button-icon'],
+    states: {
+      'data-variant': ['default', 'secondary', 'destructive', 'ghost', 'outline', 'link'],
+      'data-size': ['sm', 'md', 'lg'],
+      'data-loading': ['true'],
+      'data-icon': ['true'],
+    },
+  },
+  {
     name: 'Transcript',
     summary: 'The conversation: one scroll container over the selected branch path.',
     source: ['Transcript.tsx'],
@@ -104,10 +116,12 @@ export const primitives: readonly PrimitiveContract[] = [
     source: ['Composer.tsx'],
     slots: [
       'composer',
+      'composer-body',
       'composer-input',
       'composer-submit',
       'composer-attach',
       'composer-disabled-reason',
+      'composer-hint',
       'attachment-row',
     ],
     states: {

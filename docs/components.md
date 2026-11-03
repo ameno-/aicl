@@ -10,8 +10,9 @@ The names are public API. Changing one is a breaking change.
 
 | Primitive | What it is for | Slots |
 | --- | --- | --- |
+| Button | A button. Variant, size and loading, with the glyphs as icon slots. | `button` `button-label` `button-icon` |
 | Transcript | The conversation: one scroll container over the selected branch path. | `transcript-root` `transcript` `message-row` `message` `status-line` `day-separator` `scroll-to-bottom` `branch-switcher` |
-| Composer | The field, the submit action, the toolbar slots and the above-band. | `composer` `composer-input` `composer-submit` `composer-attach` `composer-disabled-reason` `attachment-row` |
+| Composer | The field, the submit action, the toolbar slots and the above-band. | `composer` `composer-body` `composer-input` `composer-submit` `composer-attach` `composer-disabled-reason` `composer-hint` `attachment-row` |
 | PartRenderer | Dispatches one part to its renderer. The default renderers follow. | `part` `reasoning` `reasoning-body` `tool-call` `tool-call-body` `artifact-card` `artifact-icon` `artifact-title` `artifact-meta` `artifact-kind` `artifact-version` `artifact-open` `code-block` `inline-code` `terminal-output` |
 | MessageActions | The per-message action row. Hidden until the row is hovered or focused. | `message-actions` |
 | PlanChecklist | An ordered plan with a derived rollup. Render only. | `plan-checklist` `plan-rollup` `plan-title` `plan-count` |
@@ -37,6 +38,15 @@ The names are public API. Changing one is a breaking change.
 | `visually-hidden` | Text for a screen reader, painted as nothing. |
 
 ## States
+
+### Button
+
+| Attribute | Values |
+| --- | --- |
+| `data-variant` | `default` `secondary` `destructive` `ghost` `outline` `link` |
+| `data-size` | `sm` `md` `lg` |
+| `data-loading` | `true` |
+| `data-icon` | `true` |
 
 ### Transcript
 
@@ -261,10 +271,15 @@ that wants another set wraps its tree once and every primitive follows.
 - `attachment-row`
 - `attachment-size`
 - `branch-switcher`
+- `button`
+- `button-icon`
+- `button-label`
 - `code-block`
 - `composer`
 - `composer-attach`
+- `composer-body`
 - `composer-disabled-reason`
+- `composer-hint`
 - `composer-input`
 - `composer-submit`
 - `day-separator`

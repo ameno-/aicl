@@ -120,8 +120,14 @@ Two more systems make the library skinnable:
   that says what they are. The generated [component contract](docs/components.md) is the list a
   skin author reads; a test fails when it drifts from the implementation.
 
+The library's own components are **compound** where the shape calls for it: `Composer` is
+`Composer.Body` / `Composer.Input` / `Composer.Submit` / `Composer.Attach`, and `Dialog` is
+`Dialog.Title` / `Dialog.Description` / `Dialog.Close`.
+
 The full model, and where it comes from, is in [`docs/DESIGN-SYSTEM.md`](docs/DESIGN-SYSTEM.md).
-How the library is organised, and what is planned, is in [`docs/LIBRARY.md`](docs/LIBRARY.md).
+How the library is organised, and what is planned, is in [`docs/LIBRARY.md`](docs/LIBRARY.md) and
+[`docs/ROADMAP.md`](docs/ROADMAP.md). The deep inventory of the two reference libraries is in
+[`docs/INVENTORY.md`](docs/INVENTORY.md).
 
 ## The rest of the repo
 
@@ -133,6 +139,8 @@ How the library is organised, and what is planned, is in [`docs/LIBRARY.md`](doc
 | `docs/` | Architecture, decisions, corpus method, per-domain specs, evaluations, adoption guide |
 | `docs/DESIGN-SYSTEM.md` | The four layers, the token contract, the motion system, the skin model |
 | `docs/LIBRARY.md` | How the library is organised: systems, components, blocks, and what is planned |
+| `docs/INVENTORY.md` | The deep inventory of LooseLeaf and Fluid, and the shape vocabulary |
+| `docs/ROADMAP.md` | What to create, expose and refactor, and in what order |
 | `docs/components.md` | The component contract: every slot and every state (generated) |
 | `docs/llms.txt` | The library, indexed for an agent |
 | `droid-wiki/` | Contributor wiki, regenerated on demand; may lag the code |
