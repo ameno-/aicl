@@ -1,7 +1,24 @@
 export { useChat } from './useChat.js';
 export type { UseChatResult } from './useChat.js';
 export { Composer } from './Composer.js';
-export type { ComposerProps, ComposerHandle, ComposerRenderApi, ComposerPlacement } from './Composer.js';
+export type {
+  ComposerProps,
+  ComposerHandle,
+  ComposerRenderApi,
+  ComposerApi,
+  ComposerPlacement,
+} from './Composer.js';
+export {
+  useComposer,
+  ComposerBody,
+  ComposerInput,
+  ComposerSubmit,
+  ComposerAttach,
+  ComposerAttachments,
+  ComposerSuggestions,
+  ComposerHint,
+  ComposerDisabledReason,
+} from './Composer.js';
 export { Transcript, MessageItem } from './Transcript.js';
 export type { TranscriptProps } from './Transcript.js';
 export {
@@ -46,6 +63,18 @@ export type {
   RejectReason,
 } from './composer-surface.js';
 export { useReadable } from './useReadable.js';
+export { Icon, IconProvider, useIcon, useIcons, iconDefaults } from './icons.js';
+export type { IconSlot, IconComponent, IconOverrides, IconProps, IconGlyphProps } from './icons.js';
+export {
+  primitives,
+  sharedSlots,
+  allSlots,
+  primitivesForSlot,
+  iconRoles,
+} from './contract.js';
+export type { PrimitiveContract, SharedContract } from './contract.js';
+export { Button, ButtonIcon } from './Button.js';
+export type { ButtonProps, ButtonIconProps, ButtonVariant, ButtonSize } from './Button.js';
 export { SessionList, SessionListItem, SessionSearch, SidebarNav, relativeTime, resolveSecondary } from './sessions.js';
 export type {
   SessionListProps,

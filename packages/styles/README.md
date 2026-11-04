@@ -1,42 +1,134 @@
 # `@aicl/styles`
 
-Optional CSS-variable theme for every AICL primitive. Shipped as a single
-stylesheet; consumers import it once and the entire chat shell is themed.
+The AICL token contract, the chat-shell reset, and the component surfaces.
+Shipped as a single stylesheet; consumers import it once and the entire chat
+shell is themed.
 
-## Themes
+The property names are **public API**. Changing a value is free. Changing a
+name is a breaking change and needs an entry in `docs/DECISIONS.md`.
 
-Two themes ship out of the box: `light` and `dark`. Apply by setting
-`data-theme="light"` or `data-theme="dark"` on any container element. Without
-an explicit theme, the user's system preference (`prefers-color-scheme`)
-wins.
+## Layers
+
+Three layers stack on top of each other, in this order.
+
+| Layer | Import | What it does |
+|---|---|---|
+| Contract | `@aicl/styles` | the token names and their default values |
+| Skin | `@aicl/styles/themes/looseleaf.css` | replaces the values, wholesale or in part |
+| Motion | `@aicl/motion/motion.css` | replaces the easings with springs, adds the interaction patterns |
 
 ```tsx
 import '@aicl/styles';
-
-export function App() {
-  return (
-    <div data-theme="dark">
-      {/* every primitive picks up the dark palette */}
-    </div>
-  );
-}
+import '@aicl/styles/themes/looseleaf.css';
+import '@aicl/motion/motion.css';
 ```
 
-The fixture demonstrates a runtime switcher:
+The motion layer works by overriding the contract's *easings* and leaving its
+*durations* alone, so an existing stylesheet that says
+`transition: opacity var(--aicl-anim) var(--aicl-ease)` becomes a spring
+without a line changing.
+
+## Mode and skin
+
+Two attributes, two jobs:
+
+- `data-theme="light" | "dark"` selects the **mode**. Without it, the
+  system preference (`prefers-color-scheme`) wins.
+- `data-aicl-theme="<skin>"` selects the **skin**. A skin ships both modes.
+
+Apply both to the same element — usually the AICL root — so a skin can
+resolve the mode itself:
 
 ```tsx
-function apply(theme: 'light' | 'dark' | 'system') {
-  const root = document.documentElement;
-  if (theme === 'system') root.removeAttribute('data-theme');
-  else root.setAttribute('data-theme', theme);
+<div data-aicl-root data-aicl-theme="looseleaf" data-theme="dark">
+```
+
+## Density
+
+`data-aicl-density="compact"` tightens the space ladder and the hit target
+for dense surfaces — filter bars, toolbars, sidebars. `data-aicl-density="calm"`
+does the same and stops the motion.
+
+## Skins
+
+A skin is a stylesheet that overrides the contract's values. It contains no
+JavaScript, no components, and no knowledge of the primitives beyond the
+contract's names, so it cannot change behaviour.
+
+| Skin | Import | Look |
+|---|---|---|
+| LooseLeaf | `@aicl/styles/themes/looseleaf.css` | paper on a green desk, pen strokes, marker orange, a highlighter-yellow hover, warm umber shadows |
+
+Writing your own is a stylesheet:
+
+```css
+[data-aicl-theme='midnight']:not([data-theme='dark']) {
+  --aicl-bg: #0b1020;
+  --aicl-surface: #131a2e;
+  --aicl-text: #e6ebff;
+  --aicl-accent: #7aa2ff;
+  /* …the rest of the contract… */
 }
 ```
+
+See [`docs/DESIGN-SYSTEM.md`](../../docs/DESIGN-SYSTEM.md) for the model.
 
 ## Tokens
 
 Every primitive reads CSS custom properties. There are no JavaScript
 theme objects and no runtime overhead. Overriding the palette is a
 stylesheet change.
+
+### One palette, two modes
+
+A colour that differs between modes is declared **once**, with both values:
+
+```css
+--aicl-bg: #f8f8f7;                              /* the fallback */
+--aicl-bg: light-dark(#f8f8f7, #161616);         /* the real one */
+```
+
+`light-dark()` resolves against the element's used `color-scheme`, which
+`data-theme` sets and which is inherited — so a mode set on an ancestor
+still reaches a skin further down. The bare value above it is the fallback
+for a browser without `light-dark()`: the second declaration is dropped at
+parse time there, and the first one stands.
+
+A box-shadow is not a colour, so `light-dark()` cannot carry it. The
+elevation ladder therefore gets its own mode blocks.
+
+### The type roles
+
+Six roles, each a size and a leading. The roles are the theming axis: a
+skin restyles the entire type system by overriding six values, and every
+surface moves with them.
+
+| Role | Default | For |
+|---|---|---|
+| `display` | 17px / 1.25 | the largest text on a surface |
+| `title` | 15px / 1.35 | a title — a dialog title, an artifact title |
+| `body` | 14px / 1.5 | reading text in a card or a description |
+| `secondary` | 13px / 1.5 | supporting copy and control labels |
+| `caption` | 12px / 1.4 | annotations: timestamps, hints, counters |
+| `micro` | 11px / 1.3 | the smallest marks |
+
+`--aicl-text-{lg,md,base,sm,xs}` are the raw scale, derived from the
+roles. They stay because they are the finer-grained handles — a single
+surface that needs one step off the ladder.
+
+### The size ladder
+
+One ladder, and everything with a size reads from it: `--aicl-control-height`,
+`--aicl-control-padding-x`, `--aicl-control-gap`, `--aicl-icon-size`. A
+surface is dense or roomy because the ladder says so, not because each
+component decided for itself.
+
+### The elevation ladder
+
+`--aicl-shadow-1` through `--aicl-shadow-6`. Six levels, so a skin can
+express depth rather than one flat shadow.
+
+### Every token
 
 | Group | Variables |
 |---|---|
@@ -50,14 +142,19 @@ stylesheet change.
 | Terminal | `--aicl-terminal-bg`, `--aicl-terminal-fg`, `--aicl-terminal-prompt` |
 | Shadows | `--aicl-shadow-1`, `--aicl-shadow-2`, `--aicl-shadow-3` |
 | Focus | `--aicl-focus-ring` |
-| Type | `--aicl-font-sans`, `--aicl-font-mono`, `--aicl-text-{xs,sm,base,md,lg}`, `--aicl-leading-{tight,snug,normal}` |
-| Radii | `--aicl-radius-{sm,md,lg,pill}` |
+| Type | `--aicl-font-sans`, `--aicl-font-mono`, `--aicl-type-{display,title,body,secondary,caption,micro}`, `--aicl-leading-{display,title,body,secondary,caption,micro}` |
+| Scale | `--aicl-text-{lg,md,base,sm,xs}`, `--aicl-leading-{tight,snug,normal}` |
+| Radius | `--aicl-radius-{sm,md,lg,xl,pill}` |
 | Spacing | `--aicl-space-1` through `--aicl-space-7` |
-| Motion | `--aicl-anim-fast`, `--aicl-anim`, `--aicl-anim-slow`, `--aicl-ease`, `--aicl-ease-out` |
+| Size | `--aicl-control-height`, `--aicl-control-padding-x`, `--aicl-control-gap`, `--aicl-icon-size` |
+| Motion | `--aicl-anim-fast`, `--aicl-anim`, `--aicl-anim-slow`, the matching `-exit` durations, `--aicl-ease`, `--aicl-ease-out`, `--aicl-ease-in` |
+| Interaction | `--aicl-hover-bg`, `--aicl-hover-bg-strong`, `--aicl-hit`, `--aicl-hit-min` |
 | Shimmer | `--aicl-shimmer-{a,b,c}` (used by the running tool row) |
+| Selection | `--aicl-selection-bg` |
 
 All tokens are exposed on `:root` (or `[data-theme]`) so a consumer override
-is one selector away.
+is one selector away. The names are public API: changing a value is free,
+changing a name is a breaking change.
 
 ## Behaviors
 
@@ -89,10 +186,11 @@ is one selector away.
 
 | File | What |
 |---|---|
-| `src/tokens.css` | Theme tokens, light and dark |
+| `src/contract.css` | The token contract: every `--aicl-*` name, light and dark |
 | `src/reset.css` | Minimal chat-shell reset, motion reduction |
 | `src/components.css` | Every primitive as `data-aicl` selectors |
-| `src/index.css` | Imports the three above; this is the package entry |
+| `src/themes/looseleaf.css` | The LooseLeaf skin: paper, pen, marker |
+| `src/index.css` | Imports the contract, the reset and the components; this is the package entry |
 
 ## Verification
 

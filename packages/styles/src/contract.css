@@ -1,0 +1,332 @@
+/**
+ * The AICL token contract.
+ *
+ * Every visual decision a primitive makes is expressed as a CSS custom
+ * property declared here. The names are public API: `@aicl/styles` and the
+ * skins in `themes/` read them, and so can you. Changing a value is free;
+ * changing a name is a breaking change.
+ *
+ * The contract is deliberately small and deliberately *semantic*. It says
+ * what a thing is (`--aicl-surface`, `--aicl-text-muted`, `--aicl-danger`),
+ * not what colour it happens to be. A skin overrides the values; the
+ * primitives keep working.
+ *
+ * Three layers stack on top of it, in this order:
+ *
+ *   - The contract below. The default look: near-monochrome neutrals, a
+ *     near-black primary, colour reserved for meaning.
+ *   - A skin (`themes/*.css`). Replaces the values wholesale.
+ *   - `@aicl/motion/motion.css`. Upgrades the easings to springs, and adds
+ *     the interaction patterns.
+ *
+ * Mode and skin are separate attributes. `data-theme="light|dark"` picks the
+ * mode; `data-aicl-theme="<skin>"` picks the skin. Apply both to the same
+ * element — usually the AICL root — so a skin can resolve the mode itself.
+ *
+ * ## One palette, two modes
+ *
+ * A colour that differs between modes is declared once, with both values:
+ *
+ *   --aicl-bg: #f8f8f7;                              <- the fallback
+ *   --aicl-bg: light-dark(#f8f8f7, #161616);         <- the real one
+ *
+ * `light-dark()` resolves against the element's used `color-scheme`, which
+ * `data-theme` sets and which is inherited, so a mode set on an ancestor
+ * still reaches a skin further down. The bare value above it is the
+ * fallback for a browser without `light-dark()`: the second declaration is
+ * dropped at parse time there, and the first one stands.
+ *
+ * A box-shadow is not a colour, so `light-dark()` cannot carry it. The
+ * elevation ladder therefore gets its own mode blocks, below.
+ */
+
+:root {
+  color-scheme: light dark;
+
+
+  /* Surfaces */
+  --aicl-bg: #f8f8f7;
+  --aicl-bg: light-dark(#f8f8f7, #161616);
+  --aicl-surface: #ffffff;
+  --aicl-surface: light-dark(#ffffff, #1c1c1c);
+  --aicl-surface-elevated: #ffffff;
+  --aicl-surface-elevated: light-dark(#ffffff, #222222);
+  --aicl-surface-inset: #f3f3f2;
+  --aicl-surface-inset: light-dark(#f3f3f2, #111111);
+  --aicl-surface-tint: #f1f1f0;
+  --aicl-surface-tint: light-dark(#f1f1f0, #262626);
+  --aicl-sidebar: #f2f2f1;
+  --aicl-sidebar: light-dark(#f2f2f1, #111111);
+  --aicl-overlay: rgba(10, 10, 10, 0.32);
+  --aicl-overlay: light-dark(rgba(10, 10, 10, 0.32), rgba(0, 0, 0, 0.6));
+
+  /* Text */
+  --aicl-text: #18181b;
+  --aicl-text: light-dark(#18181b, #f4f4f5);
+  --aicl-text-muted: #52525b;
+  --aicl-text-muted: light-dark(#52525b, #a1a1aa);
+  --aicl-text-faint: #a1a1aa;
+  --aicl-text-faint: light-dark(#a1a1aa, #71717a);
+  --aicl-text-link: #2563eb;
+  --aicl-text-link: light-dark(#2563eb, #60a5fa);
+  --aicl-text-inverse: #fafafa;
+  --aicl-text-inverse: light-dark(#fafafa, #18181b);
+
+  /* Borders */
+  --aicl-border: #e7e7e5;
+  --aicl-border: light-dark(#e7e7e5, #2a2a2a);
+  --aicl-border-strong: #d6d6d3;
+  --aicl-border-strong: light-dark(#d6d6d3, #3a3a3a);
+  --aicl-border-focus: #a1a1aa;
+  --aicl-border-focus: light-dark(#a1a1aa, #71717a);
+
+  /* Accent */
+  --aicl-accent: #18181b;
+  --aicl-accent: light-dark(#18181b, #fafafa);
+  --aicl-accent-soft: #ececea;
+  --aicl-accent-soft: light-dark(#ececea, #2a2a2a);
+  --aicl-accent-strong: #09090b;
+  --aicl-accent-strong: light-dark(#09090b, #ffffff);
+  --aicl-accent-fg: #fafafa;
+  --aicl-accent-fg: light-dark(#fafafa, #18181b);
+
+  /* Meaning */
+  --aicl-success: #16a34a;
+  --aicl-success: light-dark(#16a34a, #4ade80);
+  --aicl-warning: #b45309;
+  --aicl-warning: light-dark(#b45309, #fbbf24);
+  --aicl-danger: #dc2626;
+  --aicl-danger: light-dark(#dc2626, #f87171);
+  --aicl-info: #2563eb;
+  --aicl-info: light-dark(#2563eb, #60a5fa);
+
+  /* Tool states */
+  --aicl-tool-pending: #a1a1aa;
+  --aicl-tool-pending: light-dark(#a1a1aa, #71717a);
+  --aicl-tool-running: #52525b;
+  --aicl-tool-running: light-dark(#52525b, #a1a1aa);
+  --aicl-tool-success: #16a34a;
+  --aicl-tool-success: light-dark(#16a34a, #4ade80);
+  --aicl-tool-error: #dc2626;
+  --aicl-tool-error: light-dark(#dc2626, #f87171);
+  --aicl-tool-cancelled: #a1a1aa;
+  --aicl-tool-cancelled: light-dark(#a1a1aa, #71717a);
+
+  /* Code */
+  --aicl-code-bg: #f6f6f5;
+  --aicl-code-bg: light-dark(#f6f6f5, #1f1f1f);
+  --aicl-code-fg: #18181b;
+  --aicl-code-fg: light-dark(#18181b, #e4e4e7);
+  --aicl-code-border: #e7e7e5;
+  --aicl-code-border: light-dark(#e7e7e5, #2a2a2a);
+  --aicl-code-comment: #a1a1aa;
+  --aicl-code-comment: light-dark(#a1a1aa, #71717a);
+  --aicl-code-keyword: #b91c1c;
+  --aicl-code-keyword: light-dark(#b91c1c, #fca5a5);
+  --aicl-code-string: #15803d;
+  --aicl-code-string: light-dark(#15803d, #86efac);
+  --aicl-code-number: #1d4ed8;
+  --aicl-code-number: light-dark(#1d4ed8, #93c5fd);
+  --aicl-code-tag: #a16207;
+  --aicl-code-tag: light-dark(#a16207, #fcd34d);
+
+  /* Terminal */
+  --aicl-terminal-bg: #18181b;
+  --aicl-terminal-bg: light-dark(#18181b, #0d0d0d);
+  --aicl-terminal-fg: #f4f4f5;
+  --aicl-terminal-fg: light-dark(#f4f4f5, #e4e4e7);
+  --aicl-terminal-prompt: #a1a1aa;
+  --aicl-terminal-prompt: light-dark(#a1a1aa, #71717a);
+
+  /* Selection and focus */
+  --aicl-ring: #a1a1aa;
+  --aicl-ring: light-dark(#a1a1aa, #71717a);
+  --aicl-focus-ring: 0 0 0 3px color-mix(in oklab, var(--aicl-ring) 35%, transparent);
+  --aicl-selection-bg: color-mix(in oklab, var(--aicl-accent) 28%, transparent);
+  --aicl-shimmer-a: color-mix(in oklab, var(--aicl-text) 0%, transparent);
+  --aicl-shimmer-b: color-mix(in oklab, var(--aicl-text) 7%, transparent);
+  --aicl-shimmer-c: color-mix(in oklab, var(--aicl-text) 0%, transparent);
+
+  /* Elevation. A shadow is not a colour, so these cannot ride
+     `light-dark()` the way the palette does. */
+
+  --aicl-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --aicl-shadow-2: 0 4px 16px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.05);
+  --aicl-shadow-3: 0 16px 48px rgba(0, 0, 0, 0.14), 0 4px 12px rgba(0, 0, 0, 0.06);
+  --aicl-shadow-4: 0 24px 64px rgba(0, 0, 0, 0.16), 0 8px 20px rgba(0, 0, 0, 0.08);
+  --aicl-shadow-5: 0 32px 96px rgba(0, 0, 0, 0.18), 0 12px 28px rgba(0, 0, 0, 0.09);
+  --aicl-shadow-6: 0 48px 144px rgba(0, 0, 0, 0.2), 0 16px 40px rgba(0, 0, 0, 0.1);
+
+  /* ─── Type ──────────────────────────────────────────────────────
+     Six roles, each a size and a leading. The roles are the theming
+     axis: a skin restyles the entire type system by overriding six
+     values, and every surface moves with them.
+
+     The `--aicl-text-*` names are the raw scale, derived from the roles.
+     They stay because they are the finer-grained handles — a single
+     surface that needs one step off the ladder. */
+  --aicl-font-sans:  'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
+                      'Helvetica Neue', Arial, sans-serif;
+  --aicl-font-mono:  ui-monospace, 'SF Mono', SFMono-Regular, 'JetBrains Mono',
+                      Menlo, Consolas, monospace;
+
+  --aicl-type-display:   17px;  --aicl-leading-display:   1.25;
+  --aicl-type-title:     15px;  --aicl-leading-title:     1.35;
+  --aicl-type-body:      14px;  --aicl-leading-body:      1.5;
+  --aicl-type-secondary: 13px;  --aicl-leading-secondary: 1.5;
+  --aicl-type-caption:   12px;  --aicl-leading-caption:   1.4;
+  --aicl-type-micro:     11px;  --aicl-leading-micro:     1.3;
+
+  --aicl-text-lg:   var(--aicl-type-display);
+  --aicl-text-md:   var(--aicl-type-title);
+  --aicl-text-base: var(--aicl-type-body);
+  --aicl-text-sm:   var(--aicl-type-secondary);
+  --aicl-text-xs:   var(--aicl-type-caption);
+
+  --aicl-leading-tight:  1.25;
+  --aicl-leading-snug:   1.4;
+  --aicl-leading-normal: 1.6;
+
+  /* ─── Radius ──────────────────────────────────────────────────── */
+  --aicl-radius-sm: 6px;
+  --aicl-radius-md: 10px;
+  --aicl-radius-lg: 14px;
+  --aicl-radius-xl: 22px;
+  --aicl-radius-pill: 999px;
+
+  /* ─── Spacing ─────────────────────────────────────────────────── */
+  --aicl-space-1: 4px;
+  --aicl-space-2: 8px;
+  --aicl-space-3: 12px;
+  --aicl-space-4: 16px;
+  --aicl-space-5: 20px;
+  --aicl-space-6: 28px;
+  --aicl-space-7: 40px;
+
+  /* ─── Motion ────────────────────────────────────────────────────
+     Three tiers, and the rule that picks between them: the bigger the
+     thing that moves, the slower it moves. The easings here are plain
+     curves; `@aicl/motion/motion.css` replaces them with real springs
+     without touching these durations. */
+  --aicl-anim-fast: 80ms;
+  --aicl-anim: 160ms;
+  --aicl-anim-slow: 240ms;
+  --aicl-anim-fast-exit: 60ms;
+  --aicl-anim-exit: 120ms;
+  --aicl-anim-slow-exit: 160ms;
+  --aicl-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --aicl-ease-out: cubic-bezier(0, 0.6, 0.2, 1);
+  --aicl-ease-in: cubic-bezier(0.4, 0, 1, 1);
+
+  /* ─── Rings ───────────────────────────────────────────────────── */
+  --aicl-shadow-ring-soft: 0 0 0 1px var(--aicl-border) inset;
+  --aicl-shadow-ring-strong: 0 0 0 1px var(--aicl-border-strong) inset;
+}
+
+/* The mode. `color-scheme` is inherited, so a mode set here reaches a skin
+   further down the tree, and a skin's `light-dark()` values follow it. */
+[data-theme='light'] { color-scheme: light; }
+[data-theme='dark'] { color-scheme: dark; }
+
+/* The elevation ladder, per mode. */
+[data-theme='dark'] {
+  --aicl-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --aicl-shadow-2: 0 4px 16px rgba(0, 0, 0, 0.45), 0 1px 3px rgba(0, 0, 0, 0.3);
+  --aicl-shadow-3: 0 16px 48px rgba(0, 0, 0, 0.6), 0 4px 12px rgba(0, 0, 0, 0.4);
+  --aicl-shadow-4: 0 24px 64px rgba(0, 0, 0, 0.62), 0 8px 20px rgba(0, 0, 0, 0.44);
+  --aicl-shadow-5: 0 32px 96px rgba(0, 0, 0, 0.64), 0 12px 28px rgba(0, 0, 0, 0.46);
+  --aicl-shadow-6: 0 48px 144px rgba(0, 0, 0, 0.66), 0 16px 40px rgba(0, 0, 0, 0.48);
+}
+
+/* Without an explicit mode, the system preference wins. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --aicl-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --aicl-shadow-2: 0 4px 16px rgba(0, 0, 0, 0.45), 0 1px 3px rgba(0, 0, 0, 0.3);
+    --aicl-shadow-3: 0 16px 48px rgba(0, 0, 0, 0.6), 0 4px 12px rgba(0, 0, 0, 0.4);
+    --aicl-shadow-4: 0 24px 64px rgba(0, 0, 0, 0.62), 0 8px 20px rgba(0, 0, 0, 0.44);
+    --aicl-shadow-5: 0 32px 96px rgba(0, 0, 0, 0.64), 0 12px 28px rgba(0, 0, 0, 0.46);
+    --aicl-shadow-6: 0 48px 144px rgba(0, 0, 0, 0.66), 0 16px 40px rgba(0, 0, 0, 0.48);
+  }
+}
+
+/* ─── Size ───────────────────────────────────────────────────────── */
+
+/* One ladder, and everything with a size reads from it: the control
+   height, the horizontal padding, the gap between a glyph and its label,
+   the icon. A surface is dense or roomy because the ladder says so, not
+   because each component decided for itself. */
+:root {
+  --aicl-control-height: 36px;
+  --aicl-control-padding-x: 12px;
+  --aicl-control-gap: 8px;
+  --aicl-icon-size: 16px;
+}
+
+/* ─── Interaction ───────────────────────────────────────────────── */
+
+/* The travelling hover highlight. One per list. */
+:root {
+  --aicl-hover-bg: color-mix(in oklab, var(--aicl-text) 6%, transparent);
+  --aicl-hover-bg-strong: color-mix(in oklab, var(--aicl-text) 10%, transparent);
+
+  /* The smallest comfortable target. A row that is not interactive may be
+     shorter; anything you can click is at least this tall. */
+  --aicl-hit: 40px;
+  --aicl-hit-min: 24px;
+}
+
+/* ─── Density ────────────────────────────────────────────────────── */
+
+/* Two densities on top of the default. `compact` is for dense surfaces —
+   filter bars, toolbars, sidebars. `calm` is the same density with the
+   motion taken out, for a surface that should feel still. */
+[data-aicl-density='compact'] {
+  --aicl-hit: 32px;
+  --aicl-control-height: 28px;
+  --aicl-control-padding-x: 10px;
+  --aicl-control-gap: 6px;
+  --aicl-icon-size: 14px;
+
+  --aicl-type-display:   16px;
+  --aicl-type-title:     14px;
+  --aicl-type-body:      13px;
+  --aicl-type-secondary: 12px;
+  --aicl-type-caption:   11px;
+  --aicl-type-micro:     10px;
+
+  --aicl-space-1: 2px;
+  --aicl-space-2: 6px;
+  --aicl-space-3: 8px;
+  --aicl-space-4: 12px;
+  --aicl-space-5: 16px;
+  --aicl-space-6: 20px;
+  --aicl-space-7: 28px;
+}
+
+[data-aicl-density='calm'] {
+  --aicl-hit: 28px;
+  --aicl-control-height: 28px;
+  --aicl-control-padding-x: 10px;
+  --aicl-control-gap: 6px;
+  --aicl-icon-size: 14px;
+
+  --aicl-type-display:   16px;
+  --aicl-type-title:     14px;
+  --aicl-type-body:      13px;
+  --aicl-type-secondary: 12px;
+  --aicl-type-caption:   11px;
+  --aicl-type-micro:     10px;
+
+  --aicl-space-1: 2px;
+  --aicl-space-2: 6px;
+  --aicl-space-3: 8px;
+  --aicl-space-4: 12px;
+  --aicl-space-5: 16px;
+  --aicl-space-6: 20px;
+  --aicl-space-7: 28px;
+
+  --aicl-anim-fast: 0ms;
+  --aicl-anim: 0ms;
+  --aicl-anim-slow: 0ms;
+}

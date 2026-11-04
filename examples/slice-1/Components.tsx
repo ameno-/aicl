@@ -4,6 +4,7 @@ import {
   AlertDialog,
   AttachmentChip,
   AttachmentDropzone,
+  Button,
   Composer,
   Dialog,
   Drawer,
@@ -303,10 +304,59 @@ function FormsDemo() {
   );
 }
 
+function ButtonsDemo() {
+  const [loading, setLoading] = useState(false);
+  return (
+    <div className="row">
+      <Button>Send</Button>
+      <Button variant="secondary" icon="plus">New task</Button>
+      <Button variant="outline">Outline</Button>
+      <Button variant="ghost">Ghost</Button>
+      <Button variant="link">Link</Button>
+      <Button variant="destructive" icon="cancelled">Delete</Button>
+      <Button size="sm">Small</Button>
+      <Button size="lg">Large</Button>
+      <Button icon="plus" aria-label="Add" />
+      <Button loading={loading} onClick={() => setLoading((v) => !v)}>
+        {loading ? 'Working' : 'Toggle loading'}
+      </Button>
+      <Button disabled>Disabled</Button>
+    </div>
+  );
+}
+
+/**
+ * The composer as a compound component: the subparts are arranged by the
+ * consumer, and the composer still owns the keyboard semantics, the
+ * autosizing and the submission guards.
+ */
+function CompoundComposerDemo() {
+  const [draft, setDraft] = useState('');
+  return (
+    <div className="row" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 'var(--aicl-space-3)' }}>
+      <Composer value={draft} onChange={setDraft} onSubmit={() => setDraft('')} placeholder="Ask the agent to build, fix, or explain…">
+        <Composer.Body>
+          <Composer.Attach />
+          <Composer.Input />
+        </Composer.Body>
+        <Composer.Suggestions />
+        <Composer.Submit />
+      </Composer>
+      <Composer.Hint>Shift+Enter for a newline. Enter sends.</Composer.Hint>
+    </div>
+  );
+}
+
 export function Components() {
   return (
     <main className="gallery components" data-aicl-root="">
       <h1>Components</h1>
+      <Section id="buttons" title="Button">
+        <ButtonsDemo />
+      </Section>
+      <Section id="composer-compound" title="Composer, compound">
+        <CompoundComposerDemo />
+      </Section>
       <Section id="trigger-menus" title="Slash and mention menus">
         <ComposerWithMenus />
       </Section>

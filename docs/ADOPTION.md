@@ -274,6 +274,28 @@ calls. Style those with anything. To use the default theme, `import '@aicl/style
 `data-theme="light" | "dark"` on a container. Without it the theme follows
 `prefers-color-scheme`. The tokens are listed in `packages/styles/README.md`.
 
+### Three layers, in import order
+
+```tsx
+import '@aicl/styles';                        // the token contract + the primitive surfaces
+import '@aicl/styles/themes/looseleaf.css';  // optional: a skin
+import '@aicl/motion/motion.css';             // optional: springs, fluid hover, weight
+```
+
+- **The contract** declares every `--aicl-*` name. The names are public API; the values are not.
+- **A skin** is a stylesheet that overrides the contract's values. It contains no JavaScript, so it
+  cannot change behaviour. Name it with `data-aicl-theme="looseleaf"`, and put it on the same
+  element as `data-theme` so the skin can resolve the mode itself.
+- **The motion layer** replaces the contract's easings with real springs, so every
+  `transition: opacity var(--aicl-anim) var(--aicl-ease)` you write becomes a spring without
+  changing. Import it **after** `@aicl/styles`, or the contract's easings win.
+
+`data-aicl-density="compact"` tightens the space ladder and the hit target; `"calm"` does the same
+and stops the motion.
+
+The full model is in [`docs/DESIGN-SYSTEM.md`](DESIGN-SYSTEM.md); the rules it rests on are D15–D18
+in [`DECISIONS.md`](DECISIONS.md).
+
 ## 7. Testing without a backend
 
 `ChatTransport` is one method, so a fake is a few lines and needs no DOM:

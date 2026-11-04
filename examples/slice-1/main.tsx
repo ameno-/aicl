@@ -5,6 +5,8 @@ import { Gallery } from './Gallery.js';
 import { Shell } from './Shell.js';
 import { ThemeRoot } from './ThemeRoot.js';
 import '@aicl/styles';
+import '@aicl/styles/themes/looseleaf.css';
+import '@aicl/motion/motion.css';
 import './styles.css';
 
 const root = document.getElementById('root');

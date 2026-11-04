@@ -2,11 +2,11 @@
  * App-level layout. The primitive surface itself comes from @aicl/styles;
  * here we only lay out the demo shell: scenarios nav, the two-column
  * stage, and the work pane.
+ *
+ * The colour scheme is the contract's business: it sets `color-scheme` from
+ * `data-theme`, and the palette resolves against it. Forcing one here
+ * would put the colours and the elevation ladder in different modes.
  */
-
-:root {
-  color-scheme: light;
-}
 
 html,
 body,
@@ -195,6 +195,13 @@ body {
 .theme-switcher button[aria-pressed='true'] {
   background: var(--aicl-accent);
   color: var(--aicl-accent-fg);
+}
+
+.theme-switcher-divider {
+  width: 1px;
+  align-self: stretch;
+  margin: 2px 2px;
+  background: var(--aicl-border);
 }
 
 /* Components page */

@@ -1,0 +1,47 @@
+# AICL — an open-source UI component library for AI chat applications
+
+> An open-source, framework-agnostic UI component library for AI chat
+> applications. Derived from a survey of 1,262 screens of four shipping
+> agentic-chat products.
+
+## Packages
+
+- [@aicl/core](./packages/core/README.md): the message model, the part union,
+  the ChatController state machine, the SSE transport. No DOM, no framework,
+  no dependencies.
+- [@aicl/react](./packages/react/README.md): the React adapter. Accessible,
+  unstyled primitives that publish their state as `data-aicl` attributes,
+  plus the component contract.
+- [@aicl/server](./packages/server/README.md): `createChatHandler`. Turns an
+  async iterable of StreamEvents into SSE frames.
+- [@aicl/styles](./packages/styles/README.md): the token contract and the
+  component surfaces. Optional. Skins live in `themes/`.
+- [@aicl/motion](./packages/motion/README.md): the motion system. Three spring
+  tiers, fluid hover, weight without reflow.
+
+## Docs
+
+- [Design system](./docs/DESIGN-SYSTEM.md): the four layers, the token
+  contract, the motion system, the skin model, the shipping model.
+- [Library](./docs/LIBRARY.md): how the library is organised, and what is
+  planned.
+- [Inventory](./docs/INVENTORY.md): the deep inventory of LooseLeaf and
+  Fluid Functionalism, and the shape vocabulary the plan is written in.
+- [Roadmap](./docs/ROADMAP.md): what to create, expose and refactor, and
+  in what order.
+- [Component contract](./docs/components.md): every slot and every state.
+- [Decisions](./docs/DECISIONS.md): the binding decisions, D1–D18.
+- [Adoption](./docs/ADOPTION.md): wiring AICL into an app, with every known
+  sharp edge.
+- [Architecture](./docs/ARCHITECTURE.md): the layer split and why.
+- [Wire contract](./docs/api/README.md): the wire format and handler
+  conventions.
+
+## The contract in one paragraph
+
+A primitive publishes slots (`data-aicl="composer"`) and states
+(`data-state="streaming"`). Those names are public API. A skin is a
+stylesheet that overrides the `--aicl-*` token contract and nothing else, so
+it cannot change behaviour. The motion system replaces the contract's
+easings with real springs. The component contract above is generated from
+the implementation and a test fails when the two drift apart.

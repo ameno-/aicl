@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@aicl/core": "file:../../packages/core",
+    "@aicl/motion": "file:../../packages/motion",
     "@aicl/react": "file:../../packages/react",
     "@aicl/styles": "file:../../packages/styles",
     "lucide-react": "^1.52.0",

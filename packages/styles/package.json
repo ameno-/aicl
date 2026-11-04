@@ -1,12 +1,14 @@
 {
   "name": "@aicl/styles",
   "version": "0.0.0",
-  "description": "Optional CSS-variable theme for AICL primitives. Two themes: light and dark.",
+  "description": "The AICL token contract, the chat-shell reset, and the component surfaces. Ships one default look; skins live in ./themes.",
   "license": "MIT",
   "type": "module",
   "sideEffects": false,
   "exports": {
-    ".": "./src/index.css"
+    ".": "./src/index.css",
+    "./contract.css": "./src/contract.css",
+    "./themes/looseleaf.css": "./src/themes/looseleaf.css"
   },
   "files": ["src"]
 }

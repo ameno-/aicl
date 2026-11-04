@@ -1,5 +1,4 @@
-import { Circle, CircleCheck, CircleX, LoaderCircle, type LucideIcon } from 'lucide-react';
-import { Icon } from './icons.js';
+import { Icon, type IconSlot } from './icons.js';
 
 export interface PlanItem {
   id: string;
@@ -7,11 +6,11 @@ export interface PlanItem {
   status: 'pending' | 'running' | 'done' | 'error';
 }
 
-const STEP_ICON: Record<PlanItem['status'], LucideIcon> = {
-  pending: Circle,
-  running: LoaderCircle,
-  done: CircleCheck,
-  error: CircleX,
+const STEP_ICON: Record<PlanItem['status'], IconSlot> = {
+  pending: 'pending',
+  running: 'spinner',
+  done: 'success',
+  error: 'failure',
 };
 
 export function PlanChecklist({ items, title }: { items: PlanItem[]; title?: string }) {
@@ -27,7 +26,7 @@ export function PlanChecklist({ items, title }: { items: PlanItem[]; title?: str
       <ol>
         {items.map((item) => (
           <li key={item.id} data-status={item.status}>
-            <Icon as={STEP_ICON[item.status]} spin={item.status === 'running'} />
+            <Icon name={STEP_ICON[item.status]} spin={item.status === 'running'} />
             <span>{item.label}</span>
           </li>
         ))}

@@ -1,12 +1,27 @@
 /**
- * AICL styles entrypoint. Importing this file once applies the design
- * tokens, the chat-shell reset, and the component surface to every
+ * AICL styles entrypoint. Importing this file once applies the token
+ * contract, the chat-shell reset, and the component surface to every
  * `[data-aicl]` selector in the document.
  *
  * Theming is by `data-theme="light"` or `data-theme="dark"` on any
  * container above the chat surface. Without an explicit theme, the
  * media query follows the user's system preference.
+ *
+ * A **skin** is a separate, opt-in layer: it replaces the contract's values
+ * wholesale. Import the skin's stylesheet after this one and name it on the
+ * element:
+ *
+ *   import '@aicl/styles';
+ *   import '@aicl/styles/themes/looseleaf.css';
+ *
+ *   <div data-aicl-root data-aicl-theme="looseleaf" data-theme="dark">
+ *
+ * The motion system is a third layer, also opt-in. It replaces the
+ * contract's easings with real springs and adds the travelling hover
+ * highlight and weight-without-reflow:
+ *
+ *   import '@aicl/motion/motion.css';
  */
-@import './tokens.css';
+@import './contract.css';
 @import './reset.css';
 @import './components.css';

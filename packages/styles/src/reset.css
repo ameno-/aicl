@@ -22,7 +22,7 @@
 }
 
 :where([data-aicl-root]) ::selection {
-  background: color-mix(in oklab, var(--aicl-accent) 28%, transparent);
+  background: var(--aicl-selection-bg);
   color: var(--aicl-text);
 }
 

@@ -283,6 +283,98 @@ part renderer and `TerminalOutput` stay in the chat packages. Also falsified if 
 terminal output legible only when interleaved with per-step tool cards such that extraction loses
 meaning (agent-execution §5.4) — that would force the component to own placement.
 
+## D15 — The token contract is the public API; a skin is values, not components
+
+**Decision.** Every visual decision a primitive makes is expressed as a CSS custom property
+declared in one place, `packages/styles/src/contract.css`. The property names are public API and
+are semantic (`--aicl-surface-elevated`, `--aicl-text-muted`, `--aicl-danger`), not chromatic.
+A **skin** is a stylesheet that overrides those values; it contains no JavaScript, no components,
+and no knowledge of the primitives beyond the contract's names.
+
+**Why.** The corpus told us what a chat surface looks like; it did not tell us that the look should
+be fixed. A library that ships one palette forces every consumer to either accept it or fork the
+stylesheet. A library that ships a *contract* lets the palette be an argument. The contract is also
+the only way the existing `data-aicl` attribute contract (D7) can be exploited: a skin selects on
+those attributes, so it can animate a state without touching the primitives.
+
+LooseLeaf demonstrates the shape: 123 components that keep shadcn/ui's `data-slot` names, so the
+skin can be swapped in without touching JSX. AICL already had the same property; it just never
+made it explicit or exploited it.
+
+**Rejected.** (a) Ship one opinionated palette and let consumers override individual variables —
+this is the status quo, and it makes "rebrand the whole thing" a matter of overriding forty names
+by hand, with no way to check that the result is coherent. (b) Make skins JavaScript objects with a
+`ThemeProvider` — it puts a runtime dependency on the styling layer, breaks the "no CSS in the
+library packages" invariant in spirit, and makes a skin unusable without JS. (c) Put the drawn
+chrome (LooseLeaf's seeded SVG outlines) into the skin layer — it is component code, not values,
+and belongs in its own layer above the primitives.
+
+**Consequence.** `packages/styles/src/tokens.css` became `contract.css`. `data-theme="light|dark"`
+still selects the mode; `data-aicl-theme="<skin>"` selects the skin, and both go on the same
+element so a skin can resolve the mode itself. A skin may override any subset of the contract.
+
+## D16 — The motion system is three spring tiers, shipped as CSS
+
+**Decision.** Motion runs on three tiers — `fast` (80 ms), `moderate` (160 ms), `slow` (240 ms,
+the only one that overshoots) — chosen by the size of the thing that moves. Each tier has its own
+exit: a plain tween, one tier quicker than the entrance it belongs to. The curves are real springs,
+encoded as CSS `linear()` easing functions and generated from the tokens in
+`packages/motion/src/springs.ts`; a test fails when the committed stylesheet drifts.
+
+**Why.** A duration cannot be interrupted gracefully: reversing from the current position needs the
+curve to know where it is. A spring can. LooseLeaf's "states are CSS, not React" and Fluid
+Functionalism's "springs, not durations" are the same observation from two directions. Shipping
+the springs as CSS `linear()` means the motion system needs no animation runtime, no JavaScript on
+the critical path, and works identically in every adapter.
+
+**Rejected.** (a) Ship durations and ease curves — cheaper, and the reason most libraries feel
+the same. (b) Require an animation runtime (`motion`, `framer-motion`) for the whole library —
+that makes the motion system unavailable to the Svelte and Vue adapters without a second
+implementation, and puts a runtime in the critical path of a chat transcript that has to stream
+while it animates. (c) Ship springs as `linear()` but hand-write the stop lists — the CSS and the
+tokens drift, and two parts of the same interface end up moving at different speeds.
+
+**Consequence.** `packages/motion` is a new package: the spring tokens and the fluid-hover
+geometry with no framework dependency, plus React bindings under `@aicl/motion/react`. The
+contract's `--aicl-anim-*` durations stay durations; `@aicl/motion/motion.css` replaces the
+*easings*, so existing stylesheets become springs without a line changing.
+
+## D17 — Components ship through a registry, as source
+
+**Decision.** The protocol layer (`@aicl/core`, `@aicl/server`) and the system layer
+(`@aicl/styles`, `@aicl/motion`) publish to npm, versioned. Components — the composed primitives
+a chat app actually needs — install as **source** through a registry: `npx aicl add <item>`, and
+the same items published in the shadcn registry format for teams already on shadcn.
+
+**Why.** "Democratize" means a consumer can read, change and delete the code. A versioned
+dependency cannot be changed; a copied file can. It also removes the ceiling: a component is not
+held hostage by the library's release cadence, and a consumer who needs a variant of one component
+edits one file rather than forking the package. Fluid Functionalism and LooseLeaf both ship this
+way, and it is the reason both are usable rather than merely available.
+
+**Rejected.** (a) Publish everything to npm — the component layer would be version-locked to the
+library's cadence, which is exactly the problem that made the chat UI feel bespoke in the first
+place. (b) Ship components only as a registry, including the protocol layer — the wire contract
+must not drift between a backend and a frontend on different release schedules, so it has to be a
+versioned dependency. (c) Reuse the shadcn CLI exclusively — it assumes Tailwind and React, and
+AICL ships plain CSS and is framework-agnostic.
+
+## D18 — The skin layer is CSS-only and cannot change behaviour
+
+**Decision.** A skin may only override contract values. It may not add JavaScript, wrap
+components, or change the DOM the primitives publish. The DOM contract (`data-aicl` and `data-*`
+attributes, D7) is owned by `@aicl/react` and is not affected by theming.
+
+**Why.** It is the property that makes the four layers composable. A skin that could change
+behaviour would fork the library the moment it did, and every consumer's app would depend on
+which skin they happened to pick. Keeping behaviour and appearance on opposite sides of a line
+that cannot be crossed means the UX stays put while the look changes — which is the whole point.
+
+**Rejected.** (a) Let a skin provide components — that is a component library, not a skin, and it
+re-opens D15's rejected option (c). (b) Let a skin ship a small amount of CSS-driven state
+animation — allowed, and is how the motion layer's patterns work; but it must not need JS, so it
+cannot depend on measurement or on the pointer.
+
 ## Sign-off
 
 **2026-10-04 — Go, slice 1 only.** Ameno authorized implementation of the first

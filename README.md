@@ -20,7 +20,8 @@ runs the same in the browser and in Node and ships with end-to-end tests.
 | [`@aicl/core`](packages/core/README.md) | Message model, `ChatController` state machine, SSE transport, session and toast stores. No DOM, no framework | none |
 | [`@aicl/react`](packages/react/README.md) | `useChat` hook and unstyled, accessible primitives (`Transcript`, `Composer`, part renderers, sessions, dialogs, toasts) | `@aicl/core`, `lucide-react`, `react-markdown`, `remark-gfm` |
 | [`@aicl/server`](packages/server/README.md) | `createChatHandler`: turns an async iterable of `StreamEvent` into SSE frames | `@aicl/core` |
-| [`@aicl/styles`](packages/styles/README.md) | Optional CSS-variable theme for every `[data-aicl]` primitive, light and dark | none (CSS) |
+| [`@aicl/styles`](packages/styles/README.md) | The token contract and the component surfaces for every `[data-aicl]` primitive, light and dark | none (CSS) |
+| [`@aicl/motion`](packages/motion/README.md) | The motion system: three spring tiers, fluid hover, weight without reflow. CSS springs, React bindings | none |
 | [`@aicl/fx`](packages/fx/README.md) | Optional animated, styled components (Tailwind v4, motion, WebGPU ambient). Source only | see package README |
 
 Svelte and Vue adapters are placeholders for now (see `packages/svelte`, `packages/vue`).
@@ -82,6 +83,52 @@ The server side, custom message parts, styling, testing and every known sharp ed
 in [`docs/ADOPTION.md`](docs/ADOPTION.md). The wire contract and the conventions every adapter
 agrees on live in [`docs/api/README.md`](docs/api/README.md).
 
+## The design system
+
+The library is four layers, and each one changes at its own rate.
+
+| Layer | What | Ships as |
+|---|---|---|
+| **Protocol** | messages, parts, the state machine, SSE framing | npm, versioned |
+| **Behaviour** | accessible primitives publishing `data-aicl` state attributes | npm, versioned |
+| **System** | the token contract, the component surfaces, the motion system | npm, versioned |
+| **Skin** | the look: a stylesheet that overrides the contract's values | import one CSS file |
+
+A skin contains no JavaScript and no components, so it cannot change what the library does. The
+UX stays; the design tokens move.
+
+```tsx
+import '@aicl/styles';
+import '@aicl/styles/themes/looseleaf.css';   // paper on a green desk, marker orange
+import '@aicl/motion/motion.css';              // springs instead of durations
+
+<div data-aicl-root data-aicl-theme="looseleaf" data-theme="dark">
+```
+
+The motion system runs on three spring tiers — `fast` 80 ms, `moderate` 160 ms, `slow` 240 ms —
+picked by the size of the thing that moves, with exits a tier quicker. The springs are real
+springs, encoded as CSS `linear()` easing functions and generated from the tokens, so there is
+no animation runtime in the critical path.
+
+Two more systems make the library skinnable:
+
+- **Icon slots.** A primitive never imports an icon. It asks for the role it plays — `close`,
+  `spinner`, `send` — and the role resolves through `IconProvider`. The default set is Lucide; an
+  app that wants another set wraps its tree once and every primitive follows.
+- **The component contract.** Every primitive publishes its slots (`data-aicl="composer"`) and its
+  states (`data-state="streaming"`), and `packages/react/src/contract.ts` is the single place
+  that says what they are. The generated [component contract](docs/components.md) is the list a
+  skin author reads; a test fails when it drifts from the implementation.
+
+The library's own components are **compound** where the shape calls for it: `Composer` is
+`Composer.Body` / `Composer.Input` / `Composer.Submit` / `Composer.Attach`, and `Dialog` is
+`Dialog.Title` / `Dialog.Description` / `Dialog.Close`.
+
+The full model, and where it comes from, is in [`docs/DESIGN-SYSTEM.md`](docs/DESIGN-SYSTEM.md).
+How the library is organised, and what is planned, is in [`docs/LIBRARY.md`](docs/LIBRARY.md) and
+[`docs/ROADMAP.md`](docs/ROADMAP.md). The deep inventory of the two reference libraries is in
+[`docs/INVENTORY.md`](docs/INVENTORY.md).
+
 ## The rest of the repo
 
 | Path | |
@@ -90,6 +137,12 @@ agrees on live in [`docs/api/README.md`](docs/api/README.md).
 | `examples/server-node` | Minimal `@aicl/server` handler on Node `http` |
 | `apps/workspace` | Reference application built on the library: a chat, an infinite canvas, live tools and an exporter. Not part of the library API. |
 | `docs/` | Architecture, decisions, corpus method, per-domain specs, evaluations, adoption guide |
+| `docs/DESIGN-SYSTEM.md` | The four layers, the token contract, the motion system, the skin model |
+| `docs/LIBRARY.md` | How the library is organised: systems, components, blocks, and what is planned |
+| `docs/INVENTORY.md` | The deep inventory of LooseLeaf and Fluid, and the shape vocabulary |
+| `docs/ROADMAP.md` | What to create, expose and refactor, and in what order |
+| `docs/components.md` | The component contract: every slot and every state (generated) |
+| `docs/llms.txt` | The library, indexed for an agent |
 | `droid-wiki/` | Contributor wiki, regenerated on demand; may lag the code |
 
 The reference application is useful as a worked example of the library in a large app, but it
