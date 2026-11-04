@@ -12,6 +12,7 @@ export default defineConfig({
     alias: {
       '@aicl/core': path.resolve(root, '../../packages/core/src/index.ts'),
       '@aicl/react': path.resolve(root, '../../packages/react/src/index.ts'),
+      '@aicl/motion/react': path.resolve(root, '../../packages/motion/src/react.tsx'),
     },
   },
   server: {

@@ -113,11 +113,15 @@
   gap: var(--aicl-space-2);
   width: 100%;
   min-width: 0;
-  animation: aicl-message-in 200ms var(--aicl-ease) both;
+  animation: aicl-message-in var(--aicl-anim) var(--aicl-ease) both;
+  transform-origin: 12px 0;
 }
 
 @keyframes aicl-message-in {
-  from { opacity: 0; transform: translateY(2px); }
+  from {
+    opacity: 0;
+    transform: translateY(var(--aicl-enter-y)) rotate(var(--aicl-enter-rotate));
+  }
 }
 
 /* Assistant: full-width text, no bubble. */
@@ -648,11 +652,14 @@
   align-items: center;
   gap: 0 var(--aicl-space-2);
   padding: var(--aicl-space-3) var(--aicl-space-3) var(--aicl-space-2);
-  border: 1px solid var(--aicl-border);
+  border: var(--aicl-border-width) solid var(--aicl-border);
   border-radius: var(--aicl-radius-xl);
   background: var(--aicl-surface);
   box-shadow: var(--aicl-shadow-2);
-  transition: border-color var(--aicl-anim) var(--aicl-ease);
+  transition:
+    border-color var(--aicl-anim) var(--aicl-ease),
+    box-shadow var(--aicl-anim) var(--aicl-ease),
+    transform var(--aicl-anim) var(--aicl-ease);
 }
 
 [data-aicl='composer']:focus-within {
@@ -778,7 +785,7 @@
   gap: var(--aicl-control-gap);
   height: var(--aicl-control-height);
   padding: 0 var(--aicl-control-padding-x);
-  border: 1px solid transparent;
+  border: var(--aicl-border-width) solid transparent;
   border-radius: var(--aicl-radius-md);
   background: var(--aicl-accent);
   color: var(--aicl-accent-fg);
@@ -791,7 +798,9 @@
     background var(--aicl-anim-fast) var(--aicl-ease),
     border-color var(--aicl-anim-fast) var(--aicl-ease),
     color var(--aicl-anim-fast) var(--aicl-ease),
-    opacity var(--aicl-anim-fast) var(--aicl-ease);
+    opacity var(--aicl-anim-fast) var(--aicl-ease),
+    box-shadow var(--aicl-anim-fast) var(--aicl-ease),
+    transform var(--aicl-anim-fast) var(--aicl-ease);
 }
 
 [data-aicl='button'][data-variant='secondary'] {
@@ -837,6 +846,10 @@
 
 [data-aicl='button']:not(:disabled):hover {
   opacity: 0.88;
+}
+
+[data-aicl='button']:not(:disabled):active {
+  transform: translateY(var(--aicl-press-y));
 }
 
 [data-aicl='button']:disabled {
@@ -1399,7 +1412,7 @@
   overflow-y: auto;
   padding: var(--aicl-space-5);
   background: var(--aicl-surface-elevated);
-  border: 1px solid var(--aicl-border);
+  border: var(--aicl-border-width) solid var(--aicl-border);
   border-radius: var(--aicl-radius-lg);
   box-shadow: var(--aicl-shadow-3);
   outline: none;
@@ -1547,7 +1560,13 @@
 }
 
 @keyframes aicl-dialog-in {
-  from { opacity: 0; transform: translateY(4px) scale(0.985); }
+  from {
+    opacity: 0;
+    transform:
+      translateY(var(--aicl-dialog-enter-y))
+      scale(var(--aicl-dialog-enter-scale))
+      rotate(var(--aicl-dialog-enter-rotate));
+  }
 }
 
 /* ═══ Toasts ══════════════════════════════════════════════════════════ */

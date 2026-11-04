@@ -128,6 +128,16 @@ changing.
 tightens the space ladder and the hit target. `calm` does the same and stops
 the motion.
 
+**Experience tokens** are how a skin becomes more than a palette. `--aicl-border-width`,
+`--aicl-press-y`, `--aicl-enter-y`, `--aicl-enter-rotate`, and the dialog
+entrance values are read by the surfaces in `components.css`. The default
+skin leaves press at `0` and the entrance at a 2px fade. LooseLeaf replaces
+them with a hard offset shadow, a press that sits the card down onto that
+shadow, and an arrival that tips like a sheet landing. A treatment that a
+single value cannot express — the highlighter wipe, the composer lifting
+when it is focused — is still a stylesheet, and it still selects only
+`data-aicl` slots. It does not change what a control does.
+
 ---
 
 ## 3. The motion system

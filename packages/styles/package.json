@@ -10,5 +10,8 @@
     "./contract.css": "./src/contract.css",
     "./themes/looseleaf.css": "./src/themes/looseleaf.css"
   },
-  "files": ["src"]
+  "files": ["src"],
+  "scripts": {
+    "test": "node --test src/experience.test.mjs"
+  }
 }

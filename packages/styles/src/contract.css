@@ -218,6 +218,19 @@
   --aicl-ease-out: cubic-bezier(0, 0.6, 0.2, 1);
   --aicl-ease-in: cubic-bezier(0.4, 0, 1, 1);
 
+  /* ─── Experience ────────────────────────────────────────────────
+     The edge, the press, and the arrival. These are not colours: a skin
+     that only rewrites the palette still looks like the same object.
+     Surfaces in components.css read these, so one override moves every
+     button, card, and dialog together. The defaults are the flat system. */
+  --aicl-border-width: 1px;
+  --aicl-press-y: 0px;
+  --aicl-enter-y: 2px;
+  --aicl-enter-rotate: 0deg;
+  --aicl-dialog-enter-y: 4px;
+  --aicl-dialog-enter-scale: 0.985;
+  --aicl-dialog-enter-rotate: 0deg;
+
   /* ─── Rings ───────────────────────────────────────────────────── */
   --aicl-shadow-ring-soft: 0 0 0 1px var(--aicl-border) inset;
   --aicl-shadow-ring-strong: 0 0 0 1px var(--aicl-border-strong) inset;
@@ -329,4 +342,10 @@
   --aicl-anim-fast: 0ms;
   --aicl-anim: 0ms;
   --aicl-anim-slow: 0ms;
+  --aicl-press-y: 0px;
+  --aicl-enter-y: 0px;
+  --aicl-enter-rotate: 0deg;
+  --aicl-dialog-enter-y: 0px;
+  --aicl-dialog-enter-scale: 1;
+  --aicl-dialog-enter-rotate: 0deg;
 }
