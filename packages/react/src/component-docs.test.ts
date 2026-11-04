@@ -3,6 +3,8 @@ import { readFile } from 'node:fs/promises';
 import { test } from 'node:test';
 
 import { allSlots, primitives } from './contract.js';
+import { STARTER_PROMPT } from './compose.js';
+import { usages } from './usage.js';
 
 const repo = new URL('../../../', import.meta.url);
 
@@ -55,9 +57,11 @@ test('llms.txt points at the docs an agent needs', () => {
     './docs/components.md',
     './docs/DECISIONS.md',
     './docs/ADOPTION.md',
+    './docs/USAGE.md',
   ]) {
     assert.ok(llms.includes(page), `llms.txt does not point at ${page}`);
   }
+  assert.ok(llms.includes(STARTER_PROMPT), 'llms.txt does not name the starter prompt');
 });
 
 function slug(name: string): string {
@@ -76,6 +80,10 @@ test('every primitive has its own page, naming its motion and its samples', asyn
         assert.ok(page.includes(`\`${behavior}\``), `${record.name} page omits motion ${behavior}`);
       }
     }
+    assert.ok(page.includes('## Usage'), `${record.name} page has no usage section`);
+    const usage = usages.find((item) => item.name === record.name);
+    assert.ok(usage, `${record.name} has no usage record`);
+    assert.ok(page.includes(usage.example.trim().split('\n')[0]!), `${record.name} page drops its example`);
     for (const name of [...record.aligns.looseleaf, ...record.aligns.fluid]) {
       assert.ok(page.includes(name), `${record.name} page does not cite ${name}`);
     }

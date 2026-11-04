@@ -17,6 +17,18 @@ Fluid reveals the action row on hover. AICL does the same and also reveals it on
 | See it | On a completed message, in the tour's Transcript stop. |
 | Source | `packages/react/src/MessageActions.tsx` |
 
+## Usage
+
+Reach for MessageActions as the per-message row: copy, retry, edit. It stays hidden until the row is hovered or focused.
+
+The buttons call `onAction`. Wiring them to `useChat` is the caller's job; the transcript does not do it for the default row.
+
+```tsx
+<MessageActions message={message} actions={['copy', 'retry']} onAction={onAction} />
+```
+
+This primitive is not a canvas input. It needs a conversation, a queue, or a portal the frame does not host. Use the example in the app.
+
 ## Slots
 
 - `message-actions`

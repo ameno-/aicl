@@ -17,6 +17,18 @@ A small label with a variant axis. Both libraries draw one; AICL publishes the v
 | See it | The components gallery, section Content. |
 | Source | `packages/react/src/content.tsx` |
 
+## Usage
+
+Reach for Badge as a short label beside a word: a count, a state, a version.
+
+It is not a button. A status the person acts on is a Button or an Alert.
+
+```tsx
+<Badge variant="success">Live</Badge>
+```
+
+Ask for `badge` or `badges`.
+
 ## Slots
 
 - `badge`

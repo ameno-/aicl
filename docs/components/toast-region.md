@@ -17,6 +17,18 @@ One polite live region for transient status. The placement is an attribute, so a
 | See it | The components gallery, section Toasts. |
 | Source | `packages/react/src/platform.tsx` |
 
+## Usage
+
+Reach for ToastRegion once, near the root, and give it a toast queue from `@aicl/core`. Toasts stack in that region.
+
+The region is the live region. Rendering `Toast` alone does not announce or time anything.
+
+```tsx
+<ToastRegion queue={queue} />
+```
+
+This primitive is not a canvas input. It needs a conversation, a queue, or a portal the frame does not host. Use the example in the app.
+
 ## Slots
 
 - `toast-region`

@@ -17,6 +17,26 @@ LooseLeaf's alert dialog cannot be dismissed by the scrim. AICL keeps that, and 
 | See it | The components gallery, in the overlays section. |
 | Source | `packages/react/src/platform.tsx` |
 
+## Usage
+
+Reach for AlertDialog when the person must confirm before something is destroyed. The scrim does not dismiss it.
+
+Initial focus is the cancel control. A typed confirmation stays disabled until the text matches. It does not delete anything itself.
+
+```tsx
+<AlertDialog
+  open={open}
+  onOpenChange={setOpen}
+  title="Delete session"
+  variant="danger"
+  consequence="This cannot be undone."
+  confirmLabel="Delete"
+  onConfirm={remove}
+/>
+```
+
+This primitive is not a canvas input. It needs a conversation, a queue, or a portal the frame does not host. Use the example in the app.
+
 ## Slots
 
 - `alert-dialog`

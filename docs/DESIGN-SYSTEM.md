@@ -321,8 +321,10 @@ the same; the binding is not.
 
 A preset encodes a configuration — a density, a skin, a size ladder, an icon
 set — and installs as one item. Nothing is stored: the code *is* the
-configuration. The playground on a docs page produces the preset code, and
-the same URL with `?preset=<code>` reopens the playground as you left it.
+configuration. That preset playground is part of the registry, which is not
+built yet. The playground that exists is the canvas in `examples/slice-1`
+(`?view=canvas`): a prompt places the primitives the library exports, and
+the address bar keeps the prompt. See [`USAGE.md`](USAGE.md).
 
 ### The gallery is the docs
 

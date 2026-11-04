@@ -17,6 +17,18 @@ Both libraries ship a button with variants, a size ladder, a loading state and i
 | See it | The components gallery, section Button, and the first stop of the tour. |
 | Source | `packages/react/src/Button.tsx` |
 
+## Usage
+
+Reach for Button for every action a person takes. Pass `type="submit"` inside a form; the default is `type="button"`, so a chat send does not fire twice.
+
+Loading keeps the button focusable and the same size. It does not disable it. The glyph is an icon role (`icon`, `trailingIcon`), resolved through `IconProvider`, not an imported icon.
+
+```tsx
+<Button variant="outline" size="sm" icon="copy">Copy</Button>
+```
+
+Ask for `button`.
+
 ## Slots
 
 - `button`

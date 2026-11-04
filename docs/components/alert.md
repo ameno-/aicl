@@ -17,6 +17,21 @@ A durable status message with a title and a description. Fluid exports a motion 
 | See it | The components gallery, section Content. |
 | Source | `packages/react/src/content.tsx` |
 
+## Usage
+
+Reach for Alert for a status the person must see in place: information, success, a warning, or a destructive failure. Use `Alert.Title` and `Alert.Description`.
+
+It does not ask for a decision. A confirm-or-cancel is an AlertDialog. It is not a toast.
+
+```tsx
+<Alert variant="warning">
+  <Alert.Title>Needs you</Alert.Title>
+  <Alert.Description>Approve the command before the agent continues.</Alert.Description>
+</Alert>
+```
+
+Ask for `alert` or `warning`.
+
 ## Slots
 
 - `alert`

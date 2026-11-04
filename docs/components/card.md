@@ -17,6 +17,24 @@ Header, title, description, body, footer. Both libraries compose a card this way
 | See it | The components gallery, section Content. |
 | Source | `packages/react/src/content.tsx` |
 
+## Usage
+
+Reach for Card to group a title, a description, a body, and a footer. The slots are `Card.Header`, `Card.Title`, `Card.Description`, `Card.Body`, and `Card.Footer`.
+
+It does not link anywhere. A card the person opens is a button or a link around the content you choose.
+
+```tsx
+<Card>
+  <Card.Header>
+    <Card.Title>Plan</Card.Title>
+    <Card.Description>Three steps, one of them done.</Card.Description>
+  </Card.Header>
+  <Card.Body>Write the failing test, then the primitive, then the gallery.</Card.Body>
+</Card>
+```
+
+Ask for `card`.
+
 ## Slots
 
 - `card`

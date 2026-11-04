@@ -17,6 +17,18 @@ A keycap that presses flat. LooseLeaf draws the cap; Fluid only formats shortcut
 | See it | The components gallery, section Content. |
 | Source | `packages/react/src/content.tsx` |
 
+## Usage
+
+Reach for Kbd as a keycap in a hint: the shortcut that does the thing.
+
+It does not listen for the key. It is the label.
+
+```tsx
+<span>Open the palette <Kbd>⌘K</Kbd></span>
+```
+
+Ask for `kbd`, `keycap`, or `shortcut`.
+
 ## Slots
 
 - `kbd`

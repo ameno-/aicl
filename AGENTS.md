@@ -68,6 +68,7 @@ Start with the library. Move to the app only when the change is about that speci
 | A React primitive's markup, ARIA, keyboard | `packages/react/src/*.tsx`, then `examples/slice-1` to see it |
 | A primitive's slots and states | `packages/react/src/contract.ts` — the contract is the source of truth; `docs/components.md` and `docs/components/*.md` are generated from it |
 | Incorporating a component | `docs/catalog/README.md`, then `packages/react/src/incorporation.ts` and `packages/react/src/catalog.ts` |
+| Using a primitive, or the canvas playground | `docs/USAGE.md`, then `packages/react/src/usage.ts`, `packages/react/src/compose.ts`, and `examples/slice-1` at `?view=canvas` |
 | Icons | `packages/react/src/icons.tsx` — the slot names and the Lucide defaults |
 | Default theme / tokens / a skin | `packages/styles/src/contract.css`, `packages/styles/src/themes/*.css`, `components.css` |
 | Springs, easings, hover, weight | `packages/motion/src/springs.ts` (the source of truth), `scripts/generate-motion-css.mjs` |
@@ -81,7 +82,8 @@ Start with the library. Move to the app only when the change is about that speci
 ## Docs index
 
 - `docs/ADOPTION.md`: wiring AICL into an app, with verified examples and every known sharp
-  edge. **Read this before writing integration code.**
+  edge. **Read this before writing integration code.** `docs/USAGE.md`: how to
+  use a primitive, and how to prompt a frame on the canvas.
 - `docs/DESIGN-SYSTEM.md`: the four layers — protocol, behaviour, system, skin — the token
   contract, the motion system, and the shipping model.
 - `docs/LIBRARY.md`: how the library is organised — systems, components, blocks — and what is

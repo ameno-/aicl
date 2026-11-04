@@ -72,13 +72,19 @@ their own, and a component that does not read one does not depend on it.
 
 ### Components
 
-Eighteen primitives across four surfaces: the transcript, the composer, the
-part renderers, the platform controls, and the navigation. The full list,
-with slots and states, is in [`docs/components.md`](components.md).
+The primitives are the transcript, the composer, the part renderers, the
+platform controls, the navigation, and the content set. The count is the
+contract: [`docs/components.md`](components.md) lists every one, and a page
+in [`docs/components/`](components/) carries its slots, its usage, and its
+incorporation record.
 
-These are AICL's own, and they stay. What changes is that they are now
-*described* — the contract names their slots and states, and a test fails
-when the description and the implementation drift apart.
+These are AICL's own, and they stay. The contract names their slots and
+states, the usage record says how to reach for them, and a test fails when
+the description and the implementation drift apart.
+
+[`USAGE.md`](USAGE.md) is the guide: import order, the boundaries that bite,
+and the canvas playground (`examples/slice-1` at `?view=canvas`) where a
+prompt places those primitives on a frame.
 
 Each primitive also has an incorporation record: the shapes it uses, the
 motion it takes, and which LooseLeaf and Fluid components it was built

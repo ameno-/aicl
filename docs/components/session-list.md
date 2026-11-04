@@ -17,6 +17,22 @@ Both libraries have a sidebar of rows. AICL's list is grouped by recency, which 
 | See it | The components gallery, section Session list, and the tour's Sessions stop. |
 | Source | `packages/react/src/sessions.tsx` |
 
+## Usage
+
+Reach for SessionList as the list of past chats, grouped by recency. Each row is a `SessionListItem`.
+
+It does not load or persist sessions. Pass the groups you already have. `relativeTime` formats a timestamp; it is not a clock.
+
+```tsx
+<SessionList
+  groups={[{ id: 'today', label: 'Today', ids: ['s1'] }]}
+  byId={{ s1: { id: 's1', title: 'Double submit' } }}
+  onSelect={open}
+/>
+```
+
+This primitive is not a canvas input. It needs a conversation, a queue, or a portal the frame does not host. Use the example in the app.
+
 ## Slots
 
 - `session-list`

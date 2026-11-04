@@ -17,6 +17,18 @@ A placeholder that shimmers while content is on its way, and is hidden from assi
 | See it | The components gallery, section Motion, and the tour's Motion stop. |
 | Source | `packages/react/src/content.tsx` |
 
+## Usage
+
+Reach for Skeleton as the placeholder while a region has no content yet.
+
+It is hidden from assistive tech. It is not a spinner, and it is not the empty state that replaces a finished empty list.
+
+```tsx
+<Skeleton width={160} />
+```
+
+Ask for `skeleton`.
+
 ## Slots
 
 - `skeleton`

@@ -17,6 +17,21 @@ A toast arrives and leaves. Fluid's banner is the durable cousin; the alert prim
 | See it | The components gallery, section Toasts. |
 | Source | `packages/react/src/platform.tsx` |
 
+## Usage
+
+Reach for Toast as one transient status, usually rendered by the region. Give it a title and, when there is a next step, an action.
+
+It does not time itself out. The queue does.
+
+```tsx
+<Toast
+  toast={{ id: 'copied', title: 'Copied', variant: 'success', paused: false }}
+  onDismiss={dismiss}
+/>
+```
+
+This primitive is not a canvas input. It needs a conversation, a queue, or a portal the frame does not host. Use the example in the app.
+
 ## Slots
 
 - `toast`

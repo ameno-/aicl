@@ -27,10 +27,13 @@ Peer deps: `react`/`react-dom` ≥ 18. Wiring it to a backend: `docs/ADOPTION.md
 | Content | `Badge`, `Separator`, `Kbd`, `Progress`, `Skeleton`, `Spinner`, `Alert` (+ `.Title`, `.Description`), `Card` (+ `.Header`, `.Title`, `.Description`, `.Body`, `.Footer`), `Empty` (+ `.Title`, `.Description`, `.Actions`), `Tooltip` | `content.tsx` |
 | Motion | `Tabs` (+ `.List`, `.Tab`, `.Panel`), `Collapsible` (+ `.Trigger`, `.Panel`), `Accordion` (+ `.Item`, `.Trigger`, `.Panel`) | `tabs.tsx`, `disclosure.tsx` |
 | Icons | `Icon`, `IconProvider`, `useIcon`, `useIcons`, `iconDefaults` | `icons.tsx` |
-| Contract | `primitives`, `sharedSlots`, `allSlots`, `primitivesForSlot`, `iconRoles`, `incorporations`, `disposition` | `contract.ts`, `incorporation.ts`, `catalog.ts` |
+| Contract | `primitives`, `sharedSlots`, `allSlots`, `primitivesForSlot`, `iconRoles`, `incorporations`, `disposition`, `usages` | `contract.ts`, `incorporation.ts`, `catalog.ts`, `usage.ts` |
+| Canvas | `composePrompt`, `compositionJsx`, `PLAYGROUND_INPUTS`, `STARTER_PROMPT` | `compose.ts` |
 
 Working examples of nearly every primitive in every state: `examples/slice-1/Components.tsx`
 and `examples/slice-1/Gallery.tsx` (`cd examples/slice-1 && npm install && npm run dev`).
+The canvas playground is the same server at `?view=canvas`. How to use it, and
+how to read a component page: `docs/USAGE.md`.
 
 ## Known sharp edges
 

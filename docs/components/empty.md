@@ -17,6 +17,24 @@ A title, an explanation and an action, for a region with nothing in it. LooseLea
 | See it | The components gallery, section Content. |
 | Source | `packages/react/src/content.tsx` |
 
+## Usage
+
+Reach for Empty when a region has finished loading and has nothing to show. Give it a title, a description, and the action that fills it.
+
+It is not a skeleton and not an error. Use it once the request has settled.
+
+```tsx
+<Empty>
+  <Empty.Title>No sessions yet</Empty.Title>
+  <Empty.Description>Start one from the composer.</Empty.Description>
+  <Empty.Actions>
+    <Button size="sm">New session</Button>
+  </Empty.Actions>
+</Empty>
+```
+
+Ask for `empty` or `no sessions`.
+
 ## Slots
 
 - `empty`

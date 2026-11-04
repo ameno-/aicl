@@ -17,6 +17,20 @@ A sheet from the edge. LooseLeaf has both a drawer and a sheet; Fluid has a mobi
 | See it | The components gallery, in the overlays section. |
 | Source | `packages/react/src/platform.tsx` |
 
+## Usage
+
+Reach for Drawer as a sheet from an edge. It traps focus the way a dialog does and can be swiped away.
+
+It is controlled, and it portals. It is not a second page.
+
+```tsx
+<Drawer open={open} onOpenChange={setOpen} side="right">
+  <Dialog.Title>Details</Dialog.Title>
+</Drawer>
+```
+
+This primitive is not a canvas input. It needs a conversation, a queue, or a portal the frame does not host. Use the example in the app.
+
 ## Slots
 
 - `drawer`

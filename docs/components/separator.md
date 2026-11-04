@@ -17,6 +17,18 @@ A rule. Decorative by default, so it is not announced, and semantic when a regio
 | See it | The components gallery, section Content. |
 | Source | `packages/react/src/content.tsx` |
 
+## Usage
+
+Reach for Separator as the rule between two regions. The default is decorative and is not announced.
+
+Pass `decorative={false}` when the rule is a real separator. Orientation is `horizontal` or `vertical`.
+
+```tsx
+<Separator />
+```
+
+Ask for `separator` or `divider`.
+
 ## Slots
 
 - `separator`

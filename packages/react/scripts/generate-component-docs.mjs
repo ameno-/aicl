@@ -18,9 +18,11 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { disposition } from '../dist/catalog.js';
+import { PLAYGROUND_INPUTS, STARTER_PROMPT } from '../dist/compose.js';
 import { allSlots, iconRoles, primitives, sharedSlots } from '../dist/contract.js';
 import { iconDefaults } from '../dist/icons.js';
 import { SHAPES, incorporations } from '../dist/incorporation.js';
+import { usages } from '../dist/usage.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const repo = join(here, '..', '..', '..');
@@ -50,6 +52,27 @@ function repoLink(source, name) {
 }
 
 const byName = new Map(incorporations.map((record) => [record.name, record]));
+const usageByName = new Map(usages.map((usage) => [usage.name, usage]));
+
+function usageBlock(name) {
+  const usage = usageByName.get(name);
+  if (!usage) throw new Error(`${name} has no usage record`);
+  const canvas = usage.canvas
+    ? usage.canvas
+    : 'This primitive is not a canvas input. It needs a conversation, a queue, or a portal the frame does not host. Use the example in the app.';
+  return `## Usage
+
+${usage.when}
+
+${usage.not}
+
+\`\`\`tsx
+${usage.example.trim()}
+\`\`\`
+
+${canvas}
+`;
+}
 
 function pageFor(primitive) {
   const record = byName.get(primitive.name);
@@ -95,6 +118,7 @@ ${record.taken}
 | See it | ${record.see} |
 | Source | ${record ? primitive.source.map((file) => `\`packages/react/src/${file}\``).join(', ') : ''} |
 
+${usageBlock(primitive.name)}
 ## Slots
 
 ${primitive.slots.map((slot) => `- \`${slot}\``).join('\n')}
@@ -271,9 +295,20 @@ const llms = `# AICL — an open-source UI component library for AI chat applica
 - [Decisions](./docs/DECISIONS.md): the binding decisions, D1–D18.
 - [Adoption](./docs/ADOPTION.md): wiring AICL into an app, with every known
   sharp edge.
+- [Usage](./docs/USAGE.md): how to use a primitive, and how to prompt a
+  screen on the canvas. Read this before composing UI.
 - [Architecture](./docs/ARCHITECTURE.md): the layer split and why.
 - [Wire contract](./docs/api/README.md): the wire format and handler
   conventions.
+
+## Prompting a screen
+
+The canvas playground is \`examples/slice-1\` at \`?view=canvas\`. A prompt
+places only the inputs below, in the order it names them. A component the
+library does not export is refused, not invented. A first visit opens
+\`${STARTER_PROMPT}\`.
+
+${PLAYGROUND_INPUTS.map((input) => `- \`${input.phrases.join('`, `')}\` places ${input.primitive}`).join('\n')}
 
 ## The contract in one paragraph
 

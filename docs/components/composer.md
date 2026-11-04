@@ -17,6 +17,23 @@ The compound slots — body, field, submit, attachments, suggestions — are the
 | See it | The components gallery, section Composer, and the tour's Composer stop. |
 | Source | `packages/react/src/Composer.tsx` |
 
+## Usage
+
+Reach for Composer as the field a person types into. `onSubmit` receives the text. `status` distinguishes `submitted` from `streaming`; stop is available only while tokens arrive.
+
+Attachments shown with `attachments` are display state. Send file parts yourself. Omit `value` for an uncontrolled field. Enter sends, Shift+Enter inserts a newline, and IME composition is not a send.
+
+```tsx
+<Composer placeholder="Ask the agent…" onSubmit={send}>
+  <Composer.Body>
+    <Composer.Input />
+    <Composer.Submit />
+  </Composer.Body>
+</Composer>
+```
+
+Ask for `composer` or `message field`.
+
 ## Slots
 
 - `composer`

@@ -17,6 +17,25 @@ Panels plus a pill that travels across equal columns, on the moderate spring. Ar
 | See it | The components gallery, section Motion, and the tour's Motion stop. |
 | Source | `packages/react/src/tabs.tsx` |
 
+## Usage
+
+Reach for Tabs when a few panels share one frame. Arrow keys move, Home and End jump, and a disabled tab is skipped. `defaultValue` is the uncontrolled form.
+
+Inactive panels stay mounted and are hidden. The travelling pill assumes equal columns. A page-level navigation is SidebarNav, not tabs.
+
+```tsx
+<Tabs defaultValue="plan">
+  <Tabs.List aria-label="Work">
+    <Tabs.Tab value="plan">Plan</Tabs.Tab>
+    <Tabs.Tab value="files">Files</Tabs.Tab>
+  </Tabs.List>
+  <Tabs.Panel value="plan">The plan lives here.</Tabs.Panel>
+  <Tabs.Panel value="files">Two files changed.</Tabs.Panel>
+</Tabs>
+```
+
+Ask for `tabs`.
+
 ## Slots
 
 - `tabs`

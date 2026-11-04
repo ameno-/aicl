@@ -17,6 +17,21 @@ The collapsible nav is the piece of both sidebars a chat app actually needs. The
 | See it | The components gallery, section Sidebar nav. |
 | Source | `packages/react/src/sessions.tsx` |
 
+## Usage
+
+Reach for SidebarNav as the vertical nav. Pass the items, and `collapsed` when the rail is icon-only.
+
+It does not own the route. `onSelect` is the navigation.
+
+```tsx
+<SidebarNav
+  items={[{ id: 'chats', label: 'Chats', active: true }]}
+  onNavigate={go}
+/>
+```
+
+This primitive is not a canvas input. It needs a conversation, a queue, or a portal the frame does not host. Use the example in the app.
+
 ## Slots
 
 - `sidebar-nav`

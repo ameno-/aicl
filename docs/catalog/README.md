@@ -52,6 +52,10 @@ Every primitive has an incorporation record in
 - where a person goes to see it
 - what was taken, and what stayed AICL's
 
+How to *use* the primitive — the example, the boundary, the canvas phrase —
+is the usage record in `packages/react/src/usage.ts`. The page renders that
+too. [`docs/USAGE.md`](../USAGE.md) is the guide.
+
 `packages/react/src/contract.ts` remains the source of truth for slots and
 states. The record does not repeat them.
 

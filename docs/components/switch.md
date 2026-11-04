@@ -17,6 +17,18 @@ A thumb that travels. Both libraries spring it; AICL uses the fast tier. The lab
 | See it | The components gallery, section Field, and the tour's Choice stop. |
 | Source | `packages/react/src/platform.tsx` |
 
+## Usage
+
+Reach for Switch as a boolean setting whose label is a real label.
+
+It is controlled. Roll `checked` back yourself when a save fails; `status="error"` only marks the failure.
+
+```tsx
+<Switch checked={on} onCheckedChange={setOn} label="Stream reasoning" />
+```
+
+Ask for `switch` or `toggle`.
+
 ## Slots
 
 - `switch`

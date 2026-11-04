@@ -17,6 +17,20 @@ The words around a control: label, description, error, and a save acknowledgemen
 | See it | The components gallery, section Field. |
 | Source | `packages/react/src/platform.tsx` |
 
+## Usage
+
+Reach for Field to pair a label, a description, and an error with one control. The child input receives the id and the aria attributes.
+
+It expects exactly one React element as a child. It does not submit the form. `saveState` only announces the save.
+
+```tsx
+<Field label="API base URL" error="Must start with https://" required>
+  <input value={url} onChange={(event) => setUrl(event.target.value)} />
+</Field>
+```
+
+Ask for `field` or `form`.
+
 ## Slots
 
 - `field`

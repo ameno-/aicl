@@ -17,6 +17,18 @@ A code block, a file chip and a typing row exist in both libraries as separate c
 | See it | Inside every transcript row. The live thread in examples/slice-1 renders the default parts. |
 | Source | `packages/react/src/parts.tsx`, `packages/react/src/markdown.tsx` |
 
+## Usage
+
+Reach for PartRenderer inside a message row when you render parts yourself. It dispatches one part to the registry.
+
+A custom registry matches exact part type names. A `data-` wildcard is ignored, and an unknown part renders `UnknownPart`.
+
+```tsx
+<PartRenderer part={part} />
+```
+
+This primitive is not a canvas input. It needs a conversation, a queue, or a portal the frame does not host. Use the example in the app.
+
 ## Slots
 
 - `part`

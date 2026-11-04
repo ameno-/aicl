@@ -17,6 +17,24 @@ A command palette is the sample shape and is still a candidate. This search is n
 | See it | The components gallery, section Session search. |
 | Source | `packages/react/src/sessions.tsx` |
 
+## Usage
+
+Reach for SessionSearch as one combobox over the session titles. It filters as the person types.
+
+It searches the list you pass. It does not query a server.
+
+```tsx
+<SessionSearch
+  value={query}
+  onChange={setQuery}
+  groups={[{ id: 'today', ids: ['s1'] }]}
+  byId={{ s1: { id: 's1', title: 'Double submit' } }}
+  onSelect={open}
+/>
+```
+
+This primitive is not a canvas input. It needs a conversation, a queue, or a portal the frame does not host. Use the example in the app.
+
 ## Slots
 
 - `session-search`

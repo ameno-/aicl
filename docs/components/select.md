@@ -17,6 +17,23 @@ A listbox trigger with typeahead. The shared popup chrome both libraries factor 
 | See it | The components gallery, section Field, and the tour's Choice stop. |
 | Source | `packages/react/src/platform.tsx` |
 
+## Usage
+
+Reach for Select as a single-choice listbox with typeahead. Options are `{ value, label }`.
+
+It is controlled. It is not a combobox: the person picks, they do not author a new value.
+
+```tsx
+<Select
+  ariaLabel="Model"
+  value={model}
+  onValueChange={setModel}
+  options={[{ value: 'sonnet', label: 'Sonnet 5.5' }]}
+/>
+```
+
+Ask for `select` or `model picker`.
+
 ## Slots
 
 - `select`

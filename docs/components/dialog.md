@@ -17,6 +17,22 @@ A modal that lands and then gets out of the way. The entrance uses the slow spri
 | See it | The components gallery, section Dialog, and the tour's Dialog stop. |
 | Source | `packages/react/src/platform.tsx` |
 
+## Usage
+
+Reach for Dialog as a modal. It traps focus, returns focus, and dismisses on Escape and the scrim unless you say otherwise.
+
+It is controlled: `open` and `onOpenChange`. A dirty dialog can veto dismissal through `onDismissRequest`. It portals to the document.
+
+```tsx
+<Dialog open={open} onOpenChange={setOpen}>
+  <Dialog.Title>Rename session</Dialog.Title>
+  <Dialog.Description>The name is what the sidebar shows.</Dialog.Description>
+  <Dialog.Close>Cancel</Dialog.Close>
+</Dialog>
+```
+
+This primitive is not a canvas input. It needs a conversation, a queue, or a portal the frame does not host. Use the example in the app.
+
 ## Slots
 
 - `dialog`

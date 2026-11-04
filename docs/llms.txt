@@ -38,9 +38,39 @@
 - [Decisions](./docs/DECISIONS.md): the binding decisions, D1–D18.
 - [Adoption](./docs/ADOPTION.md): wiring AICL into an app, with every known
   sharp edge.
+- [Usage](./docs/USAGE.md): how to use a primitive, and how to prompt a
+  screen on the canvas. Read this before composing UI.
 - [Architecture](./docs/ARCHITECTURE.md): the layer split and why.
 - [Wire contract](./docs/api/README.md): the wire format and handler
   conventions.
+
+## Prompting a screen
+
+The canvas playground is `examples/slice-1` at `?view=canvas`. A prompt
+places only the inputs below, in the order it names them. A component the
+library does not export is refused, not invented. A first visit opens
+`warning alert, a plan card, tabs, and an empty state`.
+
+- `button` places Button
+- `badges`, `badge` places Badge
+- `separator`, `divider` places Separator
+- `keycap`, `shortcut`, `kbd` places Kbd
+- `field`, `form` places Field
+- `switch`, `toggle` places Switch
+- `select`, `model picker` places Select
+- `segmented`, `choice` places SegmentedControl
+- `progress` places Progress
+- `skeleton` places Skeleton
+- `spinner` places Spinner
+- `alert`, `warning` places Alert
+- `card` places Card
+- `empty`, `no sessions` places Empty
+- `tooltip` places Tooltip
+- `tabs` places Tabs
+- `collapsible`, `worked for` places Collapsible
+- `accordion` places Accordion
+- `checklist`, `plan` places PlanChecklist
+- `composer`, `message field` places Composer
 
 ## The contract in one paragraph
 

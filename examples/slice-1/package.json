@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "e2e": "node e2e/components.mjs && node e2e/shell.mjs"
+    "e2e": "node e2e/components.mjs && node e2e/canvas.mjs && node e2e/shell.mjs"
   },
   "dependencies": {
     "@aicl/core": "file:../../packages/core",

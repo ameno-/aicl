@@ -17,6 +17,26 @@ The selection is a pill that travels across equal columns, which is Fluid's tab 
 | See it | The components gallery, section Field, and the tour's Choice stop. |
 | Source | `packages/react/src/platform.tsx` |
 
+## Usage
+
+Reach for SegmentedControl when a few options are always visible. Arrow keys move and select. It is one tab stop.
+
+It is controlled. The travelling pill assumes equal columns, 2px of padding, and a 2px gap.
+
+```tsx
+<SegmentedControl
+  ariaLabel="Layout"
+  value={layout}
+  onValueChange={setLayout}
+  options={[
+    { value: 'list', label: 'List' },
+    { value: 'grid', label: 'Grid' },
+  ]}
+/>
+```
+
+Ask for `segmented` or `choice`.
+
 ## Slots
 
 - `segmented`

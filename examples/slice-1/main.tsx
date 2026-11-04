@@ -1,5 +1,6 @@
 import { createRoot } from 'react-dom/client';
 import { App } from './App.js';
+import { Canvas } from './Canvas.js';
 import { Components } from './Components.js';
 import { Gallery } from './Gallery.js';
 import { Shell } from './Shell.js';
@@ -19,6 +20,8 @@ createRoot(root).render(
       <Gallery />
     ) : view === 'components' ? (
       <Components />
+    ) : view === 'canvas' ? (
+      <Canvas />
     ) : view === 'scenarios' ? (
       <App />
     ) : view === 'tour' ? (

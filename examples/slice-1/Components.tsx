@@ -364,6 +364,9 @@ export function Components() {
   return (
     <main className="gallery components" data-aicl-root="">
       <h1>Components</h1>
+      <p className="canvas-lead">
+        <a href="?view=canvas">Open the canvas</a> to prompt a frame from these components.
+      </p>
       <Section id="buttons" title="Button">
         <ButtonsDemo />
       </Section>

@@ -17,6 +17,18 @@ Determinate fill on the moderate spring, and an indeterminate bar that travels w
 | See it | The components gallery, section Motion, and the tour's Motion stop. |
 | Source | `packages/react/src/content.tsx` |
 
+## Usage
+
+Reach for Progress as a bar. Pass `value` from 0 to 100 when you know it. Omit `value` for an indeterminate bar.
+
+The label is announced. The bar does not estimate a duration.
+
+```tsx
+<Progress value={40} label="Tokens" />
+```
+
+Ask for `progress`.
+
 ## Slots
 
 - `progress`

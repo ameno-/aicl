@@ -17,6 +17,18 @@ A status glyph that spins, through the spinner icon slot, with an accessible nam
 | See it | The components gallery, section Motion, and the tour's Motion stop. |
 | Source | `packages/react/src/content.tsx` |
 
+## Usage
+
+Reach for Spinner as the working mark beside a label. Pass `label` so the work is announced.
+
+It does not reserve the space of the thing that will arrive. A region uses Skeleton for that.
+
+```tsx
+<Spinner label="Thinking" />
+```
+
+Ask for `spinner`.
+
 ## Slots
 
 - `spinner`

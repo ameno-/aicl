@@ -17,6 +17,20 @@ Shows on hover and on keyboard focus, on the fast tier, and is hidden from assis
 | See it | The components gallery, section Content. |
 | Source | `packages/react/src/content.tsx` |
 
+## Usage
+
+Reach for Tooltip to name a control on hover and keyboard focus. The child is the anchor.
+
+It is positioned on the anchor. It does not flip when it would leave the viewport. A collision-aware popup is still a candidate. Tooltip content is not the place for an action.
+
+```tsx
+<Tooltip content="Copies the message">
+  <Button variant="outline" size="sm" icon="copy">Copy</Button>
+</Tooltip>
+```
+
+Ask for `tooltip`.
+
 ## Slots
 
 - `tooltip-anchor`

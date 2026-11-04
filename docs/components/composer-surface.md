@@ -17,6 +17,21 @@ Attachments and suggestion chips are slots on both composers. AICL's trigger men
 | See it | The components gallery: slash and mention menus, suggestion chips, attachment chips, and the dropzone. |
 | Source | `packages/react/src/composer-surface.tsx` |
 
+## Usage
+
+Reach for ComposerSurface as the pieces around the field: `SuggestionChips`, `AttachmentChip`, `AttachmentDropzone`, `SlashMenu`, and `MentionMenu`.
+
+A slash or mention menu needs the same controlled `value`, change handler, and `inputRef` as the composer. Chips do not send a message on their own.
+
+```tsx
+<SuggestionChips
+  suggestions={[{ id: '1', label: 'Make it shorter' }]}
+  onSelect={(suggestion) => insert(suggestion.label)}
+/>
+```
+
+This primitive is not a canvas input. It needs a conversation, a queue, or a portal the frame does not host. Use the example in the app.
+
 ## Slots
 
 - `trigger-menu`

@@ -106,6 +106,10 @@ export type { TabsProps, TabsListProps, TabsTabProps, TabsPanelProps } from './t
 export { Collapsible, Accordion, AccordionItem } from './disclosure.js';
 export type { CollapsibleProps, AccordionProps, AccordionItemProps } from './disclosure.js';
 export { incorporations, SHAPES } from './incorporation.js';
+export { usages } from './usage.js';
+export type { UsageRecord } from './usage.js';
+export { PLAYGROUND_INPUTS, STARTER_PROMPT, composePrompt, compositionJsx } from './compose.js';
+export type { Composition, PlaygroundId, PlaygroundInput } from './compose.js';
 export type { IncorporationRecord, ShapeId, MotionTier, MotionRecord } from './incorporation.js';
 export { disposition } from './catalog.js';
 export type { CatalogItem, Disposition, DispositionStatus } from './catalog.js';

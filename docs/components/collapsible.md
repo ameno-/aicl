@@ -17,6 +17,21 @@ One panel. The height animates by opening the grid row, and the chevron turns on
 | See it | The components gallery, section Motion, and the tour's Motion stop. |
 | Source | `packages/react/src/disclosure.tsx` |
 
+## Usage
+
+Reach for Collapsible for one region that folds. The trigger and the panel are the two parts. Closed content stays mounted and is hidden from reading and tabbing.
+
+It does not close its neighbours. A list of exclusive rows is an Accordion.
+
+```tsx
+<Collapsible>
+  <Collapsible.Trigger>Worked for 11s</Collapsible.Trigger>
+  <Collapsible.Panel>Edited two files.</Collapsible.Panel>
+</Collapsible>
+```
+
+Ask for `collapsible` or `worked for`.
+
 ## Slots
 
 - `collapsible`

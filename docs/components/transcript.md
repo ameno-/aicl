@@ -17,6 +17,18 @@ LooseLeaf splits the scroller from the row, and Fluid puts the actions in a hove
 | See it | The tour's Transcript stop, and the live thread in examples/slice-1. |
 | Source | `packages/react/src/Transcript.tsx` |
 
+## Usage
+
+Reach for Transcript as the conversation. Pass the messages and the chat status. With no children it renders the scroller, the rows, and jump-to-latest.
+
+The default row does not receive `onAction` or `branch`. Render `Transcript.Item` yourself when retry, edit, or the branch switcher must work. One live region serves the whole thread.
+
+```tsx
+<Transcript messages={messages} status={status} />
+```
+
+This primitive is not a canvas input. It needs a conversation, a queue, or a portal the frame does not host. Use the example in the app.
+
 ## Slots
 
 - `transcript-root`
