@@ -18,7 +18,7 @@ Peer deps: `react`/`react-dom` ≥ 18. Wiring it to a backend: `docs/ADOPTION.md
 | Area | Exports | File |
 |---|---|---|
 | State | `useChat`, `useReadable` | `useChat.ts`, `useReadable.ts` |
-| Transcript | `Transcript`, `MessageItem`, `MessageActions`, `PlanChecklist` | `Transcript.tsx`, `MessageActions.tsx`, `PlanChecklist.tsx` |
+| Transcript | `Transcript` (+ `.Scroller`, `.Content`, `.Item`, `.JumpToLatest`), `TranscriptProvider`, `useTranscript`, `MessageItem`, `MessageActions`, `PlanChecklist` | `Transcript.tsx`, `MessageActions.tsx`, `PlanChecklist.tsx` |
 | Parts | `PartRenderer`, `createPartRegistry`, `defaultRegistry`, `TextPartView`, `ReasoningDisclosure`, `ToolCallDisclosure`, `ToolResultView`, `ArtifactCard`, `CodeBlock`, `FileChip`, `ErrorNotice`, `SuggestionRows`, `TerminalOutput`, `UnknownPart` | `parts.tsx` |
 | Composer | `Composer` (+ `ComposerHandle` ref: `focus`, `clear`), `TriggerMenu`, `SlashMenu`, `MentionMenu`, `findTrigger`, `SuggestionChips`, `AttachmentChip`, `AttachmentDropzone`, `useAttachmentPicker`, `matchesAccept` | `Composer.tsx`, `composer-surface.tsx` |
 | Sessions | `SessionList`, `SessionListItem`, `SessionSearch`, `SidebarNav`, `relativeTime`, `resolveSecondary` | `sessions.tsx` |
@@ -37,8 +37,8 @@ These are verified against the current source. Work around them, or fix them wit
 1. **`useChat` reads options once.** Changing `transport`, `body` or `headers` after mount has
    no effect. Use a custom `fetch` in the transport, or remount.
 2. **`<Transcript>` doesn't pass `onAction` or `branch` to `MessageItem`.** Retry and Edit
-   buttons render but do nothing, and the branch switcher never appears. Render `MessageItem`s
-   yourself when you need them (see `docs/ADOPTION.md`).
+   buttons render but do nothing, and the branch switcher never appears. Render
+   `Transcript.Item` (or `MessageItem`) yourself when you need them (see `docs/ADOPTION.md`).
 3. **`<PartRenderer>` uses a custom registry only for exact type names.** It checks
    `registry.has(part.type)`, so a `'data-'` wildcard or a custom fallback passed to
    `createPartRegistry` is ignored, and the built-in `UnknownPart` renders instead.
@@ -60,7 +60,9 @@ These are verified against the current source. Work around them, or fix them wit
   newline. The textarea autosizes up to `maxRows`.
 - `Transcript` keeps one `role="log" aria-live="polite"` node for its whole life, so token
   updates aren't re-announced. It sticks to the bottom until the user scrolls up more than 24 px,
-  then shows a "Jump to latest" button.
+  then shows a "Jump to latest" button. With no children it renders `Scroller`, `Content` and
+  `JumpToLatest`. Arrange those parts yourself, or render `Transcript.Item` outside that list
+  under `TranscriptProvider`; a row registers with the scroller either way.
 - `ToolCallDisclosure` force-opens on `status: 'error'` and shows `argsText` while args stream.
 - Every primitive marks itself with `data-aicl="<name>"`. Treat the attribute names as public
   API, because `@aicl/styles` and consumer CSS select on them. The full list, with every state

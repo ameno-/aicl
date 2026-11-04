@@ -89,7 +89,7 @@ export const primitives: readonly PrimitiveContract[] = [
   },
   {
     name: 'Transcript',
-    summary: 'The conversation: one scroll container over the selected branch path.',
+    summary: 'The conversation: a scroller, the rows, and jump-to-latest. One live region for the thread.',
     source: ['Transcript.tsx'],
     slots: [
       'transcript-root',
