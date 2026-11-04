@@ -1,0 +1,30 @@
+{
+  "name": "toaster",
+  "type": "registry:ui",
+  "title": "Toaster",
+  "description": "The styled toast host. Call `toast()` from anywhere under it.",
+  "dependencies": [
+    "react",
+    "motion",
+    "lucide-react"
+  ],
+  "registryDependencies": [
+    "cn",
+    "fx-provider"
+  ],
+  "files": [
+    {
+      "path": "packages/fx/src/components/input/Toaster.tsx",
+      "type": "registry:ui",
+      "target": "components/aicl/fx/components/input/Toaster.tsx",
+      "content": "import { AnimatePresence, motion } from 'motion/react';\nimport { CheckCircle2, Info, TriangleAlert, X } from 'lucide-react';\nimport { forwardRef, useEffect, useRef, useSyncExternalStore, type ReactNode } from 'react';\nimport { cn } from '../../lib/cn.ts';\n\nexport type ToastKind = 'success' | 'error' | 'info';\n\nexport interface ToastItem {\n  id: string;\n  kind: ToastKind;\n  title: string;\n  description?: string;\n  /** ms; 0 keeps the toast until dismissed. */\n  duration: number;\n}\n\nexport interface ToastOptions {\n  description?: string;\n  duration?: number;\n  id?: string;\n}\n\nlet items: ToastItem[] = [];\nconst listeners = new Set<() => void>();\nlet seq = 0;\nconst emit = () => listeners.forEach((l) => l());\n\nfunction push(kind: ToastKind, title: string, opts: ToastOptions = {}): string {\n  const id = opts.id ?? `t${++seq}`;\n  const item: ToastItem = { id, kind, title, description: opts.description, duration: opts.duration ?? (kind === 'error' ? 6000 : 4000) };\n  items = [...items.filter((t) => t.id !== id), item].slice(-5);\n  emit();\n  return id;\n}\n\n/** Imperative toasts. Mount one <Toaster /> anywhere. */\nexport const toast = Object.assign((title: string, opts?: ToastOptions) => push('info', title, opts), {\n  success: (title: string, opts?: ToastOptions) => push('success', title, opts),\n  error: (title: string, opts?: ToastOptions) => push('error', title, opts),\n  info: (title: string, opts?: ToastOptions) => push('info', title, opts),\n  dismiss: (id?: string) => {\n    items = id ? items.filter((t) => t.id !== id) : [];\n    emit();\n  },\n});\n\nconst subscribe = (cb: () => void) => {\n  listeners.add(cb);\n  return () => listeners.delete(cb);\n};\nconst snapshot = () => items;\n\nconst icons: Record<ToastKind, ReactNode> = {\n  success: <CheckCircle2 size={18} className=\"text-success\" />,\n  error: <TriangleAlert size={18} className=\"text-destructive\" />,\n  info: <Info size={18} className=\"text-info\" />,\n};\n\nexport interface ToasterProps {\n  position?: 'bottom-right' | 'bottom-center' | 'top-right';\n  className?: string;\n}\n\nexport function Toaster({ position = 'bottom-right', className }: ToasterProps) {\n  const list = useSyncExternalStore(subscribe, snapshot, snapshot);\n  const top = position.startsWith('top');\n  return (\n    <div\n      data-fx-component=\"toaster\"\n      aria-live=\"polite\"\n      aria-label=\"Notifications\"\n      role=\"region\"\n      className={cn(\n        'pointer-events-none fixed z-[100] flex w-[min(92vw,360px)] gap-2',\n        top ? 'top-4 flex-col' : 'bottom-4 flex-col-reverse',\n        position === 'bottom-center' ? 'left-1/2 -translate-x-1/2' : 'right-4',\n        className,\n      )}\n    >\n      <AnimatePresence initial={false} mode=\"popLayout\">\n        {[...list].reverse().map((t) => (\n          <ToastView key={t.id} item={t} top={top} />\n        ))}\n      </AnimatePresence>\n    </div>\n  );\n}\n\nconst ToastView = forwardRef<HTMLDivElement, { item: ToastItem; top: boolean }>(function ToastView({ item, top }, ref) {\n  const hovered = useRef(false);\n  useEffect(() => {\n    if (!item.duration) return;\n    let left = item.duration;\n    let last = Date.now();\n    const iv = setInterval(() => {\n      const now = Date.now();\n      if (!hovered.current) left -= now - last;\n      last = now;\n      if (left <= 0) toast.dismiss(item.id);\n    }, 100);\n    return () => clearInterval(iv);\n  }, [item.id, item.duration]);\n\n  return (\n    <motion.div\n      ref={ref}\n      layout\n      role={item.kind === 'error' ? 'alert' : 'status'}\n      data-toast={item.kind}\n      initial={{ opacity: 0, y: top ? -24 : 24, scale: 0.92, filter: 'blur(4px)' }}\n      animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}\n      exit={{ opacity: 0, scale: 0.9, filter: 'blur(4px)', transition: { duration: 0.15 } }}\n      transition={{ type: 'spring', damping: 26, stiffness: 340 }}\n      onHoverStart={() => (hovered.current = true)}\n      onHoverEnd={() => (hovered.current = false)}\n      className=\"pointer-events-auto relative flex items-start gap-3 overflow-hidden rounded-2xl border border-border bg-popover p-3 pr-9 text-popover-foreground shadow-lg\"\n    >\n      <span className=\"mt-0.5 flex shrink-0\">{icons[item.kind]}</span>\n      <div className=\"flex min-w-0 flex-col gap-0.5\">\n        <span className=\"text-sm font-medium text-foreground\">{item.title}</span>\n        {item.description ? <span className=\"text-xs text-muted-foreground\">{item.description}</span> : null}\n      </div>\n      <button\n        type=\"button\"\n        aria-label=\"Dismiss\"\n        onClick={() => toast.dismiss(item.id)}\n        className=\"absolute right-2 top-2 flex size-6 cursor-pointer items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground\"\n      >\n        <X size={14} />\n      </button>\n    </motion.div>\n  );\n});\n"
+    }
+  ],
+  "docs": "docs/components/toaster.md",
+  "categories": [
+    "fx-input"
+  ],
+  "package": "@aicl/fx",
+  "usage": "import { Toaster, toast } from '@aicl/fx';\n\n<Toaster />\ntoast({ title: 'Saved', kind: 'success' });",
+  "npmImport": "import { Toaster } from '@aicl/fx';"
+}

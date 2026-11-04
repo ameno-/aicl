@@ -1,0 +1,36 @@
+{
+  "name": "progress",
+  "type": "registry:ui",
+  "title": "Progress",
+  "description": "A determined bar, or an indeterminate pulse. The fill uses scaleX.",
+  "dependencies": [
+    "react",
+    "@aicl/core"
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "packages/react/src/Progress.tsx",
+      "type": "registry:ui",
+      "target": "components/aicl/Progress.tsx",
+      "content": "/**\n * Progress.\n *\n * A determined bar, or an indeterminate pulse while a tool has no\n * fraction yet. Never animates width: the fill uses `scaleX` so reduced\n * motion can drop the travel for free.\n */\n\nimport type { HTMLAttributes } from 'react';\n\nexport interface ProgressProps extends HTMLAttributes<HTMLDivElement> {\n  /** 0–`max`. Omit with `indeterminate` for an unbounded wait. */\n  value?: number;\n  max?: number;\n  indeterminate?: boolean;\n  label?: string;\n}\n\nexport function Progress({\n  value = 0,\n  max = 100,\n  indeterminate = false,\n  label = 'Progress',\n  ...rest\n}: ProgressProps) {\n  const clamped = max <= 0 ? 0 : Math.min(max, Math.max(0, value));\n  const ratio = max <= 0 ? 0 : clamped / max;\n\n  return (\n    <div\n      {...rest}\n      role=\"progressbar\"\n      aria-label={label}\n      aria-valuemin={indeterminate ? undefined : 0}\n      aria-valuemax={indeterminate ? undefined : max}\n      aria-valuenow={indeterminate ? undefined : clamped}\n      data-aicl=\"progress\"\n      data-state={indeterminate ? 'indeterminate' : 'determinate'}\n    >\n      <span\n        data-aicl=\"progress-fill\"\n        style={indeterminate ? undefined : { transform: `scaleX(${ratio})` }}\n      />\n    </div>\n  );\n}\n"
+    }
+  ],
+  "docs": "docs/components/progress.md",
+  "categories": [
+    "content"
+  ],
+  "package": "@aicl/react",
+  "usage": "import { Progress } from '@aicl/react';\n\n<Progress value={40} max={100} />\n<Progress indeterminate label=\"Indexing\" />",
+  "npmImport": "import { Progress } from '@aicl/react';",
+  "slots": [
+    "progress",
+    "progress-fill"
+  ],
+  "states": {
+    "data-state": [
+      "determinate",
+      "indeterminate"
+    ]
+  }
+}

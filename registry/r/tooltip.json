@@ -1,0 +1,49 @@
+{
+  "name": "tooltip",
+  "type": "registry:ui",
+  "title": "Tooltip",
+  "description": "A short label on hover or focus. The delay is the fast motion tier.",
+  "dependencies": [
+    "react",
+    "@aicl/core"
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "packages/react/src/Tooltip.tsx",
+      "type": "registry:ui",
+      "target": "components/aicl/Tooltip.tsx",
+      "content": "/**\n * Tooltip.\n *\n * A short label that appears on hover or focus. Fluid and LooseLeaf both\n * ship one; AICL had none. The delay is the motion system's `fast` tier\n * (80 ms) so it reads as a preview, not a pop.\n *\n * Compound: `Tooltip.Trigger` and `Tooltip.Content`. A `content` prop on\n * the root is the short form — it wraps the child as the trigger.\n */\n\nimport {\n  cloneElement,\n  createContext,\n  isValidElement,\n  useContext,\n  useEffect,\n  useId,\n  useRef,\n  type FocusEvent,\n  type HTMLAttributes,\n  type KeyboardEvent,\n  type PointerEvent,\n  type ReactElement,\n  type ReactNode,\n} from 'react';\n\nimport { useControllableState } from './controllable.js';\n\nexport type TooltipSide = 'top' | 'bottom' | 'start' | 'end';\n\nexport interface TooltipProps {\n  /** Controlled open. */\n  open?: boolean;\n  defaultOpen?: boolean;\n  onOpenChange?: (open: boolean) => void;\n  /** Milliseconds before the tip appears. Defaults to the fast tier, 80 ms. */\n  delay?: number;\n  side?: TooltipSide;\n  /** Short form: the tip's text, wrapping `children` as the trigger. */\n  content?: ReactNode;\n  children?: ReactNode;\n}\n\ninterface TooltipContextValue {\n  open: boolean;\n  setOpen: (open: boolean) => void;\n  delay: number;\n  side: TooltipSide;\n  triggerId: string;\n  contentId: string;\n}\n\nconst TooltipContext = createContext<TooltipContextValue | null>(null);\n\nfunction useTooltip(): TooltipContextValue {\n  const ctx = useContext(TooltipContext);\n  if (!ctx) throw new Error('Tooltip parts must be rendered inside <Tooltip>.');\n  return ctx;\n}\n\nfunction TooltipRoot({\n  open: openProp,\n  defaultOpen = false,\n  onOpenChange,\n  delay = 80,\n  side = 'top',\n  content,\n  children,\n}: TooltipProps) {\n  const [open, setOpen] = useControllableState(openProp, defaultOpen, onOpenChange);\n  const triggerId = useId();\n  const contentId = useId();\n  const value: TooltipContextValue = { open, setOpen, delay, side, triggerId, contentId };\n\n  if (content !== undefined) {\n    return (\n      <TooltipContext.Provider value={value}>\n        <span data-aicl=\"tooltip\" data-side={side} data-state={open ? 'open' : 'closed'}>\n          <TooltipTrigger>{children}</TooltipTrigger>\n          <TooltipContent>{content}</TooltipContent>\n        </span>\n      </TooltipContext.Provider>\n    );\n  }\n\n  return (\n    <TooltipContext.Provider value={value}>\n      <span data-aicl=\"tooltip\" data-side={side} data-state={open ? 'open' : 'closed'}>\n        {children}\n      </span>\n    </TooltipContext.Provider>\n  );\n}\n\nexport interface TooltipTriggerProps {\n  children: ReactNode;\n}\n\nexport function TooltipTrigger({ children }: TooltipTriggerProps) {\n  const { open, setOpen, delay, triggerId, contentId } = useTooltip();\n  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);\n\n  const show = () => {\n    if (timer.current) clearTimeout(timer.current);\n    timer.current = setTimeout(() => setOpen(true), delay);\n  };\n  const hide = () => {\n    if (timer.current) clearTimeout(timer.current);\n    setOpen(false);\n  };\n\n  useEffect(() => () => {\n    if (timer.current) clearTimeout(timer.current);\n  }, []);\n\n  const props = {\n    id: triggerId,\n    'aria-describedby': open ? contentId : undefined,\n    onPointerEnter: (event: PointerEvent) => {\n      if (event.pointerType === 'touch') return;\n      show();\n    },\n    onPointerLeave: hide,\n    onFocus: (_event: FocusEvent) => show(),\n    onBlur: hide,\n    onKeyDown: (event: KeyboardEvent) => {\n      if (event.key === 'Escape' && open) {\n        event.stopPropagation();\n        hide();\n      }\n    },\n  };\n\n  if (isValidElement(children)) {\n    const child = children as ReactElement<Record<string, unknown>>;\n    return (\n      <span data-aicl=\"tooltip-trigger\">\n        {cloneElement(child, {\n          ...props,\n          onPointerEnter: (event: PointerEvent) => {\n            (child.props.onPointerEnter as ((e: PointerEvent) => void) | undefined)?.(event);\n            props.onPointerEnter(event);\n          },\n          onPointerLeave: (event: PointerEvent) => {\n            (child.props.onPointerLeave as ((e: PointerEvent) => void) | undefined)?.(event);\n            props.onPointerLeave();\n          },\n          onFocus: (event: FocusEvent) => {\n            (child.props.onFocus as ((e: FocusEvent) => void) | undefined)?.(event);\n            props.onFocus(event);\n          },\n          onBlur: (event: FocusEvent) => {\n            (child.props.onBlur as ((e: FocusEvent) => void) | undefined)?.(event);\n            props.onBlur();\n          },\n          onKeyDown: (event: KeyboardEvent) => {\n            (child.props.onKeyDown as ((e: KeyboardEvent) => void) | undefined)?.(event);\n            props.onKeyDown(event);\n          },\n        })}\n      </span>\n    );\n  }\n\n  return (\n    <button type=\"button\" data-aicl=\"tooltip-trigger\" {...props}>\n      {children}\n    </button>\n  );\n}\n\nexport interface TooltipContentProps extends HTMLAttributes<HTMLSpanElement> {\n  children?: ReactNode;\n}\n\nexport function TooltipContent({ children, ...rest }: TooltipContentProps) {\n  const { open, side, contentId } = useTooltip();\n  return (\n    <span\n      {...rest}\n      id={contentId}\n      role=\"tooltip\"\n      data-aicl=\"tooltip-content\"\n      data-side={side}\n      data-state={open ? 'open' : 'closed'}\n      hidden={!open}\n    >\n      {children}\n    </span>\n  );\n}\n\nexport const Tooltip = Object.assign(TooltipRoot, {\n  Trigger: TooltipTrigger,\n  Content: TooltipContent,\n});\n"
+    },
+    {
+      "path": "packages/react/src/controllable.ts",
+      "type": "registry:ui",
+      "target": "components/aicl/controllable.ts",
+      "content": "import { useState } from 'react';\n\n/**\n * Controlled and uncontrolled in one hook, the shape both sample libraries\n * use: `value` wins when it is passed, otherwise `defaultValue` is the state.\n *\n * The setter always notifies `onChange`. It only writes local state when the\n * caller is not holding the value.\n */\nexport function useControllableState<T>(\n  value: T | undefined,\n  defaultValue: T,\n  onChange?: (next: T) => void,\n): [T, (next: T) => void] {\n  const [uncontrolled, setUncontrolled] = useState(defaultValue);\n  const isControlled = value !== undefined;\n  const current = isControlled ? value : uncontrolled;\n  const set = (next: T) => {\n    if (!isControlled) setUncontrolled(next);\n    onChange?.(next);\n  };\n  return [current, set];\n}\n"
+    }
+  ],
+  "docs": "docs/components/tooltip.md",
+  "categories": [
+    "overlay"
+  ],
+  "package": "@aicl/react",
+  "usage": "import { Tooltip } from '@aicl/react';\n\n<Tooltip content=\"Copy\">\n  <Button icon=\"copy\" aria-label=\"Copy\" />\n</Tooltip>",
+  "npmImport": "import { Tooltip } from '@aicl/react';",
+  "slots": [
+    "tooltip",
+    "tooltip-trigger",
+    "tooltip-content"
+  ],
+  "states": {
+    "data-state": [
+      "open",
+      "closed"
+    ],
+    "data-side": [
+      "top",
+      "bottom",
+      "start",
+      "end"
+    ]
+  }
+}

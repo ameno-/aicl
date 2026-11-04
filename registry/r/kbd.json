@@ -1,0 +1,30 @@
+{
+  "name": "kbd",
+  "type": "registry:ui",
+  "title": "Kbd",
+  "description": "A keyboard hint. Pass keys for a chord, or children for free text.",
+  "dependencies": [
+    "react",
+    "@aicl/core"
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "packages/react/src/Kbd.tsx",
+      "type": "registry:ui",
+      "target": "components/aicl/Kbd.tsx",
+      "content": "/**\n * Kbd.\n *\n * A keyboard hint. The `@aicl/fx` vendor is the animated one; this is the\n * headless primitive a skin can paint.\n *\n * Pass `keys` for a chord (`['Meta', 'K']`) or children for free text.\n */\n\nimport type { HTMLAttributes, ReactNode } from 'react';\n\nexport interface KbdProps extends HTMLAttributes<HTMLElement> {\n  /** A chord, rendered as one glyph per key. */\n  keys?: readonly string[];\n  children?: ReactNode;\n}\n\nexport function Kbd({ keys, children, ...rest }: KbdProps) {\n  const content =\n    keys && keys.length > 0\n      ? keys.map((key, index) => (\n          <span key={`${key}-${index}`} data-aicl=\"kbd-key\">\n            {key}\n          </span>\n        ))\n      : children;\n\n  return (\n    <kbd {...rest} data-aicl=\"kbd\">\n      {content}\n    </kbd>\n  );\n}\n"
+    }
+  ],
+  "docs": "docs/components/kbd.md",
+  "categories": [
+    "content"
+  ],
+  "package": "@aicl/react",
+  "usage": "import { Kbd } from '@aicl/react';\n\n<Kbd keys={['Meta', 'K']} />",
+  "npmImport": "import { Kbd } from '@aicl/react';",
+  "slots": [
+    "kbd",
+    "kbd-key"
+  ]
+}

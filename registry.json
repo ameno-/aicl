@@ -1,0 +1,1552 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "aicl",
+  "homepage": "https://github.com/ameno-/aicl",
+  "items": [
+    {
+      "name": "token-contract",
+      "type": "registry:theme",
+      "title": "Token contract",
+      "description": "Every visual decision as a named custom property, plus the primitive surfaces.",
+      "dependencies": [],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "packages/styles/src/contract.css",
+          "type": "registry:theme"
+        },
+        {
+          "path": "packages/styles/src/components.css",
+          "type": "registry:theme"
+        },
+        {
+          "path": "packages/styles/src/index.css",
+          "type": "registry:theme"
+        },
+        {
+          "path": "packages/styles/src/reset.css",
+          "type": "registry:theme"
+        }
+      ],
+      "docs": "docs/components/token-contract.md",
+      "categories": [
+        "theme"
+      ]
+    },
+    {
+      "name": "looseleaf",
+      "type": "registry:theme",
+      "title": "LooseLeaf skin",
+      "description": "Paper on a desk. Values only: no JavaScript, so it cannot change behaviour.",
+      "dependencies": [],
+      "registryDependencies": [
+        "token-contract"
+      ],
+      "files": [
+        {
+          "path": "packages/styles/src/themes/looseleaf.css",
+          "type": "registry:theme"
+        }
+      ],
+      "docs": "docs/components/looseleaf.md",
+      "categories": [
+        "theme"
+      ]
+    },
+    {
+      "name": "motion",
+      "type": "registry:lib",
+      "title": "Motion system",
+      "description": "Three spring tiers, their exits, fluid hover, and weight without reflow.",
+      "dependencies": [],
+      "registryDependencies": [
+        "token-contract"
+      ],
+      "files": [
+        {
+          "path": "packages/motion/src/springs.ts",
+          "type": "registry:lib",
+          "target": "lib/aicl/springs.ts"
+        },
+        {
+          "path": "packages/motion/src/easing.ts",
+          "type": "registry:lib",
+          "target": "lib/aicl/easing.ts"
+        },
+        {
+          "path": "packages/motion/src/geometry.ts",
+          "type": "registry:lib",
+          "target": "lib/aicl/geometry.ts"
+        },
+        {
+          "path": "packages/motion/src/weight.ts",
+          "type": "registry:lib",
+          "target": "lib/aicl/weight.ts"
+        },
+        {
+          "path": "packages/motion/src/motion.css",
+          "type": "registry:lib"
+        }
+      ],
+      "docs": "docs/components/motion.md",
+      "categories": [
+        "system"
+      ]
+    },
+    {
+      "name": "icon-slots",
+      "type": "registry:lib",
+      "title": "Icon slots",
+      "description": "Icons looked up by role, swappable through one provider. A primitive never imports an icon.",
+      "dependencies": [
+        "lucide-react",
+        "react"
+      ],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "packages/react/src/icons.tsx",
+          "type": "registry:lib",
+          "target": "components/aicl/icons.tsx"
+        }
+      ],
+      "docs": "docs/components/icon-slots.md",
+      "categories": [
+        "system"
+      ]
+    },
+    {
+      "name": "cn",
+      "type": "registry:lib",
+      "title": "cn",
+      "description": "clsx + tailwind-merge. The `@aicl/fx` components compose class names through it.",
+      "dependencies": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "packages/fx/src/lib/cn.ts",
+          "type": "registry:lib",
+          "target": "components/aicl/fx/lib/cn.ts"
+        }
+      ],
+      "docs": "docs/components/cn.md",
+      "categories": [
+        "system"
+      ]
+    },
+    {
+      "name": "fx-provider",
+      "type": "registry:lib",
+      "title": "FxProvider",
+      "description": "Sets motion reducedMotion=\"user\" and the data-fx scope vendored components assume.",
+      "dependencies": [
+        "motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "cn"
+      ],
+      "files": [
+        {
+          "path": "packages/fx/src/lib/FxProvider.tsx",
+          "type": "registry:lib",
+          "target": "components/aicl/fx/lib/FxProvider.tsx"
+        }
+      ],
+      "docs": "docs/components/fx-provider.md",
+      "categories": [
+        "system"
+      ]
+    },
+    {
+      "name": "use-chat",
+      "type": "registry:hook",
+      "title": "useChat",
+      "description": "Binds a ChatController to React. Status, messages, send, stop, and the streaming id.",
+      "dependencies": [
+        "react",
+        "@aicl/core"
+      ],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "packages/react/src/useChat.ts",
+          "type": "registry:hook",
+          "target": "hooks/use-chat.ts"
+        }
+      ],
+      "docs": "docs/components/use-chat.md",
+      "categories": [
+        "hook"
+      ]
+    },
+    {
+      "name": "use-readable",
+      "type": "registry:hook",
+      "title": "useReadable",
+      "description": "Subscribe a React component to a core store without pulling the store into the tree.",
+      "dependencies": [
+        "react",
+        "@aicl/core"
+      ],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "packages/react/src/useReadable.ts",
+          "type": "registry:hook",
+          "target": "components/aicl/useReadable.ts"
+        }
+      ],
+      "docs": "docs/components/use-readable.md",
+      "categories": [
+        "hook"
+      ]
+    },
+    {
+      "name": "use-fluid-hover",
+      "type": "registry:hook",
+      "title": "useFluidHover",
+      "description": "One travelling highlight per list. The nearest-item rule is a pure function.",
+      "dependencies": [
+        "react"
+      ],
+      "registryDependencies": [
+        "motion"
+      ],
+      "files": [
+        {
+          "path": "packages/motion/src/react.tsx",
+          "type": "registry:hook",
+          "target": "lib/aicl/react.tsx"
+        }
+      ],
+      "docs": "docs/components/use-fluid-hover.md",
+      "categories": [
+        "hook"
+      ]
+    },
+    {
+      "name": "button",
+      "type": "registry:ui",
+      "title": "Button",
+      "description": "A button. Variant, size and loading, with the glyphs as icon slots.",
+      "dependencies": [
+        "react",
+        "@aicl/core"
+      ],
+      "registryDependencies": [
+        "icon-slots"
+      ],
+      "files": [
+        {
+          "path": "packages/react/src/Button.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/Button.tsx"
+        }
+      ],
+      "docs": "docs/components/button.md",
+      "categories": [
+        "content"
+      ]
+    },
+    {
+      "name": "transcript",
+      "type": "registry:ui",
+      "title": "Transcript",
+      "description": "The conversation: a scroller, the rows, and jump-to-latest. One live region for the thread.",
+      "dependencies": [
+        "react",
+        "@aicl/core"
+      ],
+      "registryDependencies": [
+        "icon-slots",
+        "message-actions",
+        "part-renderer"
+      ],
+      "files": [
+        {
+          "path": "packages/react/src/Transcript.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/Transcript.tsx"
+        }
+      ],
+      "docs": "docs/components/transcript.md",
+      "categories": [
+        "chat"
+      ]
+    },
+    {
+      "name": "composer",
+      "type": "registry:ui",
+      "title": "Composer",
+      "description": "The field, the submit action, the toolbar slots and the above-band.",
+      "dependencies": [
+        "react",
+        "@aicl/core"
+      ],
+      "registryDependencies": [
+        "icon-slots",
+        "composer-surface"
+      ],
+      "files": [
+        {
+          "path": "packages/react/src/Composer.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/Composer.tsx"
+        }
+      ],
+      "docs": "docs/components/composer.md",
+      "categories": [
+        "chat"
+      ]
+    },
+    {
+      "name": "part-renderer",
+      "type": "registry:ui",
+      "title": "PartRenderer",
+      "description": "Dispatches one part to its renderer. The default renderers follow.",
+      "dependencies": [
+        "react",
+        "@aicl/core",
+        "react-markdown",
+        "remark-gfm"
+      ],
+      "registryDependencies": [
+        "icon-slots"
+      ],
+      "files": [
+        {
+          "path": "packages/react/src/parts.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/parts.tsx"
+        },
+        {
+          "path": "packages/react/src/markdown.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/markdown.tsx"
+        }
+      ],
+      "docs": "docs/components/part-renderer.md",
+      "categories": [
+        "chat"
+      ]
+    },
+    {
+      "name": "message-actions",
+      "type": "registry:ui",
+      "title": "MessageActions",
+      "description": "The per-message action row. Hidden until the row is hovered or focused.",
+      "dependencies": [
+        "react",
+        "@aicl/core"
+      ],
+      "registryDependencies": [
+        "icon-slots"
+      ],
+      "files": [
+        {
+          "path": "packages/react/src/MessageActions.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/MessageActions.tsx"
+        }
+      ],
+      "docs": "docs/components/message-actions.md",
+      "categories": [
+        "chat"
+      ]
+    },
+    {
+      "name": "plan-checklist",
+      "type": "registry:ui",
+      "title": "PlanChecklist",
+      "description": "An ordered plan with a derived rollup. Render only.",
+      "dependencies": [
+        "react",
+        "@aicl/core"
+      ],
+      "registryDependencies": [
+        "icon-slots"
+      ],
+      "files": [
+        {
+          "path": "packages/react/src/PlanChecklist.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/PlanChecklist.tsx"
+        }
+      ],
+      "docs": "docs/components/plan-checklist.md",
+      "categories": [
+        "chat"
+      ]
+    },
+    {
+      "name": "composer-surface",
+      "type": "registry:ui",
+      "title": "ComposerSurface",
+      "description": "The composer surface: trigger menus, suggestion chips, attachments.",
+      "dependencies": [
+        "react",
+        "@aicl/core"
+      ],
+      "registryDependencies": [
+        "icon-slots",
+        "use-readable"
+      ],
+      "files": [
+        {
+          "path": "packages/react/src/composer-surface.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/composer-surface.tsx"
+        }
+      ],
+      "docs": "docs/components/composer-surface.md",
+      "categories": [
+        "chat"
+      ]
+    },
+    {
+      "name": "session-list",
+      "type": "registry:ui",
+      "title": "SessionList",
+      "description": "A host-agnostic session listbox, grouped by recency.",
+      "dependencies": [
+        "react",
+        "@aicl/core"
+      ],
+      "registryDependencies": [
+        "icon-slots",
+        "use-readable"
+      ],
+      "files": [
+        {
+          "path": "packages/react/src/sessions.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/sessions.tsx"
+        }
+      ],
+      "docs": "docs/components/session-list.md",
+      "categories": [
+        "navigation"
+      ]
+    },
+    {
+      "name": "session-search",
+      "type": "registry:ui",
+      "title": "SessionSearch",
+      "description": "One incremental combobox for sessions.",
+      "dependencies": [
+        "react",
+        "@aicl/core"
+      ],
+      "registryDependencies": [
+        "icon-slots",
+        "use-readable"
+      ],
+      "files": [
+        {
+          "path": "packages/react/src/sessions.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/sessions.tsx"
+        }
+      ],
+      "docs": "docs/components/session-search.md",
+      "categories": [
+        "navigation"
+      ]
+    },
+    {
+      "name": "sidebar-nav",
+      "type": "registry:ui",
+      "title": "SidebarNav",
+      "description": "A vertical nav host with a controlled collapse.",
+      "dependencies": [
+        "react",
+        "@aicl/core"
+      ],
+      "registryDependencies": [
+        "icon-slots",
+        "use-readable"
+      ],
+      "files": [
+        {
+          "path": "packages/react/src/sessions.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/sessions.tsx"
+        }
+      ],
+      "docs": "docs/components/sidebar-nav.md",
+      "categories": [
+        "navigation"
+      ]
+    },
+    {
+      "name": "dialog",
+      "type": "registry:ui",
+      "title": "Dialog",
+      "description": "A modal on the top layer, with a focus trap and a focus return.",
+      "dependencies": [
+        "react",
+        "@aicl/core"
+      ],
+      "registryDependencies": [
+        "icon-slots",
+        "use-readable"
+      ],
+      "files": [
+        {
+          "path": "packages/react/src/platform.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/platform.tsx"
+        }
+      ],
+      "docs": "docs/components/dialog.md",
+      "categories": [
+        "overlay"
+      ]
+    },
+    {
+      "name": "alert-dialog",
+      "type": "registry:ui",
+      "title": "AlertDialog",
+      "description": "A modal that asks before it acts. The scrim does not dismiss it.",
+      "dependencies": [
+        "react",
+        "@aicl/core"
+      ],
+      "registryDependencies": [
+        "icon-slots",
+        "use-readable"
+      ],
+      "files": [
+        {
+          "path": "packages/react/src/platform.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/platform.tsx"
+        }
+      ],
+      "docs": "docs/components/alert-dialog.md",
+      "categories": [
+        "overlay"
+      ]
+    },
+    {
+      "name": "drawer",
+      "type": "registry:ui",
+      "title": "Drawer",
+      "description": "A sheet that slides in from an edge. Swipe to dismiss.",
+      "dependencies": [
+        "react",
+        "@aicl/core"
+      ],
+      "registryDependencies": [
+        "icon-slots",
+        "use-readable"
+      ],
+      "files": [
+        {
+          "path": "packages/react/src/platform.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/platform.tsx"
+        }
+      ],
+      "docs": "docs/components/drawer.md",
+      "categories": [
+        "overlay"
+      ]
+    },
+    {
+      "name": "toast-region",
+      "type": "registry:ui",
+      "title": "ToastRegion",
+      "description": "Transient status in a corner region. One live region, polite by default.",
+      "dependencies": [
+        "react",
+        "@aicl/core"
+      ],
+      "registryDependencies": [
+        "use-readable"
+      ],
+      "files": [
+        {
+          "path": "packages/react/src/platform.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/platform.tsx"
+        }
+      ],
+      "docs": "docs/components/toast-region.md",
+      "categories": [
+        "overlay"
+      ]
+    },
+    {
+      "name": "toast",
+      "type": "registry:ui",
+      "title": "Toast",
+      "description": "One transient status message, with an optional action.",
+      "dependencies": [
+        "react",
+        "@aicl/core"
+      ],
+      "registryDependencies": [
+        "icon-slots",
+        "use-readable"
+      ],
+      "files": [
+        {
+          "path": "packages/react/src/platform.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/platform.tsx"
+        }
+      ],
+      "docs": "docs/components/toast.md",
+      "categories": [
+        "overlay"
+      ]
+    },
+    {
+      "name": "field",
+      "type": "registry:ui",
+      "title": "Field",
+      "description": "A label, a control, a description, an error and a save acknowledgement.",
+      "dependencies": [
+        "react",
+        "@aicl/core"
+      ],
+      "registryDependencies": [
+        "use-readable"
+      ],
+      "files": [
+        {
+          "path": "packages/react/src/platform.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/platform.tsx"
+        }
+      ],
+      "docs": "docs/components/field.md",
+      "categories": [
+        "form"
+      ]
+    },
+    {
+      "name": "switch",
+      "type": "registry:ui",
+      "title": "Switch",
+      "description": "A toggle. The label is a real label, not a placeholder for one.",
+      "dependencies": [
+        "react",
+        "@aicl/core"
+      ],
+      "registryDependencies": [
+        "use-readable"
+      ],
+      "files": [
+        {
+          "path": "packages/react/src/platform.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/platform.tsx"
+        }
+      ],
+      "docs": "docs/components/switch.md",
+      "categories": [
+        "form"
+      ]
+    },
+    {
+      "name": "select",
+      "type": "registry:ui",
+      "title": "Select",
+      "description": "A listbox trigger with typeahead.",
+      "dependencies": [
+        "react",
+        "@aicl/core"
+      ],
+      "registryDependencies": [
+        "icon-slots",
+        "use-readable"
+      ],
+      "files": [
+        {
+          "path": "packages/react/src/platform.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/platform.tsx"
+        }
+      ],
+      "docs": "docs/components/select.md",
+      "categories": [
+        "form"
+      ]
+    },
+    {
+      "name": "segmented-control",
+      "type": "registry:ui",
+      "title": "SegmentedControl",
+      "description": "One tab stop, arrow keys move and select.",
+      "dependencies": [
+        "react",
+        "@aicl/core"
+      ],
+      "registryDependencies": [
+        "use-readable"
+      ],
+      "files": [
+        {
+          "path": "packages/react/src/platform.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/platform.tsx"
+        }
+      ],
+      "docs": "docs/components/segmented-control.md",
+      "categories": [
+        "form"
+      ]
+    },
+    {
+      "name": "tooltip",
+      "type": "registry:ui",
+      "title": "Tooltip",
+      "description": "A short label on hover or focus. The delay is the fast motion tier.",
+      "dependencies": [
+        "react",
+        "@aicl/core"
+      ],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "packages/react/src/Tooltip.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/Tooltip.tsx"
+        },
+        {
+          "path": "packages/react/src/controllable.ts",
+          "type": "registry:ui",
+          "target": "components/aicl/controllable.ts"
+        }
+      ],
+      "docs": "docs/components/tooltip.md",
+      "categories": [
+        "overlay"
+      ]
+    },
+    {
+      "name": "badge",
+      "type": "registry:ui",
+      "title": "Badge",
+      "description": "A status chip. Quiet colour, never a button.",
+      "dependencies": [
+        "react",
+        "@aicl/core"
+      ],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "packages/react/src/Badge.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/Badge.tsx"
+        }
+      ],
+      "docs": "docs/components/badge.md",
+      "categories": [
+        "content"
+      ]
+    },
+    {
+      "name": "separator",
+      "type": "registry:ui",
+      "title": "Separator",
+      "description": "A line between groups. Decorative by default.",
+      "dependencies": [
+        "react",
+        "@aicl/core"
+      ],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "packages/react/src/Separator.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/Separator.tsx"
+        }
+      ],
+      "docs": "docs/components/separator.md",
+      "categories": [
+        "content"
+      ]
+    },
+    {
+      "name": "kbd",
+      "type": "registry:ui",
+      "title": "Kbd",
+      "description": "A keyboard hint. Pass keys for a chord, or children for free text.",
+      "dependencies": [
+        "react",
+        "@aicl/core"
+      ],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "packages/react/src/Kbd.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/Kbd.tsx"
+        }
+      ],
+      "docs": "docs/components/kbd.md",
+      "categories": [
+        "content"
+      ]
+    },
+    {
+      "name": "progress",
+      "type": "registry:ui",
+      "title": "Progress",
+      "description": "A determined bar, or an indeterminate pulse. The fill uses scaleX.",
+      "dependencies": [
+        "react",
+        "@aicl/core"
+      ],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "packages/react/src/Progress.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/Progress.tsx"
+        }
+      ],
+      "docs": "docs/components/progress.md",
+      "categories": [
+        "content"
+      ]
+    },
+    {
+      "name": "collapsible",
+      "type": "registry:ui",
+      "title": "Collapsible",
+      "description": "A disclosure. Height is not animated; opacity is.",
+      "dependencies": [
+        "react",
+        "@aicl/core"
+      ],
+      "registryDependencies": [
+        "icon-slots"
+      ],
+      "files": [
+        {
+          "path": "packages/react/src/Collapsible.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/Collapsible.tsx"
+        },
+        {
+          "path": "packages/react/src/controllable.ts",
+          "type": "registry:ui",
+          "target": "components/aicl/controllable.ts"
+        }
+      ],
+      "docs": "docs/components/collapsible.md",
+      "categories": [
+        "content"
+      ]
+    },
+    {
+      "name": "tabs",
+      "type": "registry:ui",
+      "title": "Tabs",
+      "description": "One tab stop, arrows move, a travelling pill follows the selected tab.",
+      "dependencies": [
+        "react",
+        "@aicl/core"
+      ],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "packages/react/src/Tabs.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/Tabs.tsx"
+        },
+        {
+          "path": "packages/react/src/controllable.ts",
+          "type": "registry:ui",
+          "target": "components/aicl/controllable.ts"
+        }
+      ],
+      "docs": "docs/components/tabs.md",
+      "categories": [
+        "content"
+      ]
+    },
+    {
+      "name": "streaming-text",
+      "type": "registry:ui",
+      "title": "StreamingText",
+      "description": "Tokens arrive. Character, word, or instant reveal, with a caret that does not reflow.",
+      "dependencies": [
+        "react",
+        "motion",
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "cn",
+        "fx-provider"
+      ],
+      "files": [
+        {
+          "path": "packages/fx/src/components/stream/StreamingText.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/fx/components/stream/StreamingText.tsx"
+        }
+      ],
+      "docs": "docs/components/streaming-text.md",
+      "categories": [
+        "fx"
+      ]
+    },
+    {
+      "name": "thinking-indicator",
+      "type": "registry:ui",
+      "title": "ThinkingIndicator",
+      "description": "Shimmer, dots or bars while the model thinks; collapses to \"Thought for 24s\".",
+      "dependencies": [
+        "react",
+        "motion",
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "cn",
+        "fx-provider"
+      ],
+      "files": [
+        {
+          "path": "packages/fx/src/components/stream/ThinkingIndicator.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/fx/components/stream/ThinkingIndicator.tsx"
+        },
+        {
+          "path": "packages/fx/src/components/stream/format.ts",
+          "type": "registry:ui",
+          "target": "components/aicl/fx/components/stream/format.ts"
+        },
+        {
+          "path": "packages/fx/src/vendor/spell-ui/shimmer-text.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/fx/vendor/spell-ui/shimmer-text.tsx"
+        },
+        {
+          "path": "packages/fx/src/vendor/spell-ui/bars-spinner.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/fx/vendor/spell-ui/bars-spinner.tsx"
+        }
+      ],
+      "docs": "docs/components/thinking-indicator.md",
+      "categories": [
+        "fx"
+      ]
+    },
+    {
+      "name": "work-summary",
+      "type": "registry:ui",
+      "title": "WorkSummary",
+      "description": "Devin-style \"Worked for 11s\" disclosure; animates open and closed.",
+      "dependencies": [
+        "react",
+        "motion",
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "cn",
+        "fx-provider"
+      ],
+      "files": [
+        {
+          "path": "packages/fx/src/components/stream/WorkSummary.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/fx/components/stream/WorkSummary.tsx"
+        },
+        {
+          "path": "packages/fx/src/components/stream/Collapse.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/fx/components/stream/Collapse.tsx"
+        },
+        {
+          "path": "packages/fx/src/vendor/spell-ui/shimmer-text.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/fx/vendor/spell-ui/shimmer-text.tsx"
+        }
+      ],
+      "docs": "docs/components/work-summary.md",
+      "categories": [
+        "fx"
+      ]
+    },
+    {
+      "name": "tool-call-card",
+      "type": "registry:ui",
+      "title": "ToolCallCard",
+      "description": "A live tool-call card: pending, running, success, error, cancelled.",
+      "dependencies": [
+        "react",
+        "motion",
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "cn",
+        "fx-provider",
+        "border-beam"
+      ],
+      "files": [
+        {
+          "path": "packages/fx/src/components/stream/ToolCallCard.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/fx/components/stream/ToolCallCard.tsx"
+        },
+        {
+          "path": "packages/fx/src/components/stream/Collapse.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/fx/components/stream/Collapse.tsx"
+        },
+        {
+          "path": "packages/fx/src/vendor/spell-ui/spinner.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/fx/vendor/spell-ui/spinner.tsx"
+        }
+      ],
+      "docs": "docs/components/tool-call-card.md",
+      "categories": [
+        "fx"
+      ]
+    },
+    {
+      "name": "animated-plan",
+      "type": "registry:ui",
+      "title": "AnimatedPlan",
+      "description": "A plan whose steps tick through pending, running and done.",
+      "dependencies": [
+        "react",
+        "motion",
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "cn",
+        "fx-provider",
+        "rolling-number"
+      ],
+      "files": [
+        {
+          "path": "packages/fx/src/components/stream/AnimatedPlan.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/fx/components/stream/AnimatedPlan.tsx"
+        },
+        {
+          "path": "packages/fx/src/vendor/spell-ui/animated-checkbox.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/fx/vendor/spell-ui/animated-checkbox.tsx"
+        },
+        {
+          "path": "packages/fx/src/vendor/spell-ui/shimmer-text.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/fx/vendor/spell-ui/shimmer-text.tsx"
+        },
+        {
+          "path": "packages/fx/src/vendor/spell-ui/spinner.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/fx/vendor/spell-ui/spinner.tsx"
+        }
+      ],
+      "docs": "docs/components/animated-plan.md",
+      "categories": [
+        "fx"
+      ]
+    },
+    {
+      "name": "rolling-number",
+      "type": "registry:ui",
+      "title": "RollingNumber",
+      "description": "A number that rolls to its next value. Jumps under reduced motion.",
+      "dependencies": [
+        "react",
+        "motion",
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "cn",
+        "fx-provider"
+      ],
+      "files": [
+        {
+          "path": "packages/fx/src/components/stream/RollingNumber.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/fx/components/stream/RollingNumber.tsx"
+        },
+        {
+          "path": "packages/fx/src/vendor/cult-ui/rolling-number.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/fx/vendor/cult-ui/rolling-number.tsx"
+        }
+      ],
+      "docs": "docs/components/rolling-number.md",
+      "categories": [
+        "fx"
+      ]
+    },
+    {
+      "name": "live-terminal",
+      "type": "registry:ui",
+      "title": "LiveTerminal",
+      "description": "Streaming shell output, stick-to-bottom, with a quiet chrome.",
+      "dependencies": [
+        "react",
+        "motion",
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "cn",
+        "fx-provider"
+      ],
+      "files": [
+        {
+          "path": "packages/fx/src/components/stream/LiveTerminal.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/fx/components/stream/LiveTerminal.tsx"
+        }
+      ],
+      "docs": "docs/components/live-terminal.md",
+      "categories": [
+        "fx"
+      ]
+    },
+    {
+      "name": "status-island",
+      "type": "registry:ui",
+      "title": "StatusIsland",
+      "description": "A compact status chip that morphs between idle, working and done.",
+      "dependencies": [
+        "react",
+        "motion",
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "cn",
+        "fx-provider"
+      ],
+      "files": [
+        {
+          "path": "packages/fx/src/components/stream/StatusIsland.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/fx/components/stream/StatusIsland.tsx"
+        },
+        {
+          "path": "packages/fx/src/vendor/spell-ui/bars-spinner.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/fx/vendor/spell-ui/bars-spinner.tsx"
+        }
+      ],
+      "docs": "docs/components/status-island.md",
+      "categories": [
+        "fx"
+      ]
+    },
+    {
+      "name": "fx-code-block",
+      "type": "registry:ui",
+      "title": "CodeBlock",
+      "description": "A highlighted code block with a copy button. The animated sibling of the primitive.",
+      "dependencies": [
+        "react",
+        "motion",
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "cn",
+        "fx-provider"
+      ],
+      "files": [
+        {
+          "path": "packages/fx/src/components/stream/CodeBlock.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/fx/components/stream/CodeBlock.tsx"
+        },
+        {
+          "path": "packages/fx/src/vendor/spell-ui/copy-button.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/fx/vendor/spell-ui/copy-button.tsx"
+        }
+      ],
+      "docs": "docs/components/fx-code-block.md",
+      "categories": [
+        "fx"
+      ]
+    },
+    {
+      "name": "border-beam",
+      "type": "registry:ui",
+      "title": "BorderBeam",
+      "description": "A light that travels around the parent border. Static under reduced motion.",
+      "dependencies": [
+        "react",
+        "motion",
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "cn",
+        "fx-provider"
+      ],
+      "files": [
+        {
+          "path": "packages/fx/src/components/stream/BorderBeam.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/fx/components/stream/BorderBeam.tsx"
+        }
+      ],
+      "docs": "docs/components/border-beam.md",
+      "categories": [
+        "fx"
+      ]
+    },
+    {
+      "name": "prompt-composer",
+      "type": "registry:ui",
+      "title": "PromptComposer",
+      "description": "The styled composer: attachments, a model picker, send that morphs into stop.",
+      "dependencies": [
+        "react",
+        "motion",
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "cn",
+        "fx-provider",
+        "smooth-dropdown"
+      ],
+      "files": [
+        {
+          "path": "packages/fx/src/components/input/PromptComposer.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/fx/components/input/PromptComposer.tsx"
+        }
+      ],
+      "docs": "docs/components/prompt-composer.md",
+      "categories": [
+        "fx-input"
+      ]
+    },
+    {
+      "name": "model-picker",
+      "type": "registry:ui",
+      "title": "ModelPicker",
+      "description": "A model menu on a smooth dropdown.",
+      "dependencies": [
+        "react",
+        "motion",
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "cn",
+        "fx-provider",
+        "smooth-dropdown"
+      ],
+      "files": [
+        {
+          "path": "packages/fx/src/components/input/ModelPicker.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/fx/components/input/ModelPicker.tsx"
+        }
+      ],
+      "docs": "docs/components/model-picker.md",
+      "categories": [
+        "fx-input"
+      ]
+    },
+    {
+      "name": "smooth-dropdown",
+      "type": "registry:ui",
+      "title": "SmoothDropdown",
+      "description": "A dropdown whose panel size springs to the content.",
+      "dependencies": [
+        "react",
+        "motion",
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "cn",
+        "fx-provider"
+      ],
+      "files": [
+        {
+          "path": "packages/fx/src/vendor/uselayouts/smooth-dropdown.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/fx/vendor/uselayouts/smooth-dropdown.tsx"
+        }
+      ],
+      "docs": "docs/components/smooth-dropdown.md",
+      "categories": [
+        "fx-input"
+      ]
+    },
+    {
+      "name": "suggestion-stack",
+      "type": "registry:ui",
+      "title": "SuggestionStack",
+      "description": "Follow-up chips that fan into a stack. The cousin of Fluid's queued-stack.",
+      "dependencies": [
+        "react",
+        "motion",
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "cn",
+        "fx-provider"
+      ],
+      "files": [
+        {
+          "path": "packages/fx/src/components/input/SuggestionStack.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/fx/components/input/SuggestionStack.tsx"
+        }
+      ],
+      "docs": "docs/components/suggestion-stack.md",
+      "categories": [
+        "fx-input"
+      ]
+    },
+    {
+      "name": "approval-card",
+      "type": "registry:ui",
+      "title": "ApprovalCard",
+      "description": "Allow, deny, or always-allow a pending tool call.",
+      "dependencies": [
+        "react",
+        "motion",
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "cn",
+        "fx-provider"
+      ],
+      "files": [
+        {
+          "path": "packages/fx/src/components/input/ApprovalCard.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/fx/components/input/ApprovalCard.tsx"
+        }
+      ],
+      "docs": "docs/components/approval-card.md",
+      "categories": [
+        "fx-input"
+      ]
+    },
+    {
+      "name": "question-card",
+      "type": "registry:ui",
+      "title": "QuestionCard",
+      "description": "A single question with options. The narrow form of Fluid's ask-user-questions.",
+      "dependencies": [
+        "react",
+        "motion",
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "cn",
+        "fx-provider"
+      ],
+      "files": [
+        {
+          "path": "packages/fx/src/components/input/QuestionCard.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/fx/components/input/QuestionCard.tsx"
+        }
+      ],
+      "docs": "docs/components/question-card.md",
+      "categories": [
+        "fx-input"
+      ]
+    },
+    {
+      "name": "toaster",
+      "type": "registry:ui",
+      "title": "Toaster",
+      "description": "The styled toast host. Call `toast()` from anywhere under it.",
+      "dependencies": [
+        "react",
+        "motion",
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "cn",
+        "fx-provider"
+      ],
+      "files": [
+        {
+          "path": "packages/fx/src/components/input/Toaster.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/fx/components/input/Toaster.tsx"
+        }
+      ],
+      "docs": "docs/components/toaster.md",
+      "categories": [
+        "fx-input"
+      ]
+    },
+    {
+      "name": "segmented-tabs",
+      "type": "registry:ui",
+      "title": "SegmentedTabs",
+      "description": "A sliding pill, or discrete tabs that widen to show the label.",
+      "dependencies": [
+        "react",
+        "motion",
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "cn",
+        "fx-provider"
+      ],
+      "files": [
+        {
+          "path": "packages/fx/src/components/input/SegmentedTabs.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/fx/components/input/SegmentedTabs.tsx"
+        },
+        {
+          "path": "packages/fx/src/vendor/uselayouts/discrete-tabs.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/fx/vendor/uselayouts/discrete-tabs.tsx"
+        }
+      ],
+      "docs": "docs/components/segmented-tabs.md",
+      "categories": [
+        "fx-input"
+      ]
+    },
+    {
+      "name": "inline-edit",
+      "type": "registry:ui",
+      "title": "InlineEdit",
+      "description": "Click-to-edit text. Enter commits, Escape reverts.",
+      "dependencies": [
+        "react",
+        "motion",
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "cn",
+        "fx-provider"
+      ],
+      "files": [
+        {
+          "path": "packages/fx/src/vendor/uselayouts/inline-edit.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/fx/vendor/uselayouts/inline-edit.tsx"
+        }
+      ],
+      "docs": "docs/components/inline-edit.md",
+      "categories": [
+        "fx-input"
+      ]
+    },
+    {
+      "name": "fx-kbd",
+      "type": "registry:ui",
+      "title": "Kbd (fx)",
+      "description": "The animated keyboard hint. The headless primitive is `kbd`.",
+      "dependencies": [
+        "react",
+        "motion",
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "cn",
+        "fx-provider"
+      ],
+      "files": [
+        {
+          "path": "packages/fx/src/vendor/spell-ui/kbd.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/fx/vendor/spell-ui/kbd.tsx"
+        }
+      ],
+      "docs": "docs/components/fx-kbd.md",
+      "categories": [
+        "fx-input"
+      ]
+    },
+    {
+      "name": "command-menu",
+      "type": "registry:ui",
+      "title": "CommandMenu",
+      "description": "A fuzzy-filtered command palette. Move this to the library is Wave 2 C5.",
+      "dependencies": [
+        "react",
+        "motion",
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "cn",
+        "fx-provider",
+        "fx-kbd"
+      ],
+      "files": [
+        {
+          "path": "packages/fx/src/components/input/CommandMenu.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/fx/components/input/CommandMenu.tsx"
+        }
+      ],
+      "docs": "docs/components/command-menu.md",
+      "categories": [
+        "fx-input"
+      ]
+    },
+    {
+      "name": "side-panel",
+      "type": "registry:ui",
+      "title": "SidePanel",
+      "description": "A sliding side sheet for the work the agent is doing.",
+      "dependencies": [
+        "react",
+        "motion",
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "cn",
+        "fx-provider"
+      ],
+      "files": [
+        {
+          "path": "packages/fx/src/components/input/SidePanel.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/fx/components/input/SidePanel.tsx"
+        }
+      ],
+      "docs": "docs/components/side-panel.md",
+      "categories": [
+        "fx-input"
+      ]
+    },
+    {
+      "name": "ambient",
+      "type": "registry:ui",
+      "title": "Ambient",
+      "description": "A WebGPU mesh gradient for idle and working states. CSS fallback, no telemetry.",
+      "dependencies": [
+        "react",
+        "motion",
+        "lucide-react",
+        "shaders"
+      ],
+      "registryDependencies": [
+        "cn",
+        "fx-provider"
+      ],
+      "files": [
+        {
+          "path": "packages/fx/src/components/Ambient.tsx",
+          "type": "registry:ui",
+          "target": "components/aicl/fx/components/Ambient.tsx"
+        }
+      ],
+      "docs": "docs/components/ambient.md",
+      "categories": [
+        "fx"
+      ]
+    }
+  ]
+}

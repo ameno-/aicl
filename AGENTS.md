@@ -15,7 +15,9 @@ worked example, not a starting point for your own chat UI.
 | `packages/server` | `@aicl/server`: `createChatHandler`, SSE framing | `packages/server/README.md` |
 | `packages/styles` | `@aicl/styles`: the token contract + component surfaces over `[data-aicl]`, plus skins in `src/themes/` | `packages/styles/README.md` |
 | `packages/motion` | `@aicl/motion`: the motion system — spring tiers, fluid hover, weight without reflow | `packages/motion/README.md` |
-| `packages/fx` | `@aicl/fx`: animated, styled components (Tailwind v4, source-only) | `packages/fx/README.md` || `packages/svelte`, `packages/vue` | **Empty placeholders.** No adapter exists yet | — |
+| `packages/fx` | `@aicl/fx`: animated, styled components (Tailwind v4, source-only) | `packages/fx/README.md` |
+| `packages/cli` | `@aicl/cli`: `npx aicl list` / `add` / `docs` / `doctor` | `packages/cli/README.md` |
+| `packages/svelte`, `packages/vue` | **Empty placeholders.** No adapter exists yet | — |
 | `apps/workspace` | Reference application built on the library: chat + tldraw canvas + live tools + exporter | `apps/workspace/AGENTS.md` |
 | `examples/slice-1` | Vite gallery of every React primitive in every state, plus e2e | — |
 | `examples/server-node` | Minimal `@aicl/server` handler on Node `http` | — |
@@ -30,9 +32,10 @@ lockfile, its own `npm run` scripts, and its own conventions (`apps/workspace/AG
 
 ```bash
 npm install            # root: npm workspaces over packages/*
-npm run build          # REQUIRED before running apps/examples: they resolve packages' dist/ (git-ignored)
+npm run build          # REQUIRED before running apps/examples: they resolve packages' dist/ (git-ignored). Also regenerates the component catalog.
+npm run registry       # rewrite registry.json, registry/r/*.json, docs/components/*, docs/llms.txt
 npm run typecheck      # tsc --noEmit in every package
-npm test               # node --test per package (core, react, server)
+npm test               # node --test per package (core, react, server, motion, cli)
 
 cd apps/workspace && npm install    # the app is NOT a root workspace; it has its own lockfile
 npm run typecheck && npm test       # app: tsc over server/shared/web; node --test server/*.test.ts
@@ -67,6 +70,7 @@ Start with the library. Move to the app only when the change is about that speci
 | Message/part model, stream reduction, branching | `packages/core/src/types.ts`, `packages/core/src/chat.ts` |
 | A React primitive's markup, ARIA, keyboard | `packages/react/src/*.tsx`, then `examples/slice-1` to see it |
 | A primitive's slots and states | `packages/react/src/contract.ts` — the contract is the source of truth; `docs/components.md` is generated from it |
+| Discover / install a component | `npx aicl list`, `npx aicl add <item>`, `npx aicl docs <item>` — catalog extras in `packages/cli/src/catalog-*.ts` |
 | Icons | `packages/react/src/icons.tsx` — the slot names and the Lucide defaults |
 | Default theme / tokens / a skin | `packages/styles/src/contract.css`, `packages/styles/src/themes/*.css`, `components.css` |
 | Springs, easings, hover, weight | `packages/motion/src/springs.ts` (the source of truth), `scripts/generate-motion-css.mjs` |
@@ -84,8 +88,8 @@ Start with the library. Move to the app only when the change is about that speci
 - `docs/DESIGN-SYSTEM.md`: the four layers — protocol, behaviour, system, skin — the token
   contract, the motion system, and the shipping model.
 - `docs/LIBRARY.md`: how the library is organised — systems, components, blocks — and what is
-  planned. `docs/components.md`: the component contract, generated. `docs/llms.txt`: the
-  library, indexed for an agent.
+  planned. `docs/components.md`: the component contract and the catalog, generated.
+  `docs/components/<item>.md`: one brief per item. `docs/llms.txt`: the library, indexed for an agent.
 - `docs/ARCHITECTURE.md`: the layer split and why. `docs/DECISIONS.md`: D1–D18 (binding).
 - `docs/api/README.md`: the wire contract and handler conventions.
 - `docs/BLUEPRINT.md`: target-state component inventory and token contract (design, partly

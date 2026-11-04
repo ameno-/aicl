@@ -1,0 +1,30 @@
+{
+  "name": "streaming-text",
+  "type": "registry:ui",
+  "title": "StreamingText",
+  "description": "Tokens arrive. Character, word, or instant reveal, with a caret that does not reflow.",
+  "dependencies": [
+    "react",
+    "motion",
+    "lucide-react"
+  ],
+  "registryDependencies": [
+    "cn",
+    "fx-provider"
+  ],
+  "files": [
+    {
+      "path": "packages/fx/src/components/stream/StreamingText.tsx",
+      "type": "registry:ui",
+      "target": "components/aicl/fx/components/stream/StreamingText.tsx",
+      "content": "import { memo, useLayoutEffect, useRef, type ReactNode } from 'react';\nimport { useReducedMotionConfig } from 'motion/react';\nimport { cn } from '../../lib/cn.ts';\n\nexport type StreamingMode = 'words' | 'blur' | 'none';\n\nexport interface StreamingTextProps {\n  text: string;\n  /** True while tokens are still arriving. Words created while false never animate. */\n  streaming: boolean;\n  mode?: StreamingMode;\n  /**\n   * Render prop for rich text (markdown). It receives the full text and its output is shown as-is:\n   * markdown re-parses the whole string each token, so per-word identity cannot be kept there.\n   */\n  render?: (text: string) => ReactNode;\n  /** Blinking caret after the last word while streaming. */\n  caret?: boolean;\n  className?: string;\n}\n\nconst TOKEN = /\\S+|\\s+/g;\n\n/** One word. Animates once, on mount, with WAAPI (no per-word motion component: cheap at 50 tokens/s). */\nconst Word = memo(function Word({\n  index,\n  word,\n  animate,\n  mode,\n}: {\n  index: number;\n  word: string;\n  animate: boolean;\n  mode: 'words' | 'blur';\n}) {\n  const ref = useRef<HTMLSpanElement>(null);\n  useLayoutEffect(() => {\n    const el = ref.current;\n    if (!animate || !el || typeof el.animate !== 'function') return;\n    const from =\n      mode === 'blur'\n        ? { opacity: 0, filter: 'blur(6px)' }\n        : { opacity: 0, transform: 'translateY(4px)' };\n    const to =\n      mode === 'blur'\n        ? { opacity: 1, filter: 'blur(0px)' }\n        : { opacity: 1, transform: 'translateY(0)' };\n    el.animate([from, to], { duration: 320, easing: 'ease-out', fill: 'backwards' });\n    // Mount-only: later text growth of a partial word must not restart the animation.\n    // eslint-disable-next-line react-hooks/exhaustive-deps\n  }, []);\n  return (\n    <span ref={ref} data-w={index} className=\"inline-block\">\n      {word}\n    </span>\n  );\n});\n\n/**\n * Reveals newly appended text as tokens arrive. Words are stable keyed nodes: when `text` grows only\n * the new tail mounts (and animates); existing words are never re-created or re-animated.\n */\nexport function StreamingText({\n  text,\n  streaming,\n  mode = 'words',\n  render,\n  caret = false,\n  className,\n}: StreamingTextProps) {\n  const reduced = useReducedMotionConfig();\n  const effective: StreamingMode = reduced ? 'none' : mode;\n  const root = 'whitespace-pre-wrap break-words';\n\n  if (render) {\n    return (\n      <div data-fx-component=\"StreamingText\" data-streaming={streaming} className={cn(className)}>\n        {render(text)}\n      </div>\n    );\n  }\n  if (effective === 'none') {\n    return (\n      <div data-fx-component=\"StreamingText\" data-streaming={streaming} className={cn(root, className)}>\n        {text}\n      </div>\n    );\n  }\n\n  const tokens = text.match(TOKEN) ?? [];\n  return (\n    <div data-fx-component=\"StreamingText\" data-streaming={streaming} className={cn(root, className)}>\n      {tokens.map((t, i) =>\n        /^\\s/.test(t) ? (\n          t\n        ) : (\n          <Word key={i} index={i} word={t} mode={effective} animate={streaming} />\n        ),\n      )}\n      {caret && streaming ? (\n        <span aria-hidden=\"true\" className=\"ml-0.5 inline-block h-[1em] w-[2px] translate-y-[2px] animate-pulse bg-foreground\" />\n      ) : null}\n    </div>\n  );\n}\n"
+    }
+  ],
+  "docs": "docs/components/streaming-text.md",
+  "categories": [
+    "fx"
+  ],
+  "package": "@aicl/fx",
+  "usage": "import { StreamingText } from '@aicl/fx';\n\n<StreamingText text={text} streaming />",
+  "npmImport": "import { StreamingText } from '@aicl/fx';"
+}

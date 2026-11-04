@@ -4,21 +4,28 @@ import {
   AlertDialog,
   AttachmentChip,
   AttachmentDropzone,
+  Badge,
   Button,
+  Collapsible,
   Composer,
   Dialog,
   Drawer,
   Field,
+  Kbd,
   MentionMenu,
+  Progress,
   SegmentedControl,
   Select,
+  Separator,
   SessionList,
   SessionSearch,
   SidebarNav,
   SlashMenu,
   SuggestionChips,
   Switch,
+  Tabs,
   ToastRegion,
+  Tooltip,
   useAttachmentPicker,
   useReadable,
 } from '@aicl/react';
@@ -304,6 +311,45 @@ function FormsDemo() {
   );
 }
 
+function ChromeDemo() {
+  const [tab, setTab] = useState('chat');
+  return (
+    <div className="stack" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--aicl-space-4)' }}>
+      <div className="row">
+        <Badge>Default</Badge>
+        <Badge variant="secondary">Queued</Badge>
+        <Badge variant="success">Done</Badge>
+        <Badge variant="warning">Needs you</Badge>
+        <Badge variant="danger">Failed</Badge>
+        <Badge variant="outline">Outline</Badge>
+      </div>
+      <div className="row">
+        <Kbd keys={['Meta', 'K']} />
+        <Separator orientation="vertical" />
+        <Tooltip content="Copy the reply">
+          <Button icon="copy" aria-label="Copy" />
+        </Tooltip>
+      </div>
+      <Progress value={40} max={100} label="Indexing" />
+      <Progress indeterminate label="Waiting on the model" />
+      <Tabs value={tab} onValueChange={setTab} label="Work">
+        <Tabs.List>
+          <Tabs.Tab value="chat">Chat</Tabs.Tab>
+          <Tabs.Tab value="files">Files</Tabs.Tab>
+          <Tabs.Tab value="diff">Diff</Tabs.Tab>
+        </Tabs.List>
+        <Tabs.Panel value="chat">The thread.</Tabs.Panel>
+        <Tabs.Panel value="files">The tree.</Tabs.Panel>
+        <Tabs.Panel value="diff">The patch.</Tabs.Panel>
+      </Tabs>
+      <Collapsible>
+        <Collapsible.Trigger>Reasoning</Collapsible.Trigger>
+        <Collapsible.Content>The work is a list of steps, not a wall of text.</Collapsible.Content>
+      </Collapsible>
+    </div>
+  );
+}
+
 function ButtonsDemo() {
   const [loading, setLoading] = useState(false);
   return (
@@ -353,6 +399,9 @@ export function Components() {
       <h1>Components</h1>
       <Section id="buttons" title="Button">
         <ButtonsDemo />
+      </Section>
+      <Section id="chrome" title="Badge, kbd, tooltip, progress, tabs, collapsible">
+        <ChromeDemo />
       </Section>
       <Section id="composer-compound" title="Composer, compound">
         <CompoundComposerDemo />

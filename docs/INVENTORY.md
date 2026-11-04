@@ -18,8 +18,8 @@ established.
 
 | | LooseLeaf | Fluid Functionalism | AICL |
 |---|---|---|---|
-| Registry items | **213** | **83** | 0 (not published) |
-| Components | 123 | 49 (25 base + 24 radix) | 18 primitives |
+| Registry items | **213** | **83** | generated (`npx aicl list`) |
+| Components | 123 | 49 (25 base + 24 radix) | primitives in `@aicl/react` + animated in `@aicl/fx` |
 | Blocks | 62 | 7 | 0 |
 | Libraries / systems | 19 | 17 | 2 (`motion`, the contract) |
 | Hooks | 5 | 5 | 4 |

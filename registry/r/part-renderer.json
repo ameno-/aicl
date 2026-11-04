@@ -1,0 +1,116 @@
+{
+  "name": "part-renderer",
+  "type": "registry:ui",
+  "title": "PartRenderer",
+  "description": "Dispatches one part to its renderer. The default renderers follow.",
+  "dependencies": [
+    "react",
+    "@aicl/core",
+    "react-markdown",
+    "remark-gfm"
+  ],
+  "registryDependencies": [
+    "icon-slots"
+  ],
+  "files": [
+    {
+      "path": "packages/react/src/parts.tsx",
+      "type": "registry:ui",
+      "target": "components/aicl/parts.tsx",
+      "content": "import { useState, type ComponentType, type ReactNode } from 'react';\nimport {\n  createRendererRegistry,\n  type ArtifactPart,\n  type FilePart,\n  type Message,\n  type Part,\n  type ReasoningPart,\n  type RendererRegistry,\n  type TextPart as TextPartModel,\n  type ToolCallPart,\n  type ToolResultPart,\n} from '@aicl/core';\nimport { Icon, type IconSlot } from './icons.js';\n\nexport interface PartProps<P extends Part = Part> {\n  part: P;\n  message: Message;\n  index: number;\n  streaming: boolean;\n}\n\nexport function createPartRegistry(\n  initial?: Partial<Record<string, ComponentType<PartProps>>>,\n  fallback?: ComponentType<PartProps>,\n): RendererRegistry<ComponentType<PartProps>> {\n  return createRendererRegistry(initial, fallback);\n}\n\nexport function PartRenderer({\n  part,\n  message,\n  index,\n  streaming,\n  registry,\n}: PartProps & { registry?: RendererRegistry<ComponentType<PartProps>> }) {\n  const custom = registry?.has(part.type) ? registry.resolve(part) : undefined;\n  const Renderer = custom ?? defaultRegistry().resolve(part) ?? UnknownPart;\n  return <Renderer part={part} message={message} index={index} streaming={streaming} />;\n}\n\nexport function TextPartView({ part }: PartProps<TextPartModel>) {\n  return <div data-aicl=\"part\" data-part=\"text\">{part.text}</div>;\n}\n\nexport function ReasoningDisclosure({\n  part,\n  streaming,\n}: {\n  part?: ReasoningPart;\n  streaming: boolean;\n}) {\n  const [open, setOpen] = useState(false);\n  const pending = streaming && !part?.text;\n  // Only the thought still in progress spins; a finished one carries its duration.\n  const thinking = pending || (streaming && part?.durationMs === undefined);\n  const label = part?.durationMs\n    ? `Thought for ${Math.max(1, Math.round(part.durationMs / 1000))}s`\n    : pending || streaming\n      ? 'Thinking'\n      : 'Thought';\n  return (\n    <div data-aicl=\"reasoning\" data-state={pending ? 'pending' : open ? 'open' : 'closed'}>\n      <button type=\"button\" aria-expanded={open} onClick={() => setOpen((v) => !v)}>\n        <Icon name={thinking ? 'spinner' : 'reasoning'} spin={thinking} />\n        <span>{label}</span>\n        {part?.text ? <Icon name=\"chevron-right\" /> : null}\n      </button>\n      {open && part?.text ? <div data-aicl=\"reasoning-body\">{part.text}</div> : null}\n    </div>\n  );\n}\n\nconst TOOL_ICON: Record<ToolCallPart['status'], IconSlot> = {\n  pending: 'spinner',\n  running: 'spinner',\n  success: 'success',\n  error: 'failure',\n  cancelled: 'cancelled',\n};\n\nconst ARTIFACT_ICON: Record<string, IconSlot> = {\n  code: 'code',\n  document: 'document',\n  diff: 'diff',\n  preview: 'preview',\n  terminal: 'terminal',\n  table: 'table',\n  chart: 'chart',\n};\n\nexport function ToolCallDisclosure({ part }: PartProps<ToolCallPart>) {\n  const forceOpen = part.status === 'error';\n  const [open, setOpen] = useState(forceOpen);\n  const shown = forceOpen || open;\n  const label =\n    part.status === 'cancelled'\n      ? `${part.name} cancelled`\n      : part.status === 'error'\n        ? `${part.name} failed`\n        : part.status === 'running' || part.status === 'pending'\n          ? `${part.name}…`\n          : part.name;\n  return (\n    <div data-aicl=\"tool-call\" data-status={part.status} data-open={shown || undefined}>\n      <button\n        type=\"button\"\n        aria-expanded={shown}\n        onClick={() => {\n          if (!forceOpen) setOpen((v) => !v);\n        }}\n      >\n        <Icon name={TOOL_ICON[part.status]} spin={part.status === 'running' || part.status === 'pending'} />\n        <span>{label}</span>\n        <Icon name=\"chevron-right\" />\n      </button>\n      {shown ? (\n        <pre data-aicl=\"tool-call-body\">{part.argsText ?? JSON.stringify(part.args)}</pre>\n      ) : null}\n    </div>\n  );\n}\n\nexport function ArtifactCard({\n  part,\n  onOpen,\n  children,\n}: PartProps<ArtifactPart> & { onOpen?: (part: ArtifactPart) => void; children?: ReactNode }) {\n  return (\n    <div\n      data-aicl=\"artifact-card\"\n      data-part=\"artifact\"\n      data-artifact-kind={part.kind}\n      data-artifact-id={part.artifactId}\n      data-artifact-version={part.version}\n      data-openable={onOpen ? '' : undefined}\n    >\n      <span data-aicl=\"artifact-icon\">\n        <Icon name={ARTIFACT_ICON[part.kind] ?? 'document'} size={18} />\n      </span>\n      <span data-aicl=\"artifact-title\">{part.title ?? part.artifactId}</span>\n      <span data-aicl=\"artifact-meta\">\n        <span data-aicl=\"artifact-kind\">{part.kind}</span>\n        {part.version != null ? <span data-aicl=\"artifact-version\">v{part.version}</span> : null}\n      </span>\n      {onOpen ? (\n        <button type=\"button\" data-aicl=\"artifact-open\" aria-label={`Open ${part.kind} artifact${part.version != null ? `, version ${part.version}` : ''}`} onClick={() => onOpen(part)}>\n          Open\n        </button>\n      ) : null}\n      {children}\n    </div>\n  );\n}\n\nexport function CodeBlock({\n  content,\n  language,\n  inline = false,\n}: {\n  content: string;\n  language?: string;\n  inline?: boolean;\n}) {\n  const [copied, setCopied] = useState(false);\n  return (\n    <figure data-aicl=\"code-block\" data-language={language} data-copied={copied || undefined} data-inline={inline || undefined}>\n      {language ? <figcaption>{language}</figcaption> : null}\n      <pre>\n        <code>{content}</code>\n      </pre>\n      <button\n        type=\"button\"\n        aria-label=\"Copy code\"\n        onClick={() => {\n          void navigator.clipboard?.writeText(content);\n          setCopied(true);\n        }}\n      >\n        <Icon name={copied ? 'check' : 'copy'} size={14} />\n        <span>{copied ? 'Copied' : 'Copy'}</span>\n      </button>\n      <span aria-live=\"polite\" data-aicl=\"visually-hidden\">{copied ? 'Copied' : ''}</span>\n    </figure>\n  );\n}\n\nexport function ToolResultView({ part }: PartProps<ToolResultPart>) {\n  return (\n    <div\n      data-aicl=\"part\"\n      data-part=\"tool-result\"\n      data-is-error={part.isError || undefined}\n      role=\"region\"\n      aria-label={part.toolCallId}\n    >\n      {part.isError ? 'Error' : 'Result'}\n    </div>\n  );\n}\n\nexport function FileChip({ part, onOpen }: PartProps<FilePart> & { onOpen?: (part: FilePart) => void }) {\n  const uploading = part.uploadProgress != null && part.uploadProgress < 100;\n  return (\n    <div\n      data-aicl=\"part\"\n      data-part=\"file\"\n      data-media-type={part.mediaType}\n      data-state={uploading ? 'uploading' : 'uploaded'}\n      data-progress={part.uploadProgress}\n    >\n      <button type=\"button\" onClick={() => onOpen?.(part)}>\n        <Icon name=\"attachment\" size={14} />\n        <span>{part.name ?? part.url}</span>\n      </button>\n    </div>\n  );\n}\n\nexport function ErrorNotice({\n  part,\n  streaming,\n  onRetry,\n}: PartProps & { onRetry?: () => void }) {\n  if (part.type !== 'error') return null;\n  return (\n    <div data-aicl=\"part\" data-part=\"error\" data-retryable={part.retryable || undefined} role={streaming ? 'alert' : 'status'}>\n      <Icon name=\"alert\" />\n      <p>{part.message}</p>\n      {part.retryable && onRetry ? (\n        <button type=\"button\" aria-label=\"Retry\" onClick={onRetry}>\n          <Icon name=\"retry\" size={14} />\n          <span>Retry</span>\n        </button>\n      ) : null}\n    </div>\n  );\n}\n\nexport function SuggestionRows({ part, onSelect }: PartProps & { onSelect?: (label: string) => void }) {\n  const suggestions =\n    part.type === 'data-suggested-followups' &&\n    part.data &&\n    typeof part.data === 'object' &&\n    'suggestions' in part.data &&\n    Array.isArray((part.data as { suggestions: unknown }).suggestions)\n      ? (part.data as { suggestions: Array<{ id?: string; label: string }> }).suggestions\n      : [];\n  if (!suggestions.length) return null;\n  return (\n    <div data-aicl=\"part\" data-part=\"data-suggested-followups\" data-count={suggestions.length} data-behavior=\"insert\">\n      {suggestions.map((item) => (\n        <button key={item.id ?? item.label} type=\"button\" onClick={() => onSelect?.(item.label)}>\n          {item.label}\n        </button>\n      ))}\n    </div>\n  );\n}\n\nexport function TerminalOutput({ lines, streaming = false }: { lines: string[]; streaming?: boolean }) {\n  return (\n    <div\n      data-aicl=\"terminal-output\"\n      data-streaming={streaming || undefined}\n      data-following={streaming || undefined}\n      data-line-count={lines.length}\n      role=\"log\"\n      aria-live=\"off\"\n    >\n      {lines.map((line, index) => (\n        <div key={`${index}:${line}`}>{line}</div>\n      ))}\n    </div>\n  );\n}\n\nexport function UnknownPart({ part }: PartProps) {\n  return (\n    <div data-aicl=\"part\" data-part=\"unknown\" data-raw-type={part.type}>\n      {part.type}\n    </div>\n  );\n}\n\nconst sharedRegistry = createRendererRegistry<ComponentType<PartProps>>(\n  {\n    text: TextPartView as ComponentType<PartProps>,\n    reasoning: ((props: PartProps) =>\n      props.part.type === 'reasoning' ? (\n        <ReasoningDisclosure part={props.part} streaming={props.streaming} />\n      ) : null) as ComponentType<PartProps>,\n    'tool-call': ((props: PartProps) =>\n      props.part.type === 'tool-call' ? <ToolCallDisclosure {...props} part={props.part} /> : null) as ComponentType<PartProps>,\n    artifact: ((props: PartProps) => {\n      if (props.part.type !== 'artifact') return null;\n      if (props.part.kind === 'terminal') {\n        return (\n          <ArtifactCard {...props} part={props.part}>\n            <TerminalOutput lines={['ready']} streaming={props.streaming} />\n          </ArtifactCard>\n        );\n      }\n      return <ArtifactCard {...props} part={props.part} />;\n    }) as ComponentType<PartProps>,\n    'tool-result': ToolResultView as ComponentType<PartProps>,\n    file: FileChip as ComponentType<PartProps>,\n    error: ErrorNotice as ComponentType<PartProps>,\n    'data-suggested-followups': SuggestionRows as ComponentType<PartProps>,\n  },\n  UnknownPart,\n);\n\n/** Default closed set. Consumers register `data-*` parts on a copy, not on this object. */\nexport function defaultRegistry(): RendererRegistry<ComponentType<PartProps>> {\n  return sharedRegistry;\n}\n"
+    },
+    {
+      "path": "packages/react/src/markdown.tsx",
+      "type": "registry:ui",
+      "target": "components/aicl/markdown.tsx",
+      "content": "/**\n * Opt-in Markdown for text parts: `@aicl/react/markdown`.\n *\n * Kept off the main entry so the core adapter ships no parser (ARCHITECTURE\n * non-goal); consumers who want rich replies register it:\n *\n *   createPartRegistry({ ...markdownRenderers })\n *\n * Built on react-markdown + remark-gfm rather than a bespoke parser. Raw HTML\n * is never rendered (react-markdown's default), so model output cannot inject\n * markup. Fenced code renders through the library's `CodeBlock`.\n */\n\nimport type { ComponentType } from 'react';\nimport ReactMarkdown, { type Components } from 'react-markdown';\nimport remarkGfm from 'remark-gfm';\nimport type { TextPart } from '@aicl/core';\nimport { CodeBlock, type PartProps } from './parts.js';\n\nconst components: Components = {\n  // Fenced blocks arrive as <pre><code class=\"language-x\">; render them as CodeBlock.\n  pre({ children }) {\n    return <>{children}</>;\n  },\n  code({ className, children, node }) {\n    const text = String(children ?? '').replace(/\\n$/, '');\n    const fenced = node?.position && node.position.start.line !== node.position.end.line;\n    const language = /language-([\\w-]+)/.exec(className ?? '')?.[1];\n    if (fenced || language) return <CodeBlock content={text} language={language} />;\n    return <code data-aicl=\"inline-code\">{children}</code>;\n  },\n  a({ href, children }) {\n    return (\n      <a href={href} target=\"_blank\" rel=\"noreferrer noopener\">\n        {children}\n      </a>\n    );\n  },\n};\n\nexport function Markdown({ text }: { text: string }) {\n  return (\n    <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>\n      {text}\n    </ReactMarkdown>\n  );\n}\n\n/** Drop-in renderer for `text` parts. User messages stay verbatim: people do not write Markdown at the model. */\nexport function MarkdownTextPart({ part, message }: PartProps<TextPart>) {\n  if (message.role === 'user') {\n    return (\n      <div data-aicl=\"part\" data-part=\"text\">\n        {part.text}\n      </div>\n    );\n  }\n  return (\n    <div data-aicl=\"part\" data-part=\"text\" data-format=\"markdown\">\n      <Markdown text={part.text} />\n    </div>\n  );\n}\n\nexport const markdownRenderers: Record<string, ComponentType<PartProps>> = {\n  text: MarkdownTextPart as ComponentType<PartProps>,\n};\n"
+    }
+  ],
+  "docs": "docs/components/part-renderer.md",
+  "categories": [
+    "chat"
+  ],
+  "package": "@aicl/react",
+  "usage": "import { PartRenderer } from '@aicl/react';\n\n<PartRenderer part={part} />",
+  "npmImport": "import { PartRenderer } from '@aicl/react';",
+  "slots": [
+    "part",
+    "reasoning",
+    "reasoning-body",
+    "tool-call",
+    "tool-call-body",
+    "artifact-card",
+    "artifact-icon",
+    "artifact-title",
+    "artifact-meta",
+    "artifact-kind",
+    "artifact-version",
+    "artifact-open",
+    "code-block",
+    "inline-code",
+    "terminal-output"
+  ],
+  "states": {
+    "data-part": [
+      "text",
+      "reasoning",
+      "tool-call",
+      "tool-result",
+      "artifact",
+      "file",
+      "error",
+      "data-suggested-followups",
+      "unknown"
+    ],
+    "data-format": [
+      "markdown"
+    ],
+    "data-state": [
+      "pending",
+      "open",
+      "closed",
+      "uploading",
+      "uploaded"
+    ],
+    "data-status": [
+      "pending",
+      "running",
+      "success",
+      "error",
+      "cancelled"
+    ],
+    "data-open": [
+      "true"
+    ],
+    "data-is-error": [
+      "true"
+    ],
+    "data-retryable": [
+      "true"
+    ],
+    "data-raw-type": [
+      "true"
+    ],
+    "data-behavior": [
+      "insert"
+    ],
+    "data-language": [
+      "true"
+    ],
+    "data-copied": [
+      "true"
+    ],
+    "data-inline": [
+      "true"
+    ],
+    "data-streaming": [
+      "true"
+    ],
+    "data-following": [
+      "true"
+    ],
+    "data-openable": [
+      "true"
+    ]
+  }
+}

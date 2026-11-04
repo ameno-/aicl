@@ -1,0 +1,31 @@
+{
+  "name": "ambient",
+  "type": "registry:ui",
+  "title": "Ambient",
+  "description": "A WebGPU mesh gradient for idle and working states. CSS fallback, no telemetry.",
+  "dependencies": [
+    "react",
+    "motion",
+    "lucide-react",
+    "shaders"
+  ],
+  "registryDependencies": [
+    "cn",
+    "fx-provider"
+  ],
+  "files": [
+    {
+      "path": "packages/fx/src/components/Ambient.tsx",
+      "type": "registry:ui",
+      "target": "components/aicl/fx/components/Ambient.tsx",
+      "content": "import { Component, useState, type CSSProperties, type ReactNode } from 'react';\nimport { MeshGradient, Shader } from 'shaders/react';\nimport { cn } from '../lib/cn.ts';\n\nexport type AmbientMood = 'idle' | 'working' | 'error';\n\nexport interface AmbientProps {\n  mood?: AmbientMood;\n  /** Colours, darkest first; defaults follow the AICL accent. */\n  colors?: [string, string, string?];\n  className?: string;\n  style?: CSSProperties;\n}\n\nconst DEFAULT: [string, string, string] = ['#18181b', '#6366f1', '#ec4899'];\n\nconst supportsWebGpu = (): boolean => typeof navigator !== 'undefined' && 'gpu' in navigator;\n\n/**\n * A soft animated background (WebGPU via `shaders`) for hero, idle and working\n * states. Falls back to a CSS gradient when WebGPU is missing or fails, never\n * throws, and sends no telemetry.\n */\nexport function Ambient({ mood = 'idle', colors, className, style }: AmbientProps) {\n  const [a, b, c] = colors ?? DEFAULT;\n  const [failed, setFailed] = useState(!supportsWebGpu());\n  const fallback = (\n    <div\n      aria-hidden=\"true\"\n      data-ambient=\"fallback\"\n      className={cn('absolute inset-0', className)}\n      style={{\n        background: `radial-gradient(120% 90% at 20% 10%, ${b}55, transparent 60%), radial-gradient(100% 80% at 90% 90%, ${c ?? b}44, transparent 55%), ${a}`,\n        ...style,\n      }}\n    />\n  );\n  if (failed) return fallback;\n  const palette = mood === 'error' ? [a, '#7f1d1d', '#ef4444'] : [a, b, c ?? b];\n  const stops = palette.map((color, i) => ({ color, position: i / (palette.length - 1) }));\n  return (\n    <ShaderBoundary fallback={fallback}>\n      <Shader\n        aria-hidden=\"true\"\n        data-ambient={mood}\n        disableTelemetry\n        className={cn('absolute inset-0', className)}\n        style={style}\n        onUnavailable={() => setFailed(true)}\n      >\n        <MeshGradient\n          stops={stops}\n          speed={mood === 'working' ? 2.2 : mood === 'error' ? 0.25 : 0.6}\n          swirl={mood === 'working' ? 0.9 : 0.4}\n        />\n      </Shader>\n    </ShaderBoundary>\n  );\n}\n\nclass ShaderBoundary extends Component<{ fallback: ReactNode; children: ReactNode }, { broken: boolean }> {\n  override state = { broken: false };\n  static getDerivedStateFromError() {\n    return { broken: true };\n  }\n  override render() {\n    return this.state.broken ? this.props.fallback : this.props.children;\n  }\n}\n"
+    }
+  ],
+  "docs": "docs/components/ambient.md",
+  "categories": [
+    "fx"
+  ],
+  "package": "@aicl/fx",
+  "usage": "import { Ambient } from '@aicl/fx';\n\n<Ambient mood=\"working\" />",
+  "npmImport": "import { Ambient } from '@aicl/fx';"
+}

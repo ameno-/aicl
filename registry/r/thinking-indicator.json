@@ -1,0 +1,48 @@
+{
+  "name": "thinking-indicator",
+  "type": "registry:ui",
+  "title": "ThinkingIndicator",
+  "description": "Shimmer, dots or bars while the model thinks; collapses to \"Thought for 24s\".",
+  "dependencies": [
+    "react",
+    "motion",
+    "lucide-react"
+  ],
+  "registryDependencies": [
+    "cn",
+    "fx-provider"
+  ],
+  "files": [
+    {
+      "path": "packages/fx/src/components/stream/ThinkingIndicator.tsx",
+      "type": "registry:ui",
+      "target": "components/aicl/fx/components/stream/ThinkingIndicator.tsx",
+      "content": "import { motion, useReducedMotionConfig } from 'motion/react';\nimport { cn } from '../../lib/cn.ts';\nimport { ShimmerText } from '../../vendor/spell-ui/shimmer-text.tsx';\nimport { BarsSpinner } from '../../vendor/spell-ui/bars-spinner.tsx';\nimport { formatSeconds } from './format.ts';\n\nexport interface ThinkingIndicatorProps {\n  label?: string;\n  /** Elapsed time while thinking, or the final duration when `done`. */\n  elapsedMs?: number;\n  variant?: 'shimmer' | 'dots' | 'bars';\n  /** Finished: shows \"Thought for 24s\" with no animation. */\n  done?: boolean;\n  className?: string;\n}\n\nfunction Dots({ still }: { still: boolean }) {\n  return (\n    <span aria-hidden=\"true\" className=\"inline-flex items-center gap-1\">\n      {[0, 1, 2].map((i) => (\n        <motion.span\n          key={i}\n          className=\"size-1.5 rounded-full bg-muted-foreground\"\n          animate={still ? { opacity: 0.6 } : { opacity: [0.25, 1, 0.25] }}\n          transition={{ duration: 1.2, repeat: Infinity, delay: i * 0.18, ease: 'easeInOut' }}\n        />\n      ))}\n    </span>\n  );\n}\n\n/** \"Thinking… 3s\" with shimmer / dots / bars; collapses to \"Thought for 24s\" when done. */\nexport function ThinkingIndicator({\n  label = 'Thinking',\n  elapsedMs,\n  variant = 'shimmer',\n  done = false,\n  className,\n}: ThinkingIndicatorProps) {\n  const reduced = useReducedMotionConfig() ?? false;\n  const secs = elapsedMs === undefined ? '' : formatSeconds(elapsedMs);\n  const text = done ? `Thought${secs ? ` for ${secs}` : ''}` : `${label}…`;\n  return (\n    <div\n      data-fx-component=\"ThinkingIndicator\"\n      data-state={done ? 'done' : 'thinking'}\n      data-variant={variant}\n      role=\"status\"\n      className={cn('inline-flex h-6 items-center gap-2 text-sm text-muted-foreground', className)}\n    >\n      {!done && variant === 'bars' ? <BarsSpinner size={14} /> : null}\n      {!done && variant === 'dots' ? <Dots still={reduced} /> : null}\n      <div className=\"font-medium\">\n        {done || reduced || variant !== 'shimmer' ? text : <ShimmerText delay={0}>{text}</ShimmerText>}\n      </div>\n      {!done && secs ? <span className=\"tabular-nums text-faint\">{secs}</span> : null}\n    </div>\n  );\n}\n"
+    },
+    {
+      "path": "packages/fx/src/components/stream/format.ts",
+      "type": "registry:ui",
+      "target": "components/aicl/fx/components/stream/format.ts",
+      "content": "/** \"7s\", \"1m 05s\": elapsed time for labels. */\nexport function formatSeconds(ms: number): string {\n  const s = Math.max(0, Math.floor(ms / 1000));\n  if (s < 60) return `${s}s`;\n  return `${Math.floor(s / 60)}m ${String(s % 60).padStart(2, '0')}s`;\n}\n"
+    },
+    {
+      "path": "packages/fx/src/vendor/spell-ui/shimmer-text.tsx",
+      "type": "registry:ui",
+      "target": "components/aicl/fx/vendor/spell-ui/shimmer-text.tsx",
+      "content": "/**\n * Vendored from xxtomm/spell-ui (registry/spell-ui/shimmer-text.tsx) at fffe96db7b67. MIT licence, see ../../../ATTRIBUTION.md.\n * Adapted: imports rewritten to relative paths; AICL changes are marked with `AICL:`.\n */\n\"use client\";\n\nimport { motion } from \"motion/react\";\nimport { cn } from \"../../lib/cn.ts\";\n\ntype Variant =\n  | \"default\"\n  | \"secondary\"\n  | \"destructive\"\n  | \"red\"\n  | \"blue\"\n  | \"green\"\n  | \"yellow\"\n  | \"purple\"\n  | \"pink\"\n  | \"orange\"\n  | \"cyan\"\n  | \"indigo\"\n  | \"violet\"\n  | \"rose\"\n  | \"amber\"\n  | \"lime\"\n  | \"emerald\"\n  | \"sky\"\n  | \"slate\"\n  | \"fuchsia\";\n\ninterface ShimmerTextProps {\n  children: React.ReactNode;\n  className?: string;\n  variant?: Variant;\n  duration?: number;\n  delay?: number;\n  spread?: number;\n}\n\nconst variantMap: Record<Variant, string> = {\n  default: \"\",\n  secondary: \"text-secondary-foreground\",\n  destructive: \"text-destructive dark:text-destructive-foreground\",\n  red: \"text-red-600 dark:text-red-400\",\n  blue: \"text-blue-600 dark:text-blue-400\",\n  green: \"text-green-600 dark:text-green-400\",\n  yellow: \"text-yellow-600 dark:text-yellow-400\",\n  purple: \"text-purple-600 dark:text-purple-400\",\n  pink: \"text-pink-600 dark:text-pink-400\",\n  orange: \"text-orange-600 dark:text-orange-400\",\n  cyan: \"text-cyan-600 dark:text-cyan-400\",\n  indigo: \"text-indigo-600 dark:text-indigo-400\",\n  violet: \"text-violet-600 dark:text-violet-400\",\n  rose: \"text-rose-600 dark:text-rose-400\",\n  amber: \"text-amber-600 dark:text-amber-400\",\n  lime: \"text-lime-600 dark:text-lime-400\",\n  emerald: \"text-emerald-600 dark:text-emerald-400\",\n  sky: \"text-sky-600 dark:text-sky-400\",\n  slate: \"text-slate-600 dark:text-slate-400\",\n  fuchsia: \"text-fuchsia-600 dark:text-fuchsia-400\",\n};\n\nexport function ShimmerText({\n  children,\n  className,\n  variant = \"default\",\n  duration = 1.5,\n  delay = 1.5,\n}: ShimmerTextProps) {\n  return (\n    <div className=\"group overflow-hidden\">\n      <div>\n        <motion.div\n          className={cn(\n            \"inline-block [--shimmer-contrast:rgba(255,255,255,0.6)] dark:[--shimmer-contrast:rgba(0,0,0,0.5)]\",\n            variantMap[variant],\n            className,\n          )}\n          style={{\n            WebkitTextFillColor: \"transparent\",\n            background:\n              \"currentColor linear-gradient(to right, currentColor 0%, var(--shimmer-contrast) 40%, var(--shimmer-contrast) 60%, currentColor 100%)\",\n            WebkitBackgroundClip: \"text\",\n            backgroundClip: \"text\",\n            backgroundRepeat: \"no-repeat\",\n            backgroundSize: \"50% 200%\",\n          } as React.CSSProperties}\n          initial={{\n            backgroundPositionX: \"250%\",\n          }}\n          animate={{\n            backgroundPositionX: [\"-100%\", \"250%\"],\n          }}\n          transition={{\n            duration: duration,\n            delay: delay,\n            repeat: Infinity,\n            repeatDelay: 1.5,\n            ease: \"linear\",\n          }}\n        >\n          <span>{children}</span>\n        </motion.div>\n      </div>\n    </div>\n  );\n}\n\nexport default ShimmerText;\n"
+    },
+    {
+      "path": "packages/fx/src/vendor/spell-ui/bars-spinner.tsx",
+      "type": "registry:ui",
+      "target": "components/aicl/fx/vendor/spell-ui/bars-spinner.tsx",
+      "content": "/**\n * Vendored from xxtomm/spell-ui (registry/spell-ui/bars-spinner.tsx) at fffe96db7b67. MIT licence, see ../../../ATTRIBUTION.md.\n * AICL: the `<style jsx>` block (needs styled-jsx, and its global `.bar`/`spin` names would leak)\n * is replaced by 12 motion bars with the same geometry (rotate + translate 146%) and a staggered opacity fade.\n */\n\"use client\";\n\nimport * as React from \"react\";\nimport { motion } from \"motion/react\";\nimport { cn } from \"../../lib/cn.ts\";\n\ninterface BarsSpinnerProps extends React.HTMLAttributes<HTMLDivElement> {\n  size?: number;\n  color?: string;\n}\n\nconst BARS = Array.from({ length: 12 }, (_, i) => i);\n\nexport const BarsSpinner = React.forwardRef<HTMLDivElement, BarsSpinnerProps>(\n  ({ className, size = 20, color = \"currentColor\", style, ...props }, ref) => (\n    <div\n      ref={ref}\n      role=\"presentation\"\n      className={cn(\"relative inline-block shrink-0\", className)}\n      style={{ width: size, height: size, ...style }}\n      {...props}\n    >\n      <div className=\"absolute left-1/2 top-1/2 size-full\">\n        {BARS.map((i) => (\n          <motion.div\n            key={i}\n            className=\"absolute rounded-[6px]\"\n            style={{\n              background: color,\n              height: \"8%\",\n              left: \"-10%\",\n              top: \"-3.9%\",\n              width: \"24%\",\n              transform: `rotate(${i === 0 ? 0.0001 : i * 30}deg) translate(146%)`,\n            }}\n            initial={{ opacity: 1 }}\n            animate={{ opacity: [1, 0.15] }}\n            transition={{ duration: 1.2, repeat: Infinity, ease: \"linear\", delay: -1.2 + i * 0.1 }}\n          />\n        ))}\n      </div>\n    </div>\n  ),\n);\n\nBarsSpinner.displayName = \"SpellUI.BarsSpinner\";\n\nexport type { BarsSpinnerProps };\n"
+    }
+  ],
+  "docs": "docs/components/thinking-indicator.md",
+  "categories": [
+    "fx"
+  ],
+  "package": "@aicl/fx",
+  "usage": "import { ThinkingIndicator } from '@aicl/fx';\n\n<ThinkingIndicator elapsedMs={2400} />",
+  "npmImport": "import { ThinkingIndicator } from '@aicl/fx';"
+}

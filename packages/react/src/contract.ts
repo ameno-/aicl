@@ -407,6 +407,67 @@ export const primitives: readonly PrimitiveContract[] = [
       'data-size': ['sm', 'md'],
     },
   },
+  {
+    name: 'Tooltip',
+    summary: 'A short label on hover or focus. The delay is the fast motion tier.',
+    source: ['Tooltip.tsx'],
+    slots: ['tooltip', 'tooltip-trigger', 'tooltip-content'],
+    states: {
+      'data-state': ['open', 'closed'],
+      'data-side': ['top', 'bottom', 'start', 'end'],
+    },
+  },
+  {
+    name: 'Badge',
+    summary: 'A status chip. Quiet colour, never a button.',
+    source: ['Badge.tsx'],
+    slots: ['badge'],
+    states: {
+      'data-variant': ['default', 'secondary', 'success', 'warning', 'danger', 'outline'],
+    },
+  },
+  {
+    name: 'Separator',
+    summary: 'A line between groups. Decorative by default.',
+    source: ['Separator.tsx'],
+    slots: ['separator'],
+    states: {
+      'data-orientation': ['horizontal', 'vertical'],
+    },
+  },
+  {
+    name: 'Kbd',
+    summary: 'A keyboard hint. Pass keys for a chord, or children for free text.',
+    source: ['Kbd.tsx'],
+    slots: ['kbd', 'kbd-key'],
+  },
+  {
+    name: 'Progress',
+    summary: 'A determined bar, or an indeterminate pulse. The fill uses scaleX.',
+    source: ['Progress.tsx'],
+    slots: ['progress', 'progress-fill'],
+    states: {
+      'data-state': ['determinate', 'indeterminate'],
+    },
+  },
+  {
+    name: 'Collapsible',
+    summary: 'A disclosure. Height is not animated; opacity is.',
+    source: ['Collapsible.tsx'],
+    slots: ['collapsible', 'collapsible-trigger', 'collapsible-icon', 'collapsible-content'],
+    states: {
+      'data-state': ['open', 'closed'],
+    },
+  },
+  {
+    name: 'Tabs',
+    summary: 'One tab stop, arrows move, a travelling pill follows the selected tab.',
+    source: ['Tabs.tsx'],
+    slots: ['tabs', 'tabs-list', 'tabs-tab', 'tabs-indicator', 'tabs-panel'],
+    states: {
+      'data-state': ['active', 'inactive'],
+    },
+  },
 ];
 
 /** Every slot the library renders, across every primitive. */

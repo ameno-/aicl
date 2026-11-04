@@ -1,0 +1,42 @@
+{
+  "name": "plan-checklist",
+  "type": "registry:ui",
+  "title": "PlanChecklist",
+  "description": "An ordered plan with a derived rollup. Render only.",
+  "dependencies": [
+    "react",
+    "@aicl/core"
+  ],
+  "registryDependencies": [
+    "icon-slots"
+  ],
+  "files": [
+    {
+      "path": "packages/react/src/PlanChecklist.tsx",
+      "type": "registry:ui",
+      "target": "components/aicl/PlanChecklist.tsx",
+      "content": "import { Icon, type IconSlot } from './icons.js';\n\nexport interface PlanItem {\n  id: string;\n  label: string;\n  status: 'pending' | 'running' | 'done' | 'error';\n}\n\nconst STEP_ICON: Record<PlanItem['status'], IconSlot> = {\n  pending: 'pending',\n  running: 'spinner',\n  done: 'success',\n  error: 'failure',\n};\n\nexport function PlanChecklist({ items, title }: { items: PlanItem[]; title?: string }) {\n  const done = items.filter((item) => item.status === 'done').length;\n  return (\n    <div data-aicl=\"plan-checklist\" data-count={items.length} data-progress={`${done}/${items.length}`}>\n      <p data-aicl=\"plan-rollup\" aria-live=\"polite\">\n        {title ? <span data-aicl=\"plan-title\">{title}</span> : null}\n        <span data-aicl=\"plan-count\">\n          {done}/{items.length}\n        </span>\n      </p>\n      <ol>\n        {items.map((item) => (\n          <li key={item.id} data-status={item.status}>\n            <Icon name={STEP_ICON[item.status]} spin={item.status === 'running'} />\n            <span>{item.label}</span>\n          </li>\n        ))}\n      </ol>\n    </div>\n  );\n}\n"
+    }
+  ],
+  "docs": "docs/components/plan-checklist.md",
+  "categories": [
+    "chat"
+  ],
+  "package": "@aicl/react",
+  "usage": "import { PlanChecklist } from '@aicl/react';\n\n<PlanChecklist title=\"Ship\" items={[{ id: '1', label: 'Write the test', status: 'done' }]} />",
+  "npmImport": "import { PlanChecklist } from '@aicl/react';",
+  "slots": [
+    "plan-checklist",
+    "plan-rollup",
+    "plan-title",
+    "plan-count"
+  ],
+  "states": {
+    "data-count": [
+      "true"
+    ],
+    "data-progress": [
+      "true"
+    ]
+  }
+}

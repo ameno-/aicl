@@ -1,0 +1,26 @@
+{
+  "name": "use-chat",
+  "type": "registry:hook",
+  "title": "useChat",
+  "description": "Binds a ChatController to React. Status, messages, send, stop, and the streaming id.",
+  "dependencies": [
+    "react",
+    "@aicl/core"
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "packages/react/src/useChat.ts",
+      "type": "registry:hook",
+      "target": "hooks/use-chat.ts",
+      "content": "import { useCallback, useMemo, useRef, useSyncExternalStore } from 'react';\nimport { ChatController, type ChatOptions, type ChatState, type Message, type Part } from '@aicl/core';\n\nexport interface UseChatResult {\n  messages: Message[];\n  status: ChatState['status'];\n  error: ChatState['error'];\n  streamingId?: string;\n  isBusy: boolean;\n  send: (text: string, attachments?: Part[]) => Promise<void>;\n  regenerate: () => Promise<void>;\n  edit: (messageId: string, text: string) => Promise<void>;\n  selectBranch: (messageId: string) => void;\n  stop: () => void;\n  controller: ChatController;\n}\n\n/**\n * Binds a `ChatController` to React.\n *\n * `useSyncExternalStore` rather than `useState` + `useEffect`: it is tear-free\n * under concurrent rendering, which matters here because a streaming transcript\n * updates many times per frame and React may render at a different cadence.\n */\nexport function useChat(options: ChatOptions): UseChatResult {\n  // The controller owns a live connection and must survive re-renders. A ref\n  // with lazy init avoids constructing a throwaway on every render, which\n  // `useMemo` does not strictly guarantee.\n  const ref = useRef<ChatController | null>(null);\n  if (ref.current === null) ref.current = new ChatController(options);\n  const controller = ref.current;\n\n  const subscribe = useCallback(\n    (onChange: () => void) => controller.state.subscribe(onChange),\n    [controller],\n  );\n  const getSnapshot = useCallback(() => controller.state.get(), [controller]);\n\n  // Same snapshot on the server: core holds no browser-only state, so the\n  // initial server render matches the client's first paint.\n  const state = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);\n\n  // `state` is replaced wholesale on every change, so this recomputes exactly\n  // when the transcript actually changed.\n  const messages = useMemo(\n    () => state.path.map((id) => state.nodes[id]!.message),\n    [state],\n  );\n\n  return {\n    messages,\n    status: state.status,\n    error: state.error,\n    streamingId: state.streamingId,\n    isBusy: state.status === 'submitted' || state.status === 'streaming',\n    send: useCallback((t, a) => controller.send(t, a), [controller]),\n    regenerate: useCallback(() => controller.regenerate(), [controller]),\n    edit: useCallback((id, t) => controller.edit(id, t), [controller]),\n    selectBranch: useCallback((id) => controller.selectBranch(id), [controller]),\n    stop: useCallback(() => controller.stop(), [controller]),\n    controller,\n  };\n}\n"
+    }
+  ],
+  "docs": "docs/components/use-chat.md",
+  "categories": [
+    "hook"
+  ],
+  "package": "@aicl/react",
+  "usage": "import { useChat } from '@aicl/react';\nimport { createSseTransport } from '@aicl/core';\n\nconst chat = useChat({ transport: createSseTransport({ url: '/api/chat' }) });",
+  "npmImport": "import { useChat } from '@aicl/react';"
+}

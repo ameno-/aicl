@@ -75,6 +75,20 @@ export {
 export type { PrimitiveContract, SharedContract } from './contract.js';
 export { Button, ButtonIcon } from './Button.js';
 export type { ButtonProps, ButtonIconProps, ButtonVariant, ButtonSize } from './Button.js';
+export { Badge } from './Badge.js';
+export type { BadgeProps, BadgeVariant } from './Badge.js';
+export { Separator } from './Separator.js';
+export type { SeparatorProps, SeparatorOrientation } from './Separator.js';
+export { Kbd } from './Kbd.js';
+export type { KbdProps } from './Kbd.js';
+export { Progress } from './Progress.js';
+export type { ProgressProps } from './Progress.js';
+export { Tooltip, TooltipTrigger, TooltipContent } from './Tooltip.js';
+export type { TooltipProps, TooltipTriggerProps, TooltipContentProps, TooltipSide } from './Tooltip.js';
+export { Collapsible, CollapsibleTrigger, CollapsibleContent } from './Collapsible.js';
+export type { CollapsibleProps, CollapsibleTriggerProps, CollapsibleContentProps } from './Collapsible.js';
+export { Tabs, TabsList, TabsTab, TabsPanel } from './Tabs.js';
+export type { TabsProps, TabsListProps, TabsTabProps, TabsPanelProps } from './Tabs.js';
 export { SessionList, SessionListItem, SessionSearch, SidebarNav, relativeTime, resolveSecondary } from './sessions.js';
 export type {
   SessionListProps,

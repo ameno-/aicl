@@ -1,0 +1,45 @@
+{
+  "name": "tabs",
+  "type": "registry:ui",
+  "title": "Tabs",
+  "description": "One tab stop, arrows move, a travelling pill follows the selected tab.",
+  "dependencies": [
+    "react",
+    "@aicl/core"
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "packages/react/src/Tabs.tsx",
+      "type": "registry:ui",
+      "target": "components/aicl/Tabs.tsx",
+      "content": "/**\n * Tabs.\n *\n * One tab stop, arrows move, a travelling pill follows the selected tab.\n * The pill moves with `transform` (never `width`), on the motion system's\n * `moderate` spring, so it is the showcase Fluid's tabs are in theirs.\n *\n * Compound: `Tabs.List`, `Tabs.Tab`, `Tabs.Panel`. Controlled and\n * uncontrolled (`value` / `defaultValue` / `onValueChange`).\n */\n\nimport {\n  createContext,\n  useContext,\n  useId,\n  useLayoutEffect,\n  useRef,\n  useState,\n  type ButtonHTMLAttributes,\n  type HTMLAttributes,\n  type KeyboardEvent,\n  type ReactNode,\n} from 'react';\n\nimport { useControllableState } from './controllable.js';\n\nexport interface TabsProps {\n  value?: string;\n  defaultValue?: string;\n  onValueChange?: (value: string) => void;\n  /** Accessible name for the tab list. */\n  label?: string;\n  children?: ReactNode;\n}\n\ninterface TabsContextValue {\n  value: string;\n  setValue: (value: string) => void;\n  baseId: string;\n  listRef: { current: HTMLDivElement | null };\n  register: (value: string, el: HTMLButtonElement | null) => void;\n  values: () => string[];\n}\n\nconst TabsContext = createContext<TabsContextValue | null>(null);\n\nfunction useTabs(): TabsContextValue {\n  const ctx = useContext(TabsContext);\n  if (!ctx) throw new Error('Tabs parts must be rendered inside <Tabs>.');\n  return ctx;\n}\n\nfunction TabsRoot({\n  value: valueProp,\n  defaultValue = '',\n  onValueChange,\n  label,\n  children,\n}: TabsProps) {\n  const [value, setValue] = useControllableState(valueProp, defaultValue, onValueChange);\n  const baseId = useId();\n  const listRef = useRef<HTMLDivElement | null>(null);\n  const tabs = useRef(new Map<string, HTMLButtonElement>());\n\n  const ctx: TabsContextValue = {\n    value,\n    setValue,\n    baseId,\n    listRef,\n    register: (name, el) => {\n      if (el) tabs.current.set(name, el);\n      else tabs.current.delete(name);\n    },\n    values: () => [...tabs.current.keys()],\n  };\n\n  return (\n    <TabsContext.Provider value={ctx}>\n      <div data-aicl=\"tabs\" data-state={value || undefined} aria-label={label}>\n        {children}\n      </div>\n    </TabsContext.Provider>\n  );\n}\n\nexport interface TabsListProps extends HTMLAttributes<HTMLDivElement> {\n  children?: ReactNode;\n}\n\nexport function TabsList({ children, ...rest }: TabsListProps) {\n  const { listRef, value, setValue, values } = useTabs();\n  const [indicator, setIndicator] = useState({ x: 0, w: 0 });\n\n  useLayoutEffect(() => {\n    const list = listRef.current;\n    if (!list) return;\n    const selected = list.querySelector<HTMLElement>('[data-aicl=\"tabs-tab\"][data-state=\"active\"]');\n    if (!selected) return;\n    const listBox = list.getBoundingClientRect();\n    const tabBox = selected.getBoundingClientRect();\n    setIndicator({ x: tabBox.left - listBox.left, w: tabBox.width });\n  }, [listRef, value]);\n\n  const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {\n    const keys = values();\n    const index = keys.indexOf(value);\n    if (keys.length === 0) return;\n    let next = -1;\n    if (event.key === 'ArrowRight') next = (index + 1) % keys.length;\n    else if (event.key === 'ArrowLeft') next = (index - 1 + keys.length) % keys.length;\n    else if (event.key === 'Home') next = 0;\n    else if (event.key === 'End') next = keys.length - 1;\n    else return;\n    const name = keys[next];\n    if (name === undefined) return;\n    event.preventDefault();\n    setValue(name);\n    listRef.current\n      ?.querySelector<HTMLElement>(`[data-aicl=\"tabs-tab\"][data-value=\"${CSS.escape(name)}\"]`)\n      ?.focus();\n  };\n\n  return (\n    <div\n      {...rest}\n      ref={(node) => {\n        listRef.current = node;\n      }}\n      role=\"tablist\"\n      data-aicl=\"tabs-list\"\n      onKeyDown={(event) => {\n        rest.onKeyDown?.(event);\n        if (!event.defaultPrevented) onKeyDown(event);\n      }}\n    >\n      <span\n        data-aicl=\"tabs-indicator\"\n        aria-hidden=\"true\"\n        style={{\n          transform: `translateX(${indicator.x}px) scaleX(${indicator.w || 1})`,\n        }}\n      />\n      {children}\n    </div>\n  );\n}\n\nexport interface TabsTabProps extends ButtonHTMLAttributes<HTMLButtonElement> {\n  value: string;\n  children?: ReactNode;\n}\n\nexport function TabsTab({ value, children, ...rest }: TabsTabProps) {\n  const tabs = useTabs();\n  const selected = tabs.value === value;\n  const tabId = `${tabs.baseId}-tab-${value}`;\n  const panelId = `${tabs.baseId}-panel-${value}`;\n\n  return (\n    <button\n      {...rest}\n      ref={(node) => {\n        tabs.register(value, node);\n      }}\n      type={rest.type ?? 'button'}\n      role=\"tab\"\n      id={tabId}\n      aria-selected={selected}\n      aria-controls={panelId}\n      tabIndex={selected ? 0 : -1}\n      data-aicl=\"tabs-tab\"\n      data-state={selected ? 'active' : 'inactive'}\n      data-value={value}\n      onClick={(event) => {\n        rest.onClick?.(event);\n        if (!event.defaultPrevented) tabs.setValue(value);\n      }}\n    >\n      {children}\n    </button>\n  );\n}\n\nexport interface TabsPanelProps extends HTMLAttributes<HTMLDivElement> {\n  value: string;\n  children?: ReactNode;\n}\n\nexport function TabsPanel({ value, children, ...rest }: TabsPanelProps) {\n  const tabs = useTabs();\n  const selected = tabs.value === value;\n  const tabId = `${tabs.baseId}-tab-${value}`;\n  const panelId = `${tabs.baseId}-panel-${value}`;\n\n  return (\n    <div\n      {...rest}\n      role=\"tabpanel\"\n      id={panelId}\n      aria-labelledby={tabId}\n      hidden={!selected}\n      data-aicl=\"tabs-panel\"\n      data-state={selected ? 'active' : 'inactive'}\n      data-value={value}\n    >\n      {selected ? children : null}\n    </div>\n  );\n}\n\nexport const Tabs = Object.assign(TabsRoot, {\n  List: TabsList,\n  Tab: TabsTab,\n  Panel: TabsPanel,\n});\n"
+    },
+    {
+      "path": "packages/react/src/controllable.ts",
+      "type": "registry:ui",
+      "target": "components/aicl/controllable.ts",
+      "content": "import { useState } from 'react';\n\n/**\n * Controlled and uncontrolled in one hook, the shape both sample libraries\n * use: `value` wins when it is passed, otherwise `defaultValue` is the state.\n *\n * The setter always notifies `onChange`. It only writes local state when the\n * caller is not holding the value.\n */\nexport function useControllableState<T>(\n  value: T | undefined,\n  defaultValue: T,\n  onChange?: (next: T) => void,\n): [T, (next: T) => void] {\n  const [uncontrolled, setUncontrolled] = useState(defaultValue);\n  const isControlled = value !== undefined;\n  const current = isControlled ? value : uncontrolled;\n  const set = (next: T) => {\n    if (!isControlled) setUncontrolled(next);\n    onChange?.(next);\n  };\n  return [current, set];\n}\n"
+    }
+  ],
+  "docs": "docs/components/tabs.md",
+  "categories": [
+    "content"
+  ],
+  "package": "@aicl/react",
+  "usage": "import { Tabs } from '@aicl/react';\n\n<Tabs defaultValue=\"chat\">\n  <Tabs.List>\n    <Tabs.Tab value=\"chat\">Chat</Tabs.Tab>\n    <Tabs.Tab value=\"files\">Files</Tabs.Tab>\n  </Tabs.List>\n  <Tabs.Panel value=\"chat\">The thread.</Tabs.Panel>\n  <Tabs.Panel value=\"files\">The tree.</Tabs.Panel>\n</Tabs>",
+  "npmImport": "import { Tabs } from '@aicl/react';",
+  "slots": [
+    "tabs",
+    "tabs-list",
+    "tabs-tab",
+    "tabs-indicator",
+    "tabs-panel"
+  ],
+  "states": {
+    "data-state": [
+      "active",
+      "inactive"
+    ]
+  }
+}

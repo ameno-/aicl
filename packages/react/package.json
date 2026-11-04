@@ -22,7 +22,7 @@
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "tsc -p tsconfig.test.json && node --test dist-test/*.test.js",
-    "docs": "node scripts/generate-component-docs.mjs"
+    "docs": "node ../cli/scripts/build-registry.mjs"
   },
   "peerDependencies": {
     "react": ">=18",

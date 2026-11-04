@@ -1,0 +1,26 @@
+{
+  "name": "use-readable",
+  "type": "registry:hook",
+  "title": "useReadable",
+  "description": "Subscribe a React component to a core store without pulling the store into the tree.",
+  "dependencies": [
+    "react",
+    "@aicl/core"
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "packages/react/src/useReadable.ts",
+      "type": "registry:hook",
+      "target": "components/aicl/useReadable.ts",
+      "content": "import { useSyncExternalStore } from 'react';\nimport type { ReadableStore } from '@aicl/core';\n\n/** Binds any core `ReadableStore` to React, tear-free. */\nexport function useReadable<T>(store: ReadableStore<T>): T {\n  return useSyncExternalStore(store.subscribe, store.get, store.get);\n}\n"
+    }
+  ],
+  "docs": "docs/components/use-readable.md",
+  "categories": [
+    "hook"
+  ],
+  "package": "@aicl/react",
+  "usage": "import { useReadable } from '@aicl/react';\n\nconst toasts = useReadable(queue.state);",
+  "npmImport": "import { useReadable } from '@aicl/react';"
+}

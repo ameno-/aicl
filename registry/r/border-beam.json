@@ -1,0 +1,30 @@
+{
+  "name": "border-beam",
+  "type": "registry:ui",
+  "title": "BorderBeam",
+  "description": "A light that travels around the parent border. Static under reduced motion.",
+  "dependencies": [
+    "react",
+    "motion",
+    "lucide-react"
+  ],
+  "registryDependencies": [
+    "cn",
+    "fx-provider"
+  ],
+  "files": [
+    {
+      "path": "packages/fx/src/components/stream/BorderBeam.tsx",
+      "type": "registry:ui",
+      "target": "components/aicl/fx/components/stream/BorderBeam.tsx",
+      "content": "import { motion, useReducedMotionConfig } from 'motion/react';\nimport { cn } from '../../lib/cn.ts';\n\n/**\n * A light that travels around the parent's border (parent must be `relative` with a radius).\n * A rotating conic gradient is clipped to a 1.5px ring by a mask; it never affects layout.\n * Static ring under reduced motion.\n */\nexport function BorderBeam({ active = true, className }: { active?: boolean; className?: string }) {\n  const reduced = useReducedMotionConfig() ?? false;\n  if (!active) return null;\n  const ring = 'linear-gradient(#000 0 0)';\n  return (\n    <div\n      aria-hidden=\"true\"\n      data-fx-beam=\"\"\n      className={cn('pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit] p-[1.5px]', className)}\n      style={{\n        WebkitMask: `${ring} content-box, ${ring}`,\n        WebkitMaskComposite: 'xor',\n        mask: `${ring} content-box exclude, ${ring}`,\n      }}\n    >\n      <motion.div\n        className=\"absolute left-1/2 top-1/2 aspect-square w-[300%]\"\n        style={{\n          x: '-50%',\n          y: '-50%',\n          background:\n            'conic-gradient(from 0deg, transparent 0deg, transparent 250deg, var(--aicl-accent) 320deg, var(--aicl-info, var(--aicl-accent)) 350deg, transparent 360deg)',\n        }}\n        animate={reduced ? { rotate: 0, opacity: 0.6 } : { rotate: 360 }}\n        transition={{ duration: 2.4, repeat: Infinity, ease: 'linear' }}\n      />\n    </div>\n  );\n}\n"
+    }
+  ],
+  "docs": "docs/components/border-beam.md",
+  "categories": [
+    "fx"
+  ],
+  "package": "@aicl/fx",
+  "usage": "import { BorderBeam } from '@aicl/fx';\n\n<div className=\"relative\"><BorderBeam /></div>",
+  "npmImport": "import { BorderBeam } from '@aicl/fx';"
+}

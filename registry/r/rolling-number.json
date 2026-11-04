@@ -1,0 +1,36 @@
+{
+  "name": "rolling-number",
+  "type": "registry:ui",
+  "title": "RollingNumber",
+  "description": "A number that rolls to its next value. Jumps under reduced motion.",
+  "dependencies": [
+    "react",
+    "motion",
+    "lucide-react"
+  ],
+  "registryDependencies": [
+    "cn",
+    "fx-provider"
+  ],
+  "files": [
+    {
+      "path": "packages/fx/src/components/stream/RollingNumber.tsx",
+      "type": "registry:ui",
+      "target": "components/aicl/fx/components/stream/RollingNumber.tsx",
+      "content": "import { RollingNumber as VendoredRollingNumber } from '../../vendor/cult-ui/rolling-number.tsx';\nimport { cn } from '../../lib/cn.ts';\n\nexport interface RollingNumberProps {\n  value: number;\n  /** Defaults to `toLocaleString()`. */\n  format?: (value: number) => string;\n  /** Decimal places shown while rolling. */\n  precision?: number;\n  className?: string;\n}\n\n/** Spring-rolled counter for tokens, cost, elapsed time. Jumps instantly under reduced motion. */\nexport function RollingNumber({ value, format, precision = 0, className }: RollingNumberProps) {\n  return (\n    <span data-fx-component=\"RollingNumber\" className={cn('inline-block', className)}>\n      <VendoredRollingNumber value={value} precision={precision} {...(format ? { format } : {})} />\n    </span>\n  );\n}\n"
+    },
+    {
+      "path": "packages/fx/src/vendor/cult-ui/rolling-number.tsx",
+      "type": "registry:ui",
+      "target": "components/aicl/fx/vendor/cult-ui/rolling-number.tsx",
+      "content": "/**\n * Vendored from nolly-studio/cult-ui (apps/www/registry/default/ui/rolling-number.tsx) at 67a66c6ac1cd. MIT licence, see ../../../ATTRIBUTION.md.\n * Adapted: imports rewritten to relative paths; AICL changes are marked with `AICL:`.\n */\n\"use client\"\n\nimport { useEffect } from \"react\"\nimport { motion, MotionValue, useReducedMotionConfig, useSpring, useTransform } from \"motion/react\"\n\ninterface RollingNumberProps {\n  value: number\n  mass?: number\n  stiffness?: number\n  damping?: number\n  precision?: number\n  format?: (value: number) => string\n  onAnimationStart?: () => void\n  onAnimationComplete?: () => void\n}\n\nexport function RollingNumber({\n  value,\n  mass = 0.8,\n  stiffness = 75,\n  damping = 15,\n  precision = 0,\n  format = (num) => num.toLocaleString(),\n  onAnimationStart,\n  onAnimationComplete,\n}: RollingNumberProps) {\n  const spring = useSpring(value, { mass, stiffness, damping })\n  const display: MotionValue<string> = useTransform(spring, (current) =>\n    format(parseFloat(current.toFixed(precision)))\n  )\n\n  const reduced = useReducedMotionConfig() // AICL: jump instead of rolling when the user prefers reduced motion\n  useEffect(() => {\n    if (reduced) spring.jump(value)\n    else spring.set(value)\n    if (onAnimationStart) onAnimationStart()\n    const unsubscribe = spring.on(\"change\", () => {\n      if (spring.get() === value && onAnimationComplete) onAnimationComplete()\n    })\n    return () => unsubscribe()\n  }, [spring, value, reduced, onAnimationStart, onAnimationComplete])\n\n  return <motion.span className=\"tabular-nums\">{display}</motion.span> // AICL: tabular-nums, no layout jitter\n}\n"
+    }
+  ],
+  "docs": "docs/components/rolling-number.md",
+  "categories": [
+    "fx"
+  ],
+  "package": "@aicl/fx",
+  "usage": "import { RollingNumber } from '@aicl/fx';\n\n<RollingNumber value={42} />",
+  "npmImport": "import { RollingNumber } from '@aicl/fx';"
+}

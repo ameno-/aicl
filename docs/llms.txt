@@ -4,6 +4,25 @@
 > applications. Derived from a survey of 1,262 screens of four shipping
 > agentic-chat products.
 
+## Install a component
+
+```bash
+npx aicl add button
+npx aicl add transcript composer
+npx aicl list
+npx aicl docs button
+npx aicl doctor
+```
+
+Or, in the shadcn registry format:
+
+```bash
+npx shadcn@latest add ./registry/r/button.json
+```
+
+Systems (`@aicl/core`, `@aicl/styles`, `@aicl/motion`) install as versioned
+packages. Components install as source. The catalog is `registry.json`.
+
 ## Packages
 
 - [@aicl/core](./packages/core/README.md): the message model, the part union,
@@ -18,6 +37,69 @@
   component surfaces. Optional. Skins live in `themes/`.
 - [@aicl/motion](./packages/motion/README.md): the motion system. Three spring
   tiers, fluid hover, weight without reflow.
+- [@aicl/fx](./packages/fx/README.md): optional animated, styled components.
+- [@aicl/cli](./packages/cli/README.md): `npx aicl` — list, add, docs, doctor.
+
+## Catalog
+
+- [Token contract](./docs/components/token-contract.md): Every visual decision as a named custom property, plus the primitive surfaces. `npx aicl add token-contract`
+- [LooseLeaf skin](./docs/components/looseleaf.md): Paper on a desk. Values only: no JavaScript, so it cannot change behaviour. `npx aicl add looseleaf`
+- [Motion system](./docs/components/motion.md): Three spring tiers, their exits, fluid hover, and weight without reflow. `npx aicl add motion`
+- [Icon slots](./docs/components/icon-slots.md): Icons looked up by role, swappable through one provider. A primitive never imports an icon. `npx aicl add icon-slots`
+- [cn](./docs/components/cn.md): clsx + tailwind-merge. The `@aicl/fx` components compose class names through it. `npx aicl add cn`
+- [FxProvider](./docs/components/fx-provider.md): Sets motion reducedMotion="user" and the data-fx scope vendored components assume. `npx aicl add fx-provider`
+- [useChat](./docs/components/use-chat.md): Binds a ChatController to React. Status, messages, send, stop, and the streaming id. `npx aicl add use-chat`
+- [useReadable](./docs/components/use-readable.md): Subscribe a React component to a core store without pulling the store into the tree. `npx aicl add use-readable`
+- [useFluidHover](./docs/components/use-fluid-hover.md): One travelling highlight per list. The nearest-item rule is a pure function. `npx aicl add use-fluid-hover`
+- [Button](./docs/components/button.md): A button. Variant, size and loading, with the glyphs as icon slots. `npx aicl add button`
+- [Transcript](./docs/components/transcript.md): The conversation: a scroller, the rows, and jump-to-latest. One live region for the thread. `npx aicl add transcript`
+- [Composer](./docs/components/composer.md): The field, the submit action, the toolbar slots and the above-band. `npx aicl add composer`
+- [PartRenderer](./docs/components/part-renderer.md): Dispatches one part to its renderer. The default renderers follow. `npx aicl add part-renderer`
+- [MessageActions](./docs/components/message-actions.md): The per-message action row. Hidden until the row is hovered or focused. `npx aicl add message-actions`
+- [PlanChecklist](./docs/components/plan-checklist.md): An ordered plan with a derived rollup. Render only. `npx aicl add plan-checklist`
+- [ComposerSurface](./docs/components/composer-surface.md): The composer surface: trigger menus, suggestion chips, attachments. `npx aicl add composer-surface`
+- [SessionList](./docs/components/session-list.md): A host-agnostic session listbox, grouped by recency. `npx aicl add session-list`
+- [SessionSearch](./docs/components/session-search.md): One incremental combobox for sessions. `npx aicl add session-search`
+- [SidebarNav](./docs/components/sidebar-nav.md): A vertical nav host with a controlled collapse. `npx aicl add sidebar-nav`
+- [Dialog](./docs/components/dialog.md): A modal on the top layer, with a focus trap and a focus return. `npx aicl add dialog`
+- [AlertDialog](./docs/components/alert-dialog.md): A modal that asks before it acts. The scrim does not dismiss it. `npx aicl add alert-dialog`
+- [Drawer](./docs/components/drawer.md): A sheet that slides in from an edge. Swipe to dismiss. `npx aicl add drawer`
+- [ToastRegion](./docs/components/toast-region.md): Transient status in a corner region. One live region, polite by default. `npx aicl add toast-region`
+- [Toast](./docs/components/toast.md): One transient status message, with an optional action. `npx aicl add toast`
+- [Field](./docs/components/field.md): A label, a control, a description, an error and a save acknowledgement. `npx aicl add field`
+- [Switch](./docs/components/switch.md): A toggle. The label is a real label, not a placeholder for one. `npx aicl add switch`
+- [Select](./docs/components/select.md): A listbox trigger with typeahead. `npx aicl add select`
+- [SegmentedControl](./docs/components/segmented-control.md): One tab stop, arrow keys move and select. `npx aicl add segmented-control`
+- [Tooltip](./docs/components/tooltip.md): A short label on hover or focus. The delay is the fast motion tier. `npx aicl add tooltip`
+- [Badge](./docs/components/badge.md): A status chip. Quiet colour, never a button. `npx aicl add badge`
+- [Separator](./docs/components/separator.md): A line between groups. Decorative by default. `npx aicl add separator`
+- [Kbd](./docs/components/kbd.md): A keyboard hint. Pass keys for a chord, or children for free text. `npx aicl add kbd`
+- [Progress](./docs/components/progress.md): A determined bar, or an indeterminate pulse. The fill uses scaleX. `npx aicl add progress`
+- [Collapsible](./docs/components/collapsible.md): A disclosure. Height is not animated; opacity is. `npx aicl add collapsible`
+- [Tabs](./docs/components/tabs.md): One tab stop, arrows move, a travelling pill follows the selected tab. `npx aicl add tabs`
+- [StreamingText](./docs/components/streaming-text.md): Tokens arrive. Character, word, or instant reveal, with a caret that does not reflow. `npx aicl add streaming-text`
+- [ThinkingIndicator](./docs/components/thinking-indicator.md): Shimmer, dots or bars while the model thinks; collapses to "Thought for 24s". `npx aicl add thinking-indicator`
+- [WorkSummary](./docs/components/work-summary.md): Devin-style "Worked for 11s" disclosure; animates open and closed. `npx aicl add work-summary`
+- [ToolCallCard](./docs/components/tool-call-card.md): A live tool-call card: pending, running, success, error, cancelled. `npx aicl add tool-call-card`
+- [AnimatedPlan](./docs/components/animated-plan.md): A plan whose steps tick through pending, running and done. `npx aicl add animated-plan`
+- [RollingNumber](./docs/components/rolling-number.md): A number that rolls to its next value. Jumps under reduced motion. `npx aicl add rolling-number`
+- [LiveTerminal](./docs/components/live-terminal.md): Streaming shell output, stick-to-bottom, with a quiet chrome. `npx aicl add live-terminal`
+- [StatusIsland](./docs/components/status-island.md): A compact status chip that morphs between idle, working and done. `npx aicl add status-island`
+- [CodeBlock](./docs/components/fx-code-block.md): A highlighted code block with a copy button. The animated sibling of the primitive. `npx aicl add fx-code-block`
+- [BorderBeam](./docs/components/border-beam.md): A light that travels around the parent border. Static under reduced motion. `npx aicl add border-beam`
+- [PromptComposer](./docs/components/prompt-composer.md): The styled composer: attachments, a model picker, send that morphs into stop. `npx aicl add prompt-composer`
+- [ModelPicker](./docs/components/model-picker.md): A model menu on a smooth dropdown. `npx aicl add model-picker`
+- [SmoothDropdown](./docs/components/smooth-dropdown.md): A dropdown whose panel size springs to the content. `npx aicl add smooth-dropdown`
+- [SuggestionStack](./docs/components/suggestion-stack.md): Follow-up chips that fan into a stack. The cousin of Fluid's queued-stack. `npx aicl add suggestion-stack`
+- [ApprovalCard](./docs/components/approval-card.md): Allow, deny, or always-allow a pending tool call. `npx aicl add approval-card`
+- [QuestionCard](./docs/components/question-card.md): A single question with options. The narrow form of Fluid's ask-user-questions. `npx aicl add question-card`
+- [Toaster](./docs/components/toaster.md): The styled toast host. Call `toast()` from anywhere under it. `npx aicl add toaster`
+- [SegmentedTabs](./docs/components/segmented-tabs.md): A sliding pill, or discrete tabs that widen to show the label. `npx aicl add segmented-tabs`
+- [InlineEdit](./docs/components/inline-edit.md): Click-to-edit text. Enter commits, Escape reverts. `npx aicl add inline-edit`
+- [Kbd (fx)](./docs/components/fx-kbd.md): The animated keyboard hint. The headless primitive is `kbd`. `npx aicl add fx-kbd`
+- [CommandMenu](./docs/components/command-menu.md): A fuzzy-filtered command palette. Move this to the library is Wave 2 C5. `npx aicl add command-menu`
+- [SidePanel](./docs/components/side-panel.md): A sliding side sheet for the work the agent is doing. `npx aicl add side-panel`
+- [Ambient](./docs/components/ambient.md): A WebGPU mesh gradient for idle and working states. CSS fallback, no telemetry. `npx aicl add ambient`
 
 ## Docs
 
@@ -29,7 +111,8 @@
   Fluid Functionalism, and the shape vocabulary the plan is written in.
 - [Roadmap](./docs/ROADMAP.md): what to create, expose and refactor, and
   in what order.
-- [Component contract](./docs/components.md): every slot and every state.
+- [Component contract](./docs/components.md): every slot, every state, and
+  every catalog item.
 - [Decisions](./docs/DECISIONS.md): the binding decisions, D1–D18.
 - [Adoption](./docs/ADOPTION.md): wiring AICL into an app, with every known
   sharp edge.
@@ -44,4 +127,6 @@ A primitive publishes slots (`data-aicl="composer"`) and states
 stylesheet that overrides the `--aicl-*` token contract and nothing else, so
 it cannot change behaviour. The motion system replaces the contract's
 easings with real springs. The component contract above is generated from
-the implementation and a test fails when the two drift apart.
+the implementation and a test fails when the two drift apart. The catalog
+is how a component is found, documented, and installed; a component is not
+incorporated until it is in the catalog.

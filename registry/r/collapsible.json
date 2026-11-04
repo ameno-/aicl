@@ -1,0 +1,46 @@
+{
+  "name": "collapsible",
+  "type": "registry:ui",
+  "title": "Collapsible",
+  "description": "A disclosure. Height is not animated; opacity is.",
+  "dependencies": [
+    "react",
+    "@aicl/core"
+  ],
+  "registryDependencies": [
+    "icon-slots"
+  ],
+  "files": [
+    {
+      "path": "packages/react/src/Collapsible.tsx",
+      "type": "registry:ui",
+      "target": "components/aicl/Collapsible.tsx",
+      "content": "/**\n * Collapsible.\n *\n * A disclosure. `ReasoningDisclosure` is the chat-shaped one; this is the\n * general primitive Fluid and LooseLeaf both ship. Height is not animated\n * — AICL animates opacity, so reduced motion can drop the travel.\n *\n * Compound: `Collapsible.Trigger`, `Collapsible.Content`.\n */\n\nimport {\n  createContext,\n  useContext,\n  useId,\n  type ButtonHTMLAttributes,\n  type HTMLAttributes,\n  type ReactNode,\n} from 'react';\n\nimport { useControllableState } from './controllable.js';\nimport { Icon } from './icons.js';\n\nexport interface CollapsibleProps {\n  open?: boolean;\n  defaultOpen?: boolean;\n  onOpenChange?: (open: boolean) => void;\n  children?: ReactNode;\n}\n\ninterface CollapsibleContextValue {\n  open: boolean;\n  setOpen: (open: boolean) => void;\n  triggerId: string;\n  contentId: string;\n}\n\nconst CollapsibleContext = createContext<CollapsibleContextValue | null>(null);\n\nfunction useCollapsible(): CollapsibleContextValue {\n  const ctx = useContext(CollapsibleContext);\n  if (!ctx) throw new Error('Collapsible parts must be rendered inside <Collapsible>.');\n  return ctx;\n}\n\nfunction CollapsibleRoot({\n  open: openProp,\n  defaultOpen = false,\n  onOpenChange,\n  children,\n}: CollapsibleProps) {\n  const [open, setOpen] = useControllableState(openProp, defaultOpen, onOpenChange);\n  const triggerId = useId();\n  const contentId = useId();\n\n  return (\n    <CollapsibleContext.Provider value={{ open, setOpen, triggerId, contentId }}>\n      <div data-aicl=\"collapsible\" data-state={open ? 'open' : 'closed'}>\n        {children}\n      </div>\n    </CollapsibleContext.Provider>\n  );\n}\n\nexport interface CollapsibleTriggerProps extends ButtonHTMLAttributes<HTMLButtonElement> {\n  children?: ReactNode;\n}\n\nexport function CollapsibleTrigger({ children, ...rest }: CollapsibleTriggerProps) {\n  const { open, setOpen, triggerId, contentId } = useCollapsible();\n  return (\n    <button\n      {...rest}\n      type={rest.type ?? 'button'}\n      id={triggerId}\n      aria-expanded={open}\n      aria-controls={contentId}\n      data-aicl=\"collapsible-trigger\"\n      data-state={open ? 'open' : 'closed'}\n      onClick={(event) => {\n        rest.onClick?.(event);\n        if (!event.defaultPrevented) setOpen(!open);\n      }}\n    >\n      <span data-aicl=\"collapsible-icon\" data-state={open ? 'open' : 'closed'}>\n        <Icon name=\"chevron-down\" />\n      </span>\n      {children}\n    </button>\n  );\n}\n\nexport interface CollapsibleContentProps extends HTMLAttributes<HTMLDivElement> {\n  children?: ReactNode;\n}\n\nexport function CollapsibleContent({ children, ...rest }: CollapsibleContentProps) {\n  const { open, contentId } = useCollapsible();\n  return (\n    <div\n      {...rest}\n      id={contentId}\n      role=\"region\"\n      hidden={!open}\n      data-aicl=\"collapsible-content\"\n      data-state={open ? 'open' : 'closed'}\n    >\n      {children}\n    </div>\n  );\n}\n\nexport const Collapsible = Object.assign(CollapsibleRoot, {\n  Trigger: CollapsibleTrigger,\n  Content: CollapsibleContent,\n});\n"
+    },
+    {
+      "path": "packages/react/src/controllable.ts",
+      "type": "registry:ui",
+      "target": "components/aicl/controllable.ts",
+      "content": "import { useState } from 'react';\n\n/**\n * Controlled and uncontrolled in one hook, the shape both sample libraries\n * use: `value` wins when it is passed, otherwise `defaultValue` is the state.\n *\n * The setter always notifies `onChange`. It only writes local state when the\n * caller is not holding the value.\n */\nexport function useControllableState<T>(\n  value: T | undefined,\n  defaultValue: T,\n  onChange?: (next: T) => void,\n): [T, (next: T) => void] {\n  const [uncontrolled, setUncontrolled] = useState(defaultValue);\n  const isControlled = value !== undefined;\n  const current = isControlled ? value : uncontrolled;\n  const set = (next: T) => {\n    if (!isControlled) setUncontrolled(next);\n    onChange?.(next);\n  };\n  return [current, set];\n}\n"
+    }
+  ],
+  "docs": "docs/components/collapsible.md",
+  "categories": [
+    "content"
+  ],
+  "package": "@aicl/react",
+  "usage": "import { Collapsible } from '@aicl/react';\n\n<Collapsible>\n  <Collapsible.Trigger>Reasoning</Collapsible.Trigger>\n  <Collapsible.Content>The work.</Collapsible.Content>\n</Collapsible>",
+  "npmImport": "import { Collapsible } from '@aicl/react';",
+  "slots": [
+    "collapsible",
+    "collapsible-trigger",
+    "collapsible-icon",
+    "collapsible-content"
+  ],
+  "states": {
+    "data-state": [
+      "open",
+      "closed"
+    ]
+  }
+}

@@ -361,11 +361,12 @@ Ordered by what unblocks the most.
    they use now, so the library moves as one thing.
 3. **Build the registry.** `registry.json`, a build step that emits one JSON
    item per component, and a `npx aicl` CLI that copies source and resolves
-   dependencies.
-4. **Fill the component inventory.** The gap between what AICL has (chat
-   primitives) and what a chat app needs (button, tooltip, tabs, select,
-   sidebar, command menu, table) is the whole reason a chat app ends up
-   building its own design system. This is the "democratize" work.
+   dependencies. *Done (AICL-144). Every primitive and every `@aicl/fx`
+   component is in the catalog, with a doc page and an `npx aicl add` command.*
+4. **Fill the component inventory.** Button, tooltip, tabs, badge, kbd,
+   progress, separator and collapsible landed with the registry. Still
+   missing: input, combobox, dropdown menu, hover card, command menu as a
+   library primitive, table.
 5. **The ink layer.** `@aicl/ink`: LooseLeaf's seeded SVG drawings, rendered
    behind the real DOM, as an optional layer over the primitives.
 6. **Svelte and Vue.** The same components, the same API, the same contract.

@@ -1,0 +1,36 @@
+{
+  "name": "segmented-tabs",
+  "type": "registry:ui",
+  "title": "SegmentedTabs",
+  "description": "A sliding pill, or discrete tabs that widen to show the label.",
+  "dependencies": [
+    "react",
+    "motion",
+    "lucide-react"
+  ],
+  "registryDependencies": [
+    "cn",
+    "fx-provider"
+  ],
+  "files": [
+    {
+      "path": "packages/fx/src/components/input/SegmentedTabs.tsx",
+      "type": "registry:ui",
+      "target": "components/aicl/fx/components/input/SegmentedTabs.tsx",
+      "content": "import { motion } from 'motion/react';\nimport { useId, useRef, type KeyboardEvent, type ReactNode } from 'react';\nimport { cn } from '../../lib/cn.ts';\nimport { DiscreteTabButton } from '../../vendor/uselayouts/discrete-tabs.tsx';\n\nexport interface SegmentedTab {\n  id: string;\n  label: string;\n  icon?: ReactNode;\n}\n\nexport interface SegmentedTabsProps {\n  tabs: SegmentedTab[];\n  value: string;\n  onChange: (id: string) => void;\n  /** `segmented`: sliding indicator. `discrete`: uselayouts pills that widen to show the label. */\n  variant?: 'segmented' | 'discrete';\n  label?: string;\n  className?: string;\n}\n\nexport function SegmentedTabs({ tabs, value, onChange, variant = 'segmented', label = 'Tabs', className }: SegmentedTabsProps) {\n  const scope = useId();\n  const listRef = useRef<HTMLDivElement>(null);\n\n  const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {\n    const i = tabs.findIndex((t) => t.id === value);\n    let next = -1;\n    if (e.key === 'ArrowRight') next = (i + 1) % tabs.length;\n    else if (e.key === 'ArrowLeft') next = (i - 1 + tabs.length) % tabs.length;\n    else if (e.key === 'Home') next = 0;\n    else if (e.key === 'End') next = tabs.length - 1;\n    if (next < 0) return;\n    e.preventDefault();\n    const t = tabs[next];\n    if (!t) return;\n    onChange(t.id);\n    requestAnimationFrame(() => listRef.current?.querySelector<HTMLElement>(`[id=\"${scope}-tab-${t.id}\"]`)?.focus());\n  };\n\n  return (\n    <div\n      ref={listRef}\n      data-fx-component=\"segmented-tabs\"\n      data-variant={variant}\n      role=\"tablist\"\n      aria-label={label}\n      onKeyDown={onKeyDown}\n      className={cn(\n        variant === 'segmented'\n          ? 'relative inline-flex gap-0.5 rounded-full bg-muted p-1'\n          : 'inline-flex items-center gap-3',\n        className,\n      )}\n    >\n      {tabs.map((t) =>\n        variant === 'discrete' ? (\n          <DiscreteTabButton\n            key={t.id}\n            id={t.id}\n            scope={scope}\n            title={t.label}\n            icon={t.icon}\n            isActive={t.id === value}\n            onSelect={() => onChange(t.id)}\n          />\n        ) : (\n          <button\n            key={t.id}\n            type=\"button\"\n            role=\"tab\"\n            id={`${scope}-tab-${t.id}`}\n            aria-selected={t.id === value}\n            tabIndex={t.id === value ? 0 : -1}\n            onClick={() => onChange(t.id)}\n            className={cn(\n              'relative inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-full px-3.5 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-ring',\n              t.id === value ? 'text-foreground' : 'text-muted-foreground hover:text-foreground',\n            )}\n          >\n            {t.id === value ? (\n              <motion.span\n                layoutId={`${scope}-indicator`}\n                aria-hidden=\"true\"\n                className=\"absolute inset-0 rounded-full bg-background shadow-sm\"\n                transition={{ type: 'spring', damping: 30, stiffness: 420, mass: 0.8 }}\n              />\n            ) : null}\n            {t.icon ? <span className=\"relative z-10 flex\">{t.icon}</span> : null}\n            <span className=\"relative z-10\">{t.label}</span>\n          </button>\n        ),\n      )}\n    </div>\n  );\n}\n"
+    },
+    {
+      "path": "packages/fx/src/vendor/uselayouts/discrete-tabs.tsx",
+      "type": "registry:ui",
+      "target": "components/aicl/fx/vendor/uselayouts/discrete-tabs.tsx",
+      "content": "/**\n * Vendored from iurvish/uselayouts\n * Path: registry/default/example/discrete-tabs.tsx\n * Commit: 07cc4f4fb8e0\n * Licence: MIT (see packages/fx/ATTRIBUTION.md)\n * Adapted: the demo's hard-coded tab list and inline SVG icons are replaced by\n * a props-driven DiscreteTabButton (icon is a ReactNode); layout ids are scoped\n * per instance; real tab semantics (role=tab, aria-selected); cn import.\n */\nimport { AnimatePresence, motion } from 'motion/react';\nimport type { ReactNode } from 'react';\nimport { cn } from '../../lib/cn.ts';\n\nconst spring = { type: 'spring', damping: 20, stiffness: 230, mass: 1.2 } as const;\n\nexport interface DiscreteTabButtonProps {\n  id: string;\n  title: string;\n  icon?: ReactNode;\n  isActive: boolean;\n  onSelect: () => void;\n  scope: string;\n  panelId?: string;\n}\n\n/** The pill from uselayouts' discrete tabs: it widens to reveal its label when active. */\nexport function DiscreteTabButton({ id, title, icon, isActive, onSelect, scope, panelId }: DiscreteTabButtonProps) {\n  return (\n    <motion.button\n      type=\"button\"\n      role=\"tab\"\n      id={`${scope}-tab-${id}`}\n      aria-selected={isActive}\n      aria-controls={panelId}\n      tabIndex={isActive ? 0 : -1}\n      layout\n      transition={{ layout: spring }}\n      onClick={onSelect}\n      className={cn(\n        'flex h-fit w-fit cursor-pointer items-center gap-1.5 overflow-hidden rounded-[25px] bg-secondary p-3 font-mono text-sm font-medium uppercase outline outline-2 outline-border transition-colors duration-75 ease-out focus-visible:outline-ring',\n        isActive ? 'px-4 text-primary' : 'px-3 text-muted-foreground',\n      )}\n    >\n      {icon ? <span className=\"flex shrink-0 items-center [&>svg]:size-[18px]\">{icon}</span> : null}\n      <AnimatePresence initial={false}>\n        {isActive || !icon ? (\n          <motion.span\n            key=\"label\"\n            initial={{ opacity: 0, filter: 'blur(4px)' }}\n            animate={{ opacity: 1, filter: 'blur(0px)' }}\n            exit={{ opacity: 0, filter: 'blur(4px)' }}\n            transition={{ duration: 0.2, ease: [0.86, 0, 0.07, 1] }}\n            className=\"relative inline-block whitespace-nowrap\"\n          >\n            {title}\n          </motion.span>\n        ) : null}\n      </AnimatePresence>\n    </motion.button>\n  );\n}\n"
+    }
+  ],
+  "docs": "docs/components/segmented-tabs.md",
+  "categories": [
+    "fx-input"
+  ],
+  "package": "@aicl/fx",
+  "usage": "import { SegmentedTabs } from '@aicl/fx';\n\n<SegmentedTabs tabs={tabs} value={id} onChange={setId} />",
+  "npmImport": "import { SegmentedTabs } from '@aicl/fx';"
+}

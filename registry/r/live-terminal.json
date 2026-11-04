@@ -1,0 +1,30 @@
+{
+  "name": "live-terminal",
+  "type": "registry:ui",
+  "title": "LiveTerminal",
+  "description": "Streaming shell output, stick-to-bottom, with a quiet chrome.",
+  "dependencies": [
+    "react",
+    "motion",
+    "lucide-react"
+  ],
+  "registryDependencies": [
+    "cn",
+    "fx-provider"
+  ],
+  "files": [
+    {
+      "path": "packages/fx/src/components/stream/LiveTerminal.tsx",
+      "type": "registry:ui",
+      "target": "components/aicl/fx/components/stream/LiveTerminal.tsx",
+      "content": "import { useEffect, useRef } from 'react';\nimport { motion, useReducedMotionConfig } from 'motion/react';\nimport { cn } from '../../lib/cn.ts';\n\nexport interface LiveTerminalProps {\n  lines: string[];\n  running: boolean;\n  /** Set when finished; 0 is success. */\n  exitCode?: number;\n  command?: string;\n  className?: string;\n}\n\n/** Terminal surface: new lines slide in, a cursor blinks while running, an exit badge shows the result. */\nexport function LiveTerminal({ lines, running, exitCode, command, className }: LiveTerminalProps) {\n  const reduced = useReducedMotionConfig() ?? false;\n  const scroller = useRef<HTMLDivElement>(null);\n  /** Lines present at mount appear instantly; only later lines slide in. */\n  const baseline = useRef(lines.length);\n  if (lines.length < baseline.current) baseline.current = 0;\n\n  useEffect(() => {\n    const el = scroller.current;\n    if (el) el.scrollTop = el.scrollHeight;\n  }, [lines.length]);\n\n  const finished = !running && exitCode !== undefined;\n  return (\n    <div\n      data-fx-component=\"LiveTerminal\"\n      data-running={running}\n      className={cn('overflow-hidden rounded-lg border border-border bg-terminal text-terminal-foreground', className)}\n    >\n      <div className=\"flex h-8 items-center gap-2 border-b border-white/10 px-3 font-mono text-xs\">\n        <span className=\"min-w-0 flex-1 truncate opacity-80\">{command ? `$ ${command}` : 'terminal'}</span>\n        {running ? <span className=\"opacity-60\">running</span> : null}\n        {finished ? (\n          <span\n            data-exit={exitCode}\n            className={cn(\n              'rounded px-1.5 py-0.5 font-medium',\n              exitCode === 0 ? 'bg-success/20 text-success' : 'bg-destructive/20 text-destructive',\n            )}\n          >\n            exit {exitCode}\n          </span>\n        ) : null}\n      </div>\n      <div\n        ref={scroller}\n        role=\"log\"\n        aria-live=\"off\"\n        tabIndex={0}\n        className=\"h-40 overflow-auto px-3 py-2 font-mono text-xs leading-5 outline-none focus-visible:ring-2 focus-visible:ring-ring\"\n      >\n        {lines.map((line, i) => (\n          <motion.div\n            key={i}\n            className=\"whitespace-pre-wrap break-all\"\n            initial={i >= baseline.current && !reduced ? { opacity: 0, y: 8 } : false}\n            animate={{ opacity: 1, y: 0 }}\n            transition={{ duration: 0.18, ease: 'easeOut' }}\n          >\n            {line || ' '}\n          </motion.div>\n        ))}\n        {running ? (\n          <motion.span\n            aria-hidden=\"true\"\n            data-cursor=\"\"\n            className=\"inline-block h-[1.1em] w-[0.55em] translate-y-[2px] bg-terminal-foreground\"\n            animate={reduced ? { opacity: 1 } : { opacity: [1, 1, 0, 0] }}\n            transition={{ duration: 1, repeat: Infinity, times: [0, 0.5, 0.5, 1], ease: 'linear' }}\n          />\n        ) : null}\n      </div>\n    </div>\n  );\n}\n"
+    }
+  ],
+  "docs": "docs/components/live-terminal.md",
+  "categories": [
+    "fx"
+  ],
+  "package": "@aicl/fx",
+  "usage": "import { LiveTerminal } from '@aicl/fx';\n\n<LiveTerminal lines={lines} running />",
+  "npmImport": "import { LiveTerminal } from '@aicl/fx';"
+}

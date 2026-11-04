@@ -1,0 +1,26 @@
+{
+  "name": "cn",
+  "type": "registry:lib",
+  "title": "cn",
+  "description": "clsx + tailwind-merge. The `@aicl/fx` components compose class names through it.",
+  "dependencies": [
+    "clsx",
+    "tailwind-merge"
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "packages/fx/src/lib/cn.ts",
+      "type": "registry:lib",
+      "target": "components/aicl/fx/lib/cn.ts",
+      "content": "import { clsx, type ClassValue } from 'clsx';\nimport { twMerge } from 'tailwind-merge';\n\n/** shadcn's class combiner: conditional classes, later Tailwind classes win. */\nexport function cn(...inputs: ClassValue[]): string {\n  return twMerge(clsx(inputs));\n}\n"
+    }
+  ],
+  "docs": "docs/components/cn.md",
+  "categories": [
+    "system"
+  ],
+  "package": "@aicl/fx",
+  "usage": "import { cn } from '@aicl/fx';",
+  "npmImport": "import { cn } from '@aicl/fx';"
+}

@@ -1,0 +1,54 @@
+{
+  "name": "button",
+  "type": "registry:ui",
+  "title": "Button",
+  "description": "A button. Variant, size and loading, with the glyphs as icon slots.",
+  "dependencies": [
+    "react",
+    "@aicl/core"
+  ],
+  "registryDependencies": [
+    "icon-slots"
+  ],
+  "files": [
+    {
+      "path": "packages/react/src/Button.tsx",
+      "type": "registry:ui",
+      "target": "components/aicl/Button.tsx",
+      "content": "/**\n * Button.\n *\n * AICL had no button primitive: every button in the library and in the\n * reference app was a raw `<button>` styled by whatever CSS happened to be\n * around. Both reference libraries ship one, and most of their components\n * compose it.\n *\n * The button is a **flat** primitive (S1) with three axes:\n *\n *   - `variant` — what it means: `default`, `secondary`, `destructive`,\n *     `ghost`, `outline`, `link`.\n *   - `size` — how big: `sm`, `md`, `lg`.\n *   - `loading` — it is working. The button stays focusable and stays the\n *     same size; it does not become disabled, because a disabled button\n *     cannot be found by a screen reader in a busy state.\n *\n * The glyphs are **icon slots**, not icons: `Button.Icon` takes a role\n * name and resolves it through the same `IconProvider` as everything else,\n * so an app that swaps the icon set gets its buttons swapped too.\n *\n * The button is headless. It publishes `data-aicl=\"button\"` and the three\n * axes as attributes; the surface comes from `@aicl/styles`.\n */\n\nimport { forwardRef, type ButtonHTMLAttributes, type ReactNode } from 'react';\n\nimport { Icon, type IconSlot } from './icons.js';\n\nexport type ButtonVariant = 'default' | 'secondary' | 'destructive' | 'ghost' | 'outline' | 'link';\nexport type ButtonSize = 'sm' | 'md' | 'lg';\n\nexport interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'color'> {\n  /** What the button means. Defaults to `default`. */\n  variant?: ButtonVariant;\n  /** How big the button is. Defaults to `md`. */\n  size?: ButtonSize;\n  /**\n   * The button is working. It keeps its size and stays focusable, and it\n   * announces itself as busy.\n   */\n  loading?: boolean;\n  /** The glyph before the label. A role name, not an icon. */\n  icon?: IconSlot;\n  /** The glyph after the label. */\n  trailingIcon?: IconSlot;\n  /** The accessible name, when the visible label is not the name. */\n  'aria-label'?: string;\n  children?: ReactNode;\n}\n\n/**\n * A button.\n *\n * `type` defaults to `button`. A button inside a form that submits it must\n * say so — an implicit submit is the single most common way a chat app\n * sends a message twice.\n */\nexport const Button = Object.assign(\n  forwardRef<HTMLButtonElement, ButtonProps>(function Button(\n    {\n      variant = 'default',\n      size = 'md',\n      loading = false,\n      icon,\n      trailingIcon,\n      disabled,\n      type = 'button',\n      children,\n      ...rest\n    },\n    ref,\n  ) {\n    return (\n      <button\n        {...rest}\n        ref={ref}\n        type={type}\n        disabled={disabled}\n        aria-busy={loading || undefined}\n        data-aicl=\"button\"\n        data-variant={variant}\n        data-size={size}\n        data-loading={loading || undefined}\n      >\n        {icon ? <ButtonIcon name={icon} /> : null}\n        {children != null ? <span data-aicl=\"button-label\">{children}</span> : null}\n        {trailingIcon ? <ButtonIcon name={trailingIcon} /> : null}\n      </button>\n    );\n  }),\n  { Icon: ButtonIcon },\n);\n\nexport interface ButtonIconProps {\n  /** The role this glyph plays. Resolved through the icon provider. */\n  name: IconSlot;\n  /** Size in pixels. Defaults to the button's icon size. */\n  size?: number;\n}\n\n/**\n * A glyph inside a button.\n *\n * Rendered through the icon provider, so it follows the app's icon set.\n */\nexport function ButtonIcon({ name, size }: ButtonIconProps) {\n  return (\n    <span data-aicl=\"button-icon\" data-icon={name}>\n      <Icon name={name} size={size} />\n    </span>\n  );\n}\n"
+    }
+  ],
+  "docs": "docs/components/button.md",
+  "categories": [
+    "content"
+  ],
+  "package": "@aicl/react",
+  "usage": "import { Button } from '@aicl/react';\n\n<Button variant=\"secondary\" icon=\"plus\">New task</Button>\n<Button loading>Working</Button>",
+  "npmImport": "import { Button } from '@aicl/react';",
+  "slots": [
+    "button",
+    "button-label",
+    "button-icon"
+  ],
+  "states": {
+    "data-variant": [
+      "default",
+      "secondary",
+      "destructive",
+      "ghost",
+      "outline",
+      "link"
+    ],
+    "data-size": [
+      "sm",
+      "md",
+      "lg"
+    ],
+    "data-loading": [
+      "true"
+    ],
+    "data-icon": [
+      "true"
+    ]
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "name": "fx-provider",
+  "type": "registry:lib",
+  "title": "FxProvider",
+  "description": "Sets motion reducedMotion=\"user\" and the data-fx scope vendored components assume.",
+  "dependencies": [
+    "motion",
+    "react"
+  ],
+  "registryDependencies": [
+    "cn"
+  ],
+  "files": [
+    {
+      "path": "packages/fx/src/lib/FxProvider.tsx",
+      "type": "registry:lib",
+      "target": "components/aicl/fx/lib/FxProvider.tsx",
+      "content": "import { MotionConfig } from 'motion/react';\nimport type { ReactNode } from 'react';\n\n/**\n * Wrap an app once. Motion follows the user's reduced-motion setting, and\n * `data-fx` scopes the border-box defaults vendored components assume.\n */\nexport function FxProvider({ children }: { children: ReactNode }) {\n  return (\n    <MotionConfig reducedMotion=\"user\">\n      <div data-fx=\"\" style={{ display: 'contents' }}>\n        {children}\n      </div>\n    </MotionConfig>\n  );\n}\n"
+    }
+  ],
+  "docs": "docs/components/fx-provider.md",
+  "categories": [
+    "system"
+  ],
+  "package": "@aicl/fx",
+  "usage": "import { FxProvider } from '@aicl/fx';\n\n<FxProvider>{children}</FxProvider>",
+  "npmImport": "import { FxProvider } from '@aicl/fx';"
+}

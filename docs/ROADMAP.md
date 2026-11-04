@@ -259,14 +259,15 @@ primitives in a drawn style, by seeding SVG behind the same slots. The
 
 Not new components — the machinery that makes them installable.
 
-| | What | Reference |
-|---|---|---|
-| **Registry** | `npx aicl add <item>`, source-in, with a manifest carrying the component contract | Fluid's registry, LooseLeaf's |
-| **Blocks** | the shells a chat app needs: the assistant shell, the work panel, the settings surface | Fluid's 7, LooseLeaf's 62 |
-| **Presets** | a skin + a density + an icon set, chosen once | Fluid's presets |
-| **`llms.txt`** | done, and it grows | Fluid's |
-| **The agent skill** | the library teaches itself to code against | Fluid's |
-| **`aicl doctor`** | reads the consumer's stack fresh; never caches a verdict | Fluid's `stack.mjs` |
+| | What | Reference | Status |
+|---|---|---|---|
+| **Registry** | `npx aicl add <item>`, source-in, with a manifest carrying the component contract | Fluid's registry, LooseLeaf's | Shipped (AICL-144) |
+| **Docs per item** | one brief, the install command, slots, states, a usage snippet | Fluid's llms.txt | Shipped |
+| **`aicl doctor`** | reads the consumer's stack fresh; never caches a verdict | Fluid's `stack.mjs` | Shipped |
+| **`llms.txt`** | done, and it grows | Fluid's | Shipped, now lists every item |
+| **Blocks** | the shells a chat app needs: the assistant shell, the work panel, the settings surface | Fluid's 7, LooseLeaf's 62 | Not yet |
+| **Presets** | a skin + a density + an icon set, chosen once | Fluid's presets | Not yet |
+| **The agent skill** | the library teaches itself to code against | Fluid's | Not yet |
 
 ---
 
@@ -296,7 +297,9 @@ Not new components — the machinery that makes them installable.
    value lives, and because the surface contract is a *shape* question, not
    an inventory question.
 4. **Wave 4 last**, because a registry with three items is worse than no
-   registry.
+   registry. AICL-144 inverted the last step: the catalog now covers every
+   existing primitive and every `@aicl/fx` component, so a new item has a
+   gate to pass through rather than a three-item advertisement to join.
 
 ### The one thing that would change this plan
 

@@ -44,6 +44,18 @@ test('the generated component doc lists every state', () => {
   }
 });
 
+test('every primitive has a catalog page with an install command', async () => {
+  for (const primitive of primitives) {
+    const name = primitive.name.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
+    const page = await readFile(new URL(`docs/components/${name}.md`, repo), 'utf8');
+    assert.ok(
+      page.includes(`npx aicl add ${name}`),
+      `${name}.md is missing the install command`,
+    );
+    assert.ok(page.includes('## Usage'), `${name}.md is missing a usage snippet`);
+  }
+});
+
 test('llms.txt points at the docs an agent needs', () => {
   for (const page of [
     './docs/DESIGN-SYSTEM.md',

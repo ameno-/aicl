@@ -24,6 +24,8 @@ Peer deps: `react`/`react-dom` ≥ 18. Wiring it to a backend: `docs/ADOPTION.md
 | Sessions | `SessionList`, `SessionListItem`, `SessionSearch`, `SidebarNav`, `relativeTime`, `resolveSecondary` | `sessions.tsx` |
 | Platform | `Dialog` (+ `.Title`, `.Description`, `.Close`), `AlertDialog`, `Drawer`, `Toast`, `ToastRegion`, `Field`, `Switch`, `Select`, `SegmentedControl` | `platform.tsx` |
 | Button | `Button` (+ `.Icon`) | `Button.tsx` |
+| Content | `Badge`, `Separator`, `Kbd`, `Progress`, `Collapsible` (+ `.Trigger`, `.Content`), `Tabs` (+ `.List`, `.Tab`, `.Panel`) | `Badge.tsx`, `Separator.tsx`, `Kbd.tsx`, `Progress.tsx`, `Collapsible.tsx`, `Tabs.tsx` |
+| Overlay | `Tooltip` (+ `.Trigger`, `.Content`) | `Tooltip.tsx` |
 | Icons | `Icon`, `IconProvider`, `useIcon`, `useIcons`, `iconDefaults` | `icons.tsx` |
 | Contract | `primitives`, `sharedSlots`, `allSlots`, `primitivesForSlot`, `iconRoles` | `contract.ts` |
 
@@ -87,6 +89,31 @@ say so, because an implicit submit is the most common way a chat app sends
 a message twice. A `loading` button is `aria-busy` but **not** `disabled` —
 a disabled button cannot be found by a screen reader in a busy state.
 
+## Content and overlays
+
+Badge, Kbd, Separator, Progress, Tooltip, Collapsible and Tabs are the
+content/overlay set both sample repos ship and AICL did not. They are
+headless: slots and states as `data-aicl` / `data-*`, paint from
+`@aicl/styles`. Progress fills with `scaleX`; Tabs moves a pill with
+`translateX` + `scaleX`; neither animates `width`. Tooltip delay is the
+fast motion tier (80 ms). Collapsible animates opacity, not height.
+
+```tsx
+<Badge variant="success">Done</Badge>
+<Kbd keys={['Meta', 'K']} />
+<Tooltip content="Copy"><Button icon="copy" aria-label="Copy" /></Tooltip>
+<Tabs defaultValue="chat">
+  <Tabs.List>
+    <Tabs.Tab value="chat">Chat</Tabs.Tab>
+    <Tabs.Tab value="files">Files</Tabs.Tab>
+  </Tabs.List>
+  <Tabs.Panel value="chat">The thread.</Tabs.Panel>
+</Tabs>
+```
+
+Every one of these — and every other primitive and `@aicl/fx` component — is
+a catalog item: `npx aicl add badge tabs tooltip`.
+
 ## The composer is compound
 
 The composer is a compound component, so a consumer can arrange it without
@@ -139,8 +166,11 @@ name.
 npm run build
 npm test        # react-test-renderer; src/*.test.tsx
 
-node scripts/generate-component-docs.mjs   # rewrites docs/components.md and docs/llms.txt
+npm run registry   # rewrites registry.json, docs/components/*, docs/llms.txt
+npx aicl list
+npx aicl docs button
 ```
 
-The generated docs are committed so they can be read without running anything, and a test fails
-when they drift from the contract.
+The generated docs and the catalog are committed so they can be read without running anything,
+and a test fails when they drift from the contract. A component is not incorporated until it
+is in `npx aicl list`.

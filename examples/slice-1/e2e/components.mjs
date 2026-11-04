@@ -231,6 +231,29 @@ await check('dropzone: picker accepts image, rejects wrong type', async () => {
   eq(await page.locator('#dropzone [data-aicl=attachment-chip]').count(), 0, 'removed');
 });
 
+await check('tabs: arrows move the selected tab and the panel', async () => {
+  const tab = page.locator('#chrome [role=tab]').first();
+  await tab.focus();
+  eq(await page.locator('#chrome [role=tab][aria-selected=true]').textContent(), 'Chat', 'start');
+  await page.keyboard.press('ArrowRight');
+  eq(await page.locator('#chrome [role=tab][aria-selected=true]').textContent(), 'Files', 'arrow');
+  eq(await page.locator('#chrome [role=tabpanel]:not([hidden])').textContent(), 'The tree.', 'panel');
+});
+await check('tooltip: focus shows the tip, Escape hides it', async () => {
+  const trigger = page.locator('#chrome [aria-label=Copy]');
+  await trigger.focus();
+  await page.waitForTimeout(120);
+  eq(await page.locator('#chrome [data-aicl=tooltip-content]').getAttribute('data-state'), 'open', 'open');
+  await page.keyboard.press('Escape');
+  eq(await page.locator('#chrome [data-aicl=tooltip-content]').getAttribute('data-state'), 'closed', 'closed');
+});
+await check('collapsible: click opens the region', async () => {
+  const trigger = page.locator('#chrome [data-aicl=collapsible-trigger]');
+  eq(await trigger.getAttribute('aria-expanded'), 'false', 'start');
+  await trigger.click();
+  eq(await trigger.getAttribute('aria-expanded'), 'true', 'open');
+});
+
 await check('no page errors', async () => {
   eq(errors, [], 'errors');
 });

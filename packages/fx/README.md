@@ -43,6 +43,10 @@ you get two copies of React.
 - `Ambient` (WebGPU via the `shaders` package. It renders nothing in headless browsers)
 - `cn` (clsx + tailwind-merge), `FxProvider`
 
+Every export is a catalog item: `npx aicl list` / `npx aicl add thinking-indicator`.
+The animated `Kbd` and `CodeBlock` are `fx-kbd` and `fx-code-block` so they do not
+collide with the headless primitives.
+
 ## See every component
 
 `apps/workspace/web/gallery.html` renders every component in every state (stories in

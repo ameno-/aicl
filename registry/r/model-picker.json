@@ -1,0 +1,31 @@
+{
+  "name": "model-picker",
+  "type": "registry:ui",
+  "title": "ModelPicker",
+  "description": "A model menu on a smooth dropdown.",
+  "dependencies": [
+    "react",
+    "motion",
+    "lucide-react"
+  ],
+  "registryDependencies": [
+    "cn",
+    "fx-provider",
+    "smooth-dropdown"
+  ],
+  "files": [
+    {
+      "path": "packages/fx/src/components/input/ModelPicker.tsx",
+      "type": "registry:ui",
+      "target": "components/aicl/fx/components/input/ModelPicker.tsx",
+      "content": "import { ChevronDown } from 'lucide-react';\nimport { SmoothDropdown, type DropdownOption, type SmoothDropdownProps } from '../../vendor/uselayouts/smooth-dropdown.tsx';\n\nexport type { DropdownOption, SmoothDropdownProps };\nexport { SmoothDropdown };\n\nexport interface ModelPickerProps {\n  options: DropdownOption[];\n  value: string;\n  onChange: (id: string) => void;\n  label?: string;\n  direction?: 'up' | 'down';\n  align?: 'start' | 'end';\n  disabled?: boolean;\n  className?: string;\n}\n\n/** SmoothDropdown with a \"selected label + chevron\" trigger. */\nexport function ModelPicker({ label = 'Model', ...props }: ModelPickerProps) {\n  const selected = props.options.find((o) => o.id === props.value);\n  return (\n    <SmoothDropdown\n      data-fx-component=\"model-picker\"\n      label={label}\n      width={300}\n      {...props}\n      trigger={\n        <>\n          {selected?.icon}\n          <span className=\"truncate\">{selected?.label ?? 'Select'}</span>\n          <ChevronDown size={14} aria-hidden=\"true\" className=\"text-muted-foreground\" />\n        </>\n      }\n    />\n  );\n}\n"
+    }
+  ],
+  "docs": "docs/components/model-picker.md",
+  "categories": [
+    "fx-input"
+  ],
+  "package": "@aicl/fx",
+  "usage": "import { ModelPicker } from '@aicl/fx';\n\n<ModelPicker value={model} onChange={setModel} options={models} />",
+  "npmImport": "import { ModelPicker } from '@aicl/fx';"
+}

@@ -1,0 +1,35 @@
+{
+  "name": "separator",
+  "type": "registry:ui",
+  "title": "Separator",
+  "description": "A line between groups. Decorative by default.",
+  "dependencies": [
+    "react",
+    "@aicl/core"
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "packages/react/src/Separator.tsx",
+      "type": "registry:ui",
+      "target": "components/aicl/Separator.tsx",
+      "content": "/**\n * Separator.\n *\n * A line between groups. Decorative by default (no role), or a real\n * `separator` when the caller needs one announced.\n */\n\nimport type { HTMLAttributes } from 'react';\n\nexport type SeparatorOrientation = 'horizontal' | 'vertical';\n\nexport interface SeparatorProps extends HTMLAttributes<HTMLDivElement> {\n  orientation?: SeparatorOrientation;\n  /** When true, the line is announced as a separator. Defaults to decorative. */\n  decorative?: boolean;\n}\n\nexport function Separator({\n  orientation = 'horizontal',\n  decorative = true,\n  ...rest\n}: SeparatorProps) {\n  return (\n    <div\n      {...rest}\n      role={decorative ? 'none' : 'separator'}\n      aria-orientation={decorative ? undefined : orientation}\n      data-aicl=\"separator\"\n      data-orientation={orientation}\n    />\n  );\n}\n"
+    }
+  ],
+  "docs": "docs/components/separator.md",
+  "categories": [
+    "content"
+  ],
+  "package": "@aicl/react",
+  "usage": "import { Separator } from '@aicl/react';\n\n<Separator />\n<Separator orientation=\"vertical\" />",
+  "npmImport": "import { Separator } from '@aicl/react';",
+  "slots": [
+    "separator"
+  ],
+  "states": {
+    "data-orientation": [
+      "horizontal",
+      "vertical"
+    ]
+  }
+}

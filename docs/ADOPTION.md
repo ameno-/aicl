@@ -22,6 +22,7 @@ Want a standalone app rather than a dependency? Design a screen in the workspace
 | `@aicl/react` | `useChat`, unstyled primitives (`Transcript`, `Composer`, part renderers, sessions, dialogs, toasts) | `@aicl/core`, `lucide-react`, `react-markdown`, `remark-gfm` |
 | `@aicl/styles` | Optional CSS-variable theme for every `[data-aicl]` primitive | none (CSS) |
 | `@aicl/fx` | Optional animated components (Tailwind v4 + motion + WebGPU ambience). Source only | see `packages/fx/README.md` |
+| `@aicl/cli` | `npx aicl list` / `add` / `docs` / `doctor`. Components install as source | `packages/cli/README.md` |
 
 Not provided: model-provider connectors, auth, persistence, Svelte or Vue adapters. The
 `packages/svelte` and `packages/vue` directories are empty placeholders, and the
@@ -39,6 +40,14 @@ The packages are unpublished (`version: 0.0.0`). Consume them from a checkout:
   "@aicl/server": "file:../aicl/packages/server",
   "@aicl/styles": "file:../aicl/packages/styles"
 }
+```
+
+To install one component as source instead of taking the whole adapter:
+
+```bash
+npx aicl list
+npx aicl add button tabs tooltip
+npx aicl docs button
 ```
 
 Then build the library once, because `core`, `react` and `server` resolve to `dist/`, which is

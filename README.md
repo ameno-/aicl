@@ -23,6 +23,7 @@ runs the same in the browser and in Node and ships with end-to-end tests.
 | [`@aicl/styles`](packages/styles/README.md) | The token contract and the component surfaces for every `[data-aicl]` primitive, light and dark | none (CSS) |
 | [`@aicl/motion`](packages/motion/README.md) | The motion system: three spring tiers, fluid hover, weight without reflow. CSS springs, React bindings | none |
 | [`@aicl/fx`](packages/fx/README.md) | Optional animated, styled components (Tailwind v4, motion, WebGPU ambient). Source only | see package README |
+| [`@aicl/cli`](packages/cli/README.md) | `npx aicl list` / `add` / `docs` / `doctor`. Components install as source | none |
 
 Svelte and Vue adapters are placeholders for now (see `packages/svelte`, `packages/vue`).
 
@@ -38,6 +39,13 @@ The packages are unpublished (`version: 0.0.0`). Consume them from a checkout:
   "@aicl/server": "file:../aicl/packages/server",
   "@aicl/styles": "file:../aicl/packages/styles"
 }
+```
+
+To copy one component into your repo instead of depending on the adapter:
+
+```bash
+npx aicl list
+npx aicl add button tabs tooltip
 ```
 
 Then build the library once, because `core`, `react` and `server` resolve to `dist/`, which is

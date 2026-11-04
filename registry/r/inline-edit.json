@@ -1,0 +1,30 @@
+{
+  "name": "inline-edit",
+  "type": "registry:ui",
+  "title": "InlineEdit",
+  "description": "Click-to-edit text. Enter commits, Escape reverts.",
+  "dependencies": [
+    "react",
+    "motion",
+    "lucide-react"
+  ],
+  "registryDependencies": [
+    "cn",
+    "fx-provider"
+  ],
+  "files": [
+    {
+      "path": "packages/fx/src/vendor/uselayouts/inline-edit.tsx",
+      "type": "registry:ui",
+      "target": "components/aicl/fx/vendor/uselayouts/inline-edit.tsx",
+      "content": "/**\n * Vendored from iurvish/uselayouts\n * Path: registry/default/example/inline-edit.tsx\n * Commit: 07cc4f4fb8e0\n * Licence: MIT (see packages/fx/ATTRIBUTION.md)\n * Adapted: controlled via value/onSave props; hugeicons -> lucide-react; shadcn\n * Input -> native input; pen/check are real buttons; Enter saves, Escape\n * cancels; cn import.\n */\nimport { AnimatePresence, motion } from 'motion/react';\nimport { Check, Pencil } from 'lucide-react';\nimport { useEffect, useRef, useState } from 'react';\nimport { cn } from '../../lib/cn.ts';\n\nexport interface InlineEditProps {\n  value: string;\n  onSave: (value: string) => void;\n  placeholder?: string;\n  label?: string;\n  className?: string;\n}\n\nexport function InlineEdit({ value, onSave, placeholder, label = 'Edit value', className }: InlineEditProps) {\n  const [isEditing, setIsEditing] = useState(false);\n  const [draft, setDraft] = useState(value);\n  const inputRef = useRef<HTMLInputElement>(null);\n\n  useEffect(() => {\n    if (!isEditing) setDraft(value);\n  }, [value, isEditing]);\n\n  useEffect(() => {\n    if (isEditing) inputRef.current?.select();\n  }, [isEditing]);\n\n  const commit = () => {\n    setIsEditing(false);\n    if (draft !== value) onSave(draft);\n  };\n  const cancel = () => {\n    setDraft(value);\n    setIsEditing(false);\n  };\n\n  return (\n    <motion.div\n      data-fx-component=\"inline-edit\"\n      data-editing={isEditing ? '' : undefined}\n      layout\n      className={cn(\n        'relative inline-flex items-center overflow-hidden rounded-full border-2 border-border bg-background',\n        isEditing && 'ring-2 ring-ring ring-offset-2 ring-offset-background',\n        className,\n      )}\n    >\n      <input\n        ref={inputRef}\n        aria-label={label}\n        value={draft}\n        readOnly={!isEditing}\n        placeholder={placeholder}\n        onChange={(e) => setDraft(e.target.value)}\n        onKeyDown={(e) => {\n          if (e.key === 'Enter') commit();\n          if (e.key === 'Escape') cancel();\n        }}\n        className={cn(\n          'h-10 w-full min-w-32 border-0 bg-transparent pl-4 pr-12 text-base outline-none',\n          isEditing ? 'text-foreground' : 'text-muted-foreground',\n        )}\n      />\n      <AnimatePresence initial={false} mode=\"popLayout\">\n        {isEditing ? (\n          <motion.button\n            key=\"save\"\n            type=\"button\"\n            aria-label=\"Save\"\n            initial={{ x: 50 }}\n            animate={{ x: 0 }}\n            exit={{ x: 50 }}\n            transition={{ type: 'spring', bounce: 0.1 }}\n            onClick={commit}\n            className=\"absolute right-1 flex size-8 cursor-pointer items-center justify-center rounded-full bg-primary text-primary-foreground hover:opacity-90\"\n          >\n            <Check size={16} />\n          </motion.button>\n        ) : (\n          <motion.button\n            key=\"edit\"\n            type=\"button\"\n            aria-label=\"Edit\"\n            initial={{ x: 50 }}\n            animate={{ x: 0 }}\n            exit={{ x: 50 }}\n            transition={{ type: 'spring', bounce: 0.1 }}\n            onClick={() => setIsEditing(true)}\n            className=\"absolute right-1 flex size-8 cursor-pointer items-center justify-center rounded-full border border-border bg-card text-muted-foreground hover:bg-muted\"\n          >\n            <Pencil size={14} />\n          </motion.button>\n        )}\n      </AnimatePresence>\n    </motion.div>\n  );\n}\n"
+    }
+  ],
+  "docs": "docs/components/inline-edit.md",
+  "categories": [
+    "fx-input"
+  ],
+  "package": "@aicl/fx",
+  "usage": "import { InlineEdit } from '@aicl/fx';\n\n<InlineEdit value={title} onSubmit={rename} />",
+  "npmImport": "import { InlineEdit } from '@aicl/fx';"
+}

@@ -2,13 +2,18 @@ import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import type { Message, SessionMeta } from '@aicl/core';
 import { FluidHoverHighlight, WeightText, useFluidHover } from '@aicl/motion/react';
 import {
+  Badge,
   Button,
   Composer,
   Dialog,
+  Kbd,
+  Progress,
   SegmentedControl,
   Select,
   SessionList,
   Switch,
+  Tabs,
+  Tooltip,
   Transcript,
 } from '@aicl/react';
 
@@ -25,6 +30,7 @@ type Skin = 'default' | 'looseleaf';
 
 const STOPS = [
   { id: 'button', title: 'Button', line: 'Variants, sizes, and a press. Hold one.' },
+  { id: 'chrome', title: 'Chrome', line: 'The travelling pill, a tip, a badge, a bar.' },
   { id: 'composer', title: 'Composer', line: 'Type, then send. The field is the product.' },
   { id: 'transcript', title: 'Transcript', line: 'One live region. Messages arrive; they do not pop.' },
   { id: 'choice', title: 'Choice', line: 'A switch, a segment, a select. Keyboard first.' },
@@ -94,6 +100,31 @@ function ButtonStop() {
       <Button loading={loading} onClick={() => setLoading((value) => !value)}>
         {loading ? 'Working' : 'Hold to work'}
       </Button>
+    </div>
+  );
+}
+
+function ChromeStop() {
+  const [tab, setTab] = useState('chat');
+  return (
+    <div className="tour-stack">
+      <div className="tour-row">
+        <Badge variant="success">Done</Badge>
+        <Badge variant="warning">Needs you</Badge>
+        <Kbd keys={['Meta', 'K']} />
+        <Tooltip content="Copy">
+          <Button icon="copy" aria-label="Copy" />
+        </Tooltip>
+      </div>
+      <Progress value={60} label="Indexing" />
+      <Tabs value={tab} onValueChange={setTab} label="Work">
+        <Tabs.List>
+          <Tabs.Tab value="chat">Chat</Tabs.Tab>
+          <Tabs.Tab value="files">Files</Tabs.Tab>
+        </Tabs.List>
+        <Tabs.Panel value="chat">The thread stays put. The pill travels.</Tabs.Panel>
+        <Tabs.Panel value="files">A tree, when there is one.</Tabs.Panel>
+      </Tabs>
     </div>
   );
 }
@@ -214,6 +245,7 @@ function YoursStop() {
 
 const STAGES: Record<StopId, (skin: string) => ReactNode> = {
   button: () => <ButtonStop />,
+  chrome: () => <ChromeStop />,
   composer: () => <ComposerStop />,
   transcript: (skin) => <TranscriptStop skin={skin} />,
   choice: () => <ChoiceStop />,

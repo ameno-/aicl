@@ -1,0 +1,39 @@
+{
+  "name": "badge",
+  "type": "registry:ui",
+  "title": "Badge",
+  "description": "A status chip. Quiet colour, never a button.",
+  "dependencies": [
+    "react",
+    "@aicl/core"
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "packages/react/src/Badge.tsx",
+      "type": "registry:ui",
+      "target": "components/aicl/Badge.tsx",
+      "content": "/**\n * Badge.\n *\n * A status chip. Fluid and LooseLeaf both ship one; AICL did not. The\n * corpus uses them on session rows, plan steps and tool status — quiet\n * colour, never a button.\n *\n * Headless: `data-aicl=\"badge\"` and `data-variant`. The surface comes from\n * `@aicl/styles`.\n */\n\nimport type { HTMLAttributes, ReactNode } from 'react';\n\nexport type BadgeVariant = 'default' | 'secondary' | 'success' | 'warning' | 'danger' | 'outline';\n\nexport interface BadgeProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'color'> {\n  variant?: BadgeVariant;\n  children?: ReactNode;\n}\n\nexport function Badge({ variant = 'default', children, ...rest }: BadgeProps) {\n  return (\n    <span {...rest} data-aicl=\"badge\" data-variant={variant}>\n      {children}\n    </span>\n  );\n}\n"
+    }
+  ],
+  "docs": "docs/components/badge.md",
+  "categories": [
+    "content"
+  ],
+  "package": "@aicl/react",
+  "usage": "import { Badge } from '@aicl/react';\n\n<Badge variant=\"success\">Done</Badge>\n<Badge variant=\"danger\">Failed</Badge>",
+  "npmImport": "import { Badge } from '@aicl/react';",
+  "slots": [
+    "badge"
+  ],
+  "states": {
+    "data-variant": [
+      "default",
+      "secondary",
+      "success",
+      "warning",
+      "danger",
+      "outline"
+    ]
+  }
+}

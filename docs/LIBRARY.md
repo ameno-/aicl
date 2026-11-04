@@ -72,9 +72,11 @@ their own, and a component that does not read one does not depend on it.
 
 ### Components
 
-Eighteen primitives across four surfaces: the transcript, the composer, the
-part renderers, the platform controls, and the navigation. The full list,
-with slots and states, is in [`docs/components.md`](components.md).
+The primitives across the transcript, the composer, the part renderers,
+the platform controls, the navigation, and the content/overlay set. The
+full list, with slots and states, is in [`docs/components.md`](components.md).
+The catalog — every primitive, every `@aicl/fx` component, every system —
+is `npx aicl list`.
 
 These are AICL's own, and they stay. What changes is that they are now
 *described* — the contract names their slots and states, and a test fails
@@ -91,36 +93,42 @@ highlighter hover, warm umber shadows, cut-paper radii, a handwriting stack
 
 ## What is missing, and in what order
 
-### 1. The registry
-
-The registry is Fluid's central idea and AICL's biggest gap.
+### 1. The registry — shipped
 
 ```
 npx aicl add transcript composer
+npx aicl list
+npx aicl docs button
+npx aicl doctor
 ```
 
 A registry item is a directory of source plus a manifest: its files, its
 dependencies, the CSS it needs, and the slots and states it publishes. The
-manifest is the component contract, so the two cannot disagree.
+manifest is generated from the component contract, so the two cannot
+disagree. The catalog lives in `registry.json`; each item has a brief in
+`docs/components/<name>.md` and a shadcn-shaped JSON in `registry/r/`.
 
 The same items publish in the **shadcn registry format**, so a team already
 on shadcn installs AICL components with the CLI they know:
 
 ```
-npx shadcn@latest add @aicl/transcript
+npx shadcn@latest add ./registry/r/transcript.json
 ```
 
 One source of truth, two consumers.
 
-*Before this:* the component inventory. A registry with three items in it is
-a worse advertisement than no registry at all.
+**The incorporation gate.** A component is not incorporated until it has a
+catalog entry, a contract (slots and states, or the fx equivalent), a
+source file that exists, a generated doc page, a usage snippet, a test,
+and a gallery or tour stop. A drift test fails the build otherwise.
 
 ### 2. The component inventory
 
-The gap between what AICL has (chat primitives) and what a chat app needs
-(button, tooltip, tabs, select, sidebar, command menu, table) is exactly
-why chat apps built on AICL end up building their own design system. This
-is the "democratize" work.
+Button, tooltip, tabs, badge, kbd, progress, separator and collapsible
+landed with the catalog. Still missing from the sample-repo set: input,
+combobox, dropdown menu, hover card, command menu as a library primitive,
+table. That remaining gap is why some chat apps still grow a second
+design system on top of AICL.
 
 These are AICL's components, in AICL's style — the corpus-derived look, not
 Fluid's. They are built on the same contract, publish the same slots, and

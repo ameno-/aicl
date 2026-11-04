@@ -1,0 +1,53 @@
+{
+  "name": "message-actions",
+  "type": "registry:ui",
+  "title": "MessageActions",
+  "description": "The per-message action row. Hidden until the row is hovered or focused.",
+  "dependencies": [
+    "react",
+    "@aicl/core"
+  ],
+  "registryDependencies": [
+    "icon-slots"
+  ],
+  "files": [
+    {
+      "path": "packages/react/src/MessageActions.tsx",
+      "type": "registry:ui",
+      "target": "components/aicl/MessageActions.tsx",
+      "content": "import { useState } from 'react';\nimport type { Message, Part } from '@aicl/core';\nimport { Icon, type IconSlot } from './icons.js';\n\nconst LABEL: Record<MessageAction, string> = {\n  copy: 'Copy',\n  'thumbs-up': 'Good response',\n  'thumbs-down': 'Bad response',\n  retry: 'Retry',\n  edit: 'Edit',\n};\nconst GLYPH: Record<MessageAction, IconSlot> = {\n  copy: 'copy',\n  'thumbs-up': 'thumb-up',\n  'thumbs-down': 'thumb-down',\n  retry: 'retry',\n  edit: 'edit',\n};\n\nexport type MessageAction = 'copy' | 'thumbs-up' | 'thumbs-down' | 'retry' | 'edit';\n\nconst DEFAULTS: Record<Message['role'], MessageAction[]> = {\n  user: ['edit', 'copy'],\n  assistant: ['copy', 'thumbs-up', 'thumbs-down', 'retry'],\n  system: ['copy'],\n};\n\nfunction copyableText(parts: Part[]): string {\n  return parts\n    .filter((part) => part.type === 'text')\n    .map((part) => (part.type === 'text' ? part.text : ''))\n    .join('\\n');\n}\n\nexport function MessageActions({\n  message,\n  actions,\n  onAction,\n}: {\n  message: Message;\n  actions?: MessageAction[];\n  onAction?: (action: MessageAction, message: Message) => void;\n}) {\n  const [feedback, setFeedback] = useState<'up' | 'down' | 'none'>('none');\n  const [copied, setCopied] = useState(false);\n  const shown = actions ?? DEFAULTS[message.role];\n  return (\n    <div\n      data-aicl=\"message-actions\"\n      data-visibility=\"auto\"\n      data-resolved=\"painted\"\n      data-feedback={feedback}\n      data-message-id={message.id}\n      data-role={message.role}\n      data-copied={copied || undefined}\n    >\n      {shown.map((action) => (\n        <button\n          key={action}\n          type=\"button\"\n          aria-label={LABEL[action]}\n          title={LABEL[action]}\n          data-action={action}\n          aria-pressed={action === 'thumbs-up' ? feedback === 'up' : action === 'thumbs-down' ? feedback === 'down' : undefined}\n          onClick={() => {\n            if (action === 'copy') {\n              void navigator.clipboard?.writeText(copyableText(message.parts));\n              setCopied(true);\n            }\n            if (action === 'thumbs-up') setFeedback(feedback === 'up' ? 'none' : 'up');\n            if (action === 'thumbs-down') setFeedback(feedback === 'down' ? 'none' : 'down');\n            onAction?.(action, message);\n          }}\n        >\n          <Icon name={action === 'copy' && copied ? 'check' : GLYPH[action]} size={15} />\n        </button>\n      ))}\n    </div>\n  );\n}\n"
+    }
+  ],
+  "docs": "docs/components/message-actions.md",
+  "categories": [
+    "chat"
+  ],
+  "package": "@aicl/react",
+  "usage": "import { MessageActions } from '@aicl/react';\n\n<MessageActions message={message} onAction={handle} />",
+  "npmImport": "import { MessageActions } from '@aicl/react';",
+  "slots": [
+    "message-actions"
+  ],
+  "states": {
+    "data-visibility": [
+      "auto",
+      "always"
+    ],
+    "data-resolved": [
+      "painted"
+    ],
+    "data-feedback": [
+      "up",
+      "down",
+      "none"
+    ],
+    "data-role": [
+      "user",
+      "assistant",
+      "system"
+    ],
+    "data-copied": [
+      "true"
+    ]
+  }
+}
