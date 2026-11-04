@@ -116,3 +116,11 @@ Work is complete only when the PR is pushed:
 4. Push your branch and confirm `git status` says it is up to date with its upstream, then open
    or update the PR.
 5. Hand off: what changed, what was verified, what was not.
+
+## Cursor Cloud specific instructions
+
+The default image already has Node 22. Root `npm ci` and `npm run build` have to finish before the apps, because `core`, `react`, and `server` resolve to gitignored `dist/`. `apps/workspace`, `examples/slice-1`, and `examples/server-node` are outside the root workspaces and each need their own `npm ci`. Slice-1 and workspace e2e use `playwright-core`, which does not download a browser; install Chromium with `npx playwright-core install chromium` from `examples/slice-1` (the workspace app pins the same version).
+
+On boot, the echo chat server listens on port 5174, the slice-1 gallery on 5179 (its `/api` proxy targets 5174), and the workspace API on 5180 with Vite on 5181. Workspace state is `AICL_WORKSPACE=/tmp/aicl-workspace`.
+
+Do not start the workspace with `npm run dev` unless `AICL_MODEL` is a model Pi can resolve. That script defaults `AICL_MODEL` to `ap-codex/gpt-6-luna`, which exists only on the author's machine, and the API process exits. `npm run server` and `npm run web` start with no model (`unknown/unknown`) when `AICL_MODEL` is unset. Library tests, workspace `npm test`, the slice-1 gallery, and the echo server do not need a provider. A live workspace chat turn does: Pi reads `~/.pi/agent` (or `PI_CODING_AGENT_DIR`) and the provider keys documented in `@earendil-works/pi-coding-agent`.
