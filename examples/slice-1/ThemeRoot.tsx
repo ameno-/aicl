@@ -42,6 +42,23 @@ export function ThemeRoot({ children }: { children: ReactNode }) {
     }
   }, [theme, skin]);
 
+  useEffect(() => {
+    const onSkin = (event: Event) => {
+      const next = (event as CustomEvent<string>).detail;
+      if (next === 'default' || next === 'looseleaf') setSkin(next);
+    };
+    const onTheme = (event: Event) => {
+      const next = (event as CustomEvent<string>).detail;
+      if (next === 'light' || next === 'dark' || next === 'system') setTheme(next);
+    };
+    window.addEventListener('aicl:skin', onSkin);
+    window.addEventListener('aicl:theme', onTheme);
+    return () => {
+      window.removeEventListener('aicl:skin', onSkin);
+      window.removeEventListener('aicl:theme', onTheme);
+    };
+  }, []);
+
   return (
     <>
       {children}

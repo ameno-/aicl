@@ -225,43 +225,110 @@
                                       color-mix(in srgb, #f8dc4c 32%, transparent));
 }
 
-/* ─── Light elevation ───────────────────────────────────────────────
-   Warm, never black: a shadow on paper is the paper's own colour going
-   dark, so the umber is kept and the alpha does the work. */
+/* ─── Lift ──────────────────────────────────────────────────────────
+   A sheet of paper does not blur. It sits up off the desk by a hard
+   offset, the way a cut card casts a shadow the same shape as itself.
+   Pressing the card moves it down onto that shadow. */
 [data-aicl-theme='looseleaf'] {
-  --aicl-shadow-1: 0 1px 1.5px rgb(58 44 30 / 0.16);
-  --aicl-shadow-2: 0 1px 2px rgb(58 44 30 / 0.12), 0 6px 16px -2px rgb(58 44 30 / 0.12);
-  --aicl-shadow-3: 0 1px 1.5px rgb(58 44 30 / 0.2), 0 2px 5px -1px rgb(58 44 30 / 0.1),
-                   0 12px 22px -8px rgb(58 44 30 / 0.2);
-  --aicl-shadow-4: 0 2px 6px rgb(58 44 30 / 0.22), 0 14px 28px -6px rgb(58 44 30 / 0.22);
-  --aicl-shadow-5: 0 3px 8px rgb(58 44 30 / 0.24), 0 18px 36px -8px rgb(58 44 30 / 0.24);
-  --aicl-shadow-6: 0 4px 10px rgb(58 44 30 / 0.26), 0 24px 48px -10px rgb(58 44 30 / 0.26);
+  --aicl-border-width: 1.5px;
+  --aicl-press-y: 2px;
+  --aicl-enter-y: 10px;
+  --aicl-enter-rotate: -0.7deg;
+  --aicl-dialog-enter-y: 14px;
+  --aicl-dialog-enter-scale: 0.97;
+  --aicl-dialog-enter-rotate: -0.5deg;
+
+  --aicl-shadow-1: 2px 2px 0 rgb(42 36 32 / 0.18);
+  --aicl-shadow-2: 3px 3px 0 rgb(42 36 32 / 0.22);
+  --aicl-shadow-3: 6px 6px 0 rgb(42 36 32 / 0.2);
+  --aicl-shadow-4: 8px 8px 0 rgb(42 36 32 / 0.22);
+  --aicl-shadow-5: 12px 12px 0 rgb(42 36 32 / 0.24);
+  --aicl-shadow-6: 16px 16px 0 rgb(42 36 32 / 0.26);
 }
 
 /* ─── Dark ───────────────────────────────────────────────────────────
    The desk in lamplight: the same green, taken down; the paper, warmed to
    a low lamp rather than turned to grey. */
 [data-aicl-theme='looseleaf'][data-theme='dark'] {
-  /* Elevation. A shadow is not a colour, so it cannot ride `light-dark()`
-     the way the palette does. */
-  --aicl-shadow-1: 0 1px 1.5px rgb(0 0 0 / 0.4);
-  --aicl-shadow-2: 0 1px 2px rgb(0 0 0 / 0.36), 0 6px 16px -2px rgb(0 0 0 / 0.44);
-  --aicl-shadow-3: 0 1px 1.5px rgb(0 0 0 / 0.44), 0 2px 5px -1px rgb(0 0 0 / 0.3),
-                   0 12px 22px -8px rgb(0 0 0 / 0.5);
-  --aicl-shadow-4: 0 2px 6px rgb(0 0 0 / 0.46), 0 14px 28px -6px rgb(0 0 0 / 0.52);
-  --aicl-shadow-5: 0 3px 8px rgb(0 0 0 / 0.48), 0 18px 36px -8px rgb(0 0 0 / 0.54);
-  --aicl-shadow-6: 0 4px 10px rgb(0 0 0 / 0.5), 0 24px 48px -10px rgb(0 0 0 / 0.56);
+  --aicl-shadow-1: 2px 2px 0 rgb(0 0 0 / 0.45);
+  --aicl-shadow-2: 3px 3px 0 rgb(0 0 0 / 0.5);
+  --aicl-shadow-3: 6px 6px 0 rgb(0 0 0 / 0.55);
+  --aicl-shadow-4: 8px 8px 0 rgb(0 0 0 / 0.58);
+  --aicl-shadow-5: 12px 12px 0 rgb(0 0 0 / 0.6);
+  --aicl-shadow-6: 16px 16px 0 rgb(0 0 0 / 0.64);
 }
 
 @media (prefers-color-scheme: dark) {
   [data-aicl-theme='looseleaf']:not([data-theme='light']) {
-    --aicl-shadow-1: 0 1px 1.5px rgb(0 0 0 / 0.4);
-    --aicl-shadow-2: 0 1px 2px rgb(0 0 0 / 0.36), 0 6px 16px -2px rgb(0 0 0 / 0.44);
-    --aicl-shadow-3: 0 1px 1.5px rgb(0 0 0 / 0.44), 0 2px 5px -1px rgb(0 0 0 / 0.3),
-                     0 12px 22px -8px rgb(0 0 0 / 0.5);
-    --aicl-shadow-4: 0 2px 6px rgb(0 0 0 / 0.46), 0 14px 28px -6px rgb(0 0 0 / 0.52);
-    --aicl-shadow-5: 0 3px 8px rgb(0 0 0 / 0.48), 0 18px 36px -8px rgb(0 0 0 / 0.54);
-    --aicl-shadow-6: 0 4px 10px rgb(0 0 0 / 0.5), 0 24px 48px -10px rgb(0 0 0 / 0.56);
+    --aicl-shadow-1: 2px 2px 0 rgb(0 0 0 / 0.45);
+    --aicl-shadow-2: 3px 3px 0 rgb(0 0 0 / 0.5);
+    --aicl-shadow-3: 6px 6px 0 rgb(0 0 0 / 0.55);
+    --aicl-shadow-4: 8px 8px 0 rgb(0 0 0 / 0.58);
+    --aicl-shadow-5: 12px 12px 0 rgb(0 0 0 / 0.6);
+    --aicl-shadow-6: 16px 16px 0 rgb(0 0 0 / 0.64);
+  }
+}
+
+/* Tooth on the desk. The page is the green blotter; components are the
+   sheets laid on it. */
+html[data-aicl-theme='looseleaf'],
+html[data-aicl-theme='looseleaf'] body {
+  background-color: var(--aicl-bg);
+  background-image: radial-gradient(rgb(42 36 32 / 0.05) 0.7px, transparent 0.7px);
+  background-size: 4px 4px;
+}
+
+/* The press, the highlighter, and the sheet that lifts when you write.
+   These select the public slots. They do not add behaviour: a button is
+   still a button, it just meets the desk when you hold it. */
+[data-aicl-theme='looseleaf'] [data-aicl='button']:not([data-variant='ghost']):not([data-variant='link']),
+[data-aicl-theme='looseleaf'] [data-aicl='composer'],
+[data-aicl-theme='looseleaf'] [data-aicl='dialog'],
+[data-aicl-theme='looseleaf'] [data-aicl='alert-dialog'],
+[data-aicl-theme='looseleaf'] [data-aicl='suggestion-chip'],
+[data-aicl-theme='looseleaf'] [data-aicl='scroll-to-bottom'] {
+  box-shadow: var(--aicl-shadow-2);
+}
+
+[data-aicl-theme='looseleaf'] [data-aicl='button']:not(:disabled):active,
+[data-aicl-theme='looseleaf'] [data-aicl='composer-submit']:not(:disabled):active,
+[data-aicl-theme='looseleaf'] [data-aicl='suggestion-chip']:active {
+  transform: translate(1px, var(--aicl-press-y));
+  box-shadow: 1px 1px 0 rgb(42 36 32 / 0.28);
+}
+
+[data-aicl-theme='looseleaf'] [data-aicl='composer']:focus-within {
+  transform: translate(-1px, -1px);
+  box-shadow: 5px 5px 0 rgb(42 36 32 / 0.22);
+  border-color: var(--aicl-text);
+}
+
+[data-aicl-theme='looseleaf'] [data-aicl='message'][data-alignment='end'] [data-aicl='part'][data-part='text'] {
+  border: var(--aicl-border-width) solid var(--aicl-border);
+  box-shadow: var(--aicl-shadow-1);
+  background: var(--aicl-surface);
+}
+
+[data-aicl-theme='looseleaf'] [data-aicl='button'][data-variant='ghost']:hover,
+[data-aicl-theme='looseleaf'] [data-aicl='suggestion-chip']:hover,
+[data-aicl-theme='looseleaf'] [data-aicl='session-item']:hover {
+  background: transparent;
+  box-shadow: inset 0 -0.45em 0 var(--aicl-accent-soft);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-aicl-theme='looseleaf'] {
+    --aicl-press-y: 0px;
+    --aicl-enter-y: 0px;
+    --aicl-enter-rotate: 0deg;
+    --aicl-dialog-enter-y: 0px;
+    --aicl-dialog-enter-scale: 1;
+    --aicl-dialog-enter-rotate: 0deg;
+  }
+
+  [data-aicl-theme='looseleaf'] [data-aicl='composer']:focus-within,
+  [data-aicl-theme='looseleaf'] [data-aicl='button']:active {
+    transform: none;
   }
 }
 
