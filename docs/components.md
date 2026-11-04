@@ -11,7 +11,7 @@ The names are public API. Changing one is a breaking change.
 | Primitive | What it is for | Slots |
 | --- | --- | --- |
 | Button | A button. Variant, size and loading, with the glyphs as icon slots. | `button` `button-label` `button-icon` |
-| Transcript | The conversation: one scroll container over the selected branch path. | `transcript-root` `transcript` `message-row` `message` `status-line` `day-separator` `scroll-to-bottom` `branch-switcher` |
+| Transcript | The conversation: a scroller, the rows, and jump-to-latest. One live region for the thread. | `transcript-root` `transcript` `message-row` `message` `status-line` `day-separator` `scroll-to-bottom` `branch-switcher` |
 | Composer | The field, the submit action, the toolbar slots and the above-band. | `composer` `composer-body` `composer-input` `composer-submit` `composer-attach` `composer-disabled-reason` `composer-hint` `attachment-row` |
 | PartRenderer | Dispatches one part to its renderer. The default renderers follow. | `part` `reasoning` `reasoning-body` `tool-call` `tool-call-body` `artifact-card` `artifact-icon` `artifact-title` `artifact-meta` `artifact-kind` `artifact-version` `artifact-open` `code-block` `inline-code` `terminal-output` |
 | MessageActions | The per-message action row. Hidden until the row is hovered or focused. | `message-actions` |

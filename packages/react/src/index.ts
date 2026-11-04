@@ -19,8 +19,8 @@ export {
   ComposerHint,
   ComposerDisabledReason,
 } from './Composer.js';
-export { Transcript, MessageItem } from './Transcript.js';
-export type { TranscriptProps } from './Transcript.js';
+export { Transcript, MessageItem, TranscriptProvider, useTranscript } from './Transcript.js';
+export type { TranscriptProps, TranscriptApi } from './Transcript.js';
 export {
   PartRenderer,
   createPartRegistry,
