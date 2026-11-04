@@ -48,6 +48,8 @@ test('llms.txt points at the docs an agent needs', () => {
   for (const page of [
     './docs/DESIGN-SYSTEM.md',
     './docs/LIBRARY.md',
+    './docs/catalog/README.md',
+    './docs/catalog/index.md',
     './docs/INVENTORY.md',
     './docs/ROADMAP.md',
     './docs/components.md',
@@ -55,5 +57,37 @@ test('llms.txt points at the docs an agent needs', () => {
     './docs/ADOPTION.md',
   ]) {
     assert.ok(llms.includes(page), `llms.txt does not point at ${page}`);
+  }
+});
+
+function slug(name: string): string {
+  return name.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
+}
+
+test('every primitive has its own page, naming its motion and its samples', async () => {
+  const { incorporations } = await import('./incorporation.js');
+  for (const record of incorporations) {
+    const page = await readFile(new URL(`docs/components/${slug(record.name)}.md`, repo), 'utf8');
+    assert.ok(page.startsWith(`# ${record.name}\n`), `${record.name} page is missing its heading`);
+    if (record.motion.tier === 'none') {
+      assert.ok(page.includes('Still.'), `${record.name} should say it is still`);
+    } else {
+      for (const behavior of record.motion.behaviors) {
+        assert.ok(page.includes(`\`${behavior}\``), `${record.name} page omits motion ${behavior}`);
+      }
+    }
+    for (const name of [...record.aligns.looseleaf, ...record.aligns.fluid]) {
+      assert.ok(page.includes(name), `${record.name} page does not cite ${name}`);
+    }
+  }
+});
+
+test('the catalog index names every discovered item', async () => {
+  const index = await readFile(new URL('docs/catalog/index.md', repo), 'utf8');
+  const discovered = JSON.parse(await readFile(new URL('docs/catalog/items.json', repo), 'utf8')) as {
+    items: { name: string }[];
+  };
+  for (const item of discovered.items) {
+    assert.ok(index.includes(`\`${item.name}\``), `catalog index omits ${item.name}`);
   }
 });

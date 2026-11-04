@@ -24,8 +24,10 @@ Peer deps: `react`/`react-dom` ≥ 18. Wiring it to a backend: `docs/ADOPTION.md
 | Sessions | `SessionList`, `SessionListItem`, `SessionSearch`, `SidebarNav`, `relativeTime`, `resolveSecondary` | `sessions.tsx` |
 | Platform | `Dialog` (+ `.Title`, `.Description`, `.Close`), `AlertDialog`, `Drawer`, `Toast`, `ToastRegion`, `Field`, `Switch`, `Select`, `SegmentedControl` | `platform.tsx` |
 | Button | `Button` (+ `.Icon`) | `Button.tsx` |
+| Content | `Badge`, `Separator`, `Kbd`, `Progress`, `Skeleton`, `Spinner`, `Alert` (+ `.Title`, `.Description`), `Card` (+ `.Header`, `.Title`, `.Description`, `.Body`, `.Footer`), `Empty` (+ `.Title`, `.Description`, `.Actions`), `Tooltip` | `content.tsx` |
+| Motion | `Tabs` (+ `.List`, `.Tab`, `.Panel`), `Collapsible` (+ `.Trigger`, `.Panel`), `Accordion` (+ `.Item`, `.Trigger`, `.Panel`) | `tabs.tsx`, `disclosure.tsx` |
 | Icons | `Icon`, `IconProvider`, `useIcon`, `useIcons`, `iconDefaults` | `icons.tsx` |
-| Contract | `primitives`, `sharedSlots`, `allSlots`, `primitivesForSlot`, `iconRoles` | `contract.ts` |
+| Contract | `primitives`, `sharedSlots`, `allSlots`, `primitivesForSlot`, `iconRoles`, `incorporations`, `disposition` | `contract.ts`, `incorporation.ts`, `catalog.ts` |
 
 Working examples of nearly every primitive in every state: `examples/slice-1/Components.tsx`
 and `examples/slice-1/Gallery.tsx` (`cd examples/slice-1 && npm install && npm run dev`).
@@ -139,8 +141,10 @@ name.
 npm run build
 npm test        # react-test-renderer; src/*.test.tsx
 
-node scripts/generate-component-docs.mjs   # rewrites docs/components.md and docs/llms.txt
+npm run docs   # checks the registry pin, then rewrites the component pages and the catalog
 ```
 
 The generated docs are committed so they can be read without running anything, and a test fails
-when they drift from the contract.
+when they drift from the contract. How a component gets there — discovery, a decision, a page,
+a gallery — is [`docs/catalog/README.md`](../../docs/catalog/README.md). One page per primitive
+lives in [`docs/components/`](../../docs/components/).

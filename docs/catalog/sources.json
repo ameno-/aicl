@@ -1,0 +1,12 @@
+{
+  "looseleaf": {
+    "repo": "https://github.com/kevintngo/looseleaf",
+    "commit": "4bdb647940e2fefb3cebb394f3bad25c766a27d2",
+    "registry": "registry.json"
+  },
+  "fluid": {
+    "repo": "https://github.com/mickadesign/fluid-functionalism",
+    "commit": "168d8d4982654f72da8f76df169eafb20e825409",
+    "registry": "registry.json"
+  }
+}

@@ -75,6 +75,40 @@ export {
 export type { PrimitiveContract, SharedContract } from './contract.js';
 export { Button, ButtonIcon } from './Button.js';
 export type { ButtonProps, ButtonIconProps, ButtonVariant, ButtonSize } from './Button.js';
+export {
+  Badge,
+  Separator,
+  Kbd,
+  Progress,
+  Skeleton,
+  Spinner,
+  Alert,
+  Card,
+  Empty,
+  Tooltip,
+} from './content.js';
+export type {
+  BadgeProps,
+  BadgeVariant,
+  SeparatorProps,
+  KbdProps,
+  ProgressProps,
+  SkeletonProps,
+  SpinnerProps,
+  AlertProps,
+  AlertVariant,
+  CardProps,
+  EmptyProps,
+  TooltipProps,
+} from './content.js';
+export { Tabs, TabsList, TabsTab, TabsPanel } from './tabs.js';
+export type { TabsProps, TabsListProps, TabsTabProps, TabsPanelProps } from './tabs.js';
+export { Collapsible, Accordion, AccordionItem } from './disclosure.js';
+export type { CollapsibleProps, AccordionProps, AccordionItemProps } from './disclosure.js';
+export { incorporations, SHAPES } from './incorporation.js';
+export type { IncorporationRecord, ShapeId, MotionTier, MotionRecord } from './incorporation.js';
+export { disposition } from './catalog.js';
+export type { CatalogItem, Disposition, DispositionStatus } from './catalog.js';
 export { SessionList, SessionListItem, SessionSearch, SidebarNav, relativeTime, resolveSecondary } from './sessions.js';
 export type {
   SessionListProps,

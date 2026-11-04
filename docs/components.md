@@ -6,29 +6,47 @@ are. A **slot** is a `data-aicl` value: a stable name for a piece of the
 DOM that a skin or a consumer's CSS can select on. A **state** is an
 attribute and the values it can take.
 
+Each primitive also has an incorporation record
+(`packages/react/src/incorporation.ts`): the shapes it uses, the motion it
+takes, and the sample components it was built against. The page linked from
+the table is that record, rendered.
+
 The names are public API. Changing one is a breaking change.
 
-| Primitive | What it is for | Slots |
-| --- | --- | --- |
-| Button | A button. Variant, size and loading, with the glyphs as icon slots. | `button` `button-label` `button-icon` |
-| Transcript | The conversation: a scroller, the rows, and jump-to-latest. One live region for the thread. | `transcript-root` `transcript` `message-row` `message` `status-line` `day-separator` `scroll-to-bottom` `branch-switcher` |
-| Composer | The field, the submit action, the toolbar slots and the above-band. | `composer` `composer-body` `composer-input` `composer-submit` `composer-attach` `composer-disabled-reason` `composer-hint` `attachment-row` |
-| PartRenderer | Dispatches one part to its renderer. The default renderers follow. | `part` `reasoning` `reasoning-body` `tool-call` `tool-call-body` `artifact-card` `artifact-icon` `artifact-title` `artifact-meta` `artifact-kind` `artifact-version` `artifact-open` `code-block` `inline-code` `terminal-output` |
-| MessageActions | The per-message action row. Hidden until the row is hovered or focused. | `message-actions` |
-| PlanChecklist | An ordered plan with a derived rollup. Render only. | `plan-checklist` `plan-rollup` `plan-title` `plan-count` |
-| ComposerSurface | The composer surface: trigger menus, suggestion chips, attachments. | `trigger-menu` `trigger-menu-empty` `suggestion-chips` `suggestion-chip` `attachment-chip` `attachment-dropzone` `attachment-error` `attachment-icon` `attachment-name` `attachment-preview` `attachment-progress` `attachment-remove` `attachment-retry` `attachment-size` |
-| SessionList | A host-agnostic session listbox, grouped by recency. | `session-list` `session-list-header` `session-listbox` `session-list-empty` `session-list-skeleton` `session-list-sentinel` `session-skeleton` `session-item` `session-actions` `session-title` `session-secondary` `session-group` `session-group-label` |
-| SessionSearch | One incremental combobox for sessions. | `session-search` `session-search-icon` `session-search-input` `session-search-results` `session-search-status` `session-search-empty` |
-| SidebarNav | A vertical nav host with a controlled collapse. | `sidebar-nav` `sidebar-nav-header` `sidebar-nav-list` `sidebar-nav-item` `sidebar-nav-icon` `sidebar-nav-label` `sidebar-nav-badge` `sidebar-nav-toggle` `sidebar-nav-footer` |
-| Dialog | A modal on the top layer, with a focus trap and a focus return. | `dialog` `dialog-layer` `dialog-title` `dialog-description` `dialog-close` `scrim` |
-| AlertDialog | A modal that asks before it acts. The scrim does not dismiss it. | `alert-dialog` `alert-dialog-layer` `alert-dialog-actions` `alert-dialog-cancel` `alert-dialog-confirm` `alert-dialog-confirmation` |
-| Drawer | A sheet that slides in from an edge. Swipe to dismiss. | `drawer` `drawer-layer` |
-| ToastRegion | Transient status in a corner region. One live region, polite by default. | `toast-region` |
-| Toast | One transient status message, with an optional action. | `toast` `toast-icon` `toast-title` `toast-description` `toast-action` `toast-dismiss` |
-| Field | A label, a control, a description, an error and a save acknowledgement. | `field` `field-label` `field-description` `field-error` `field-save-state` |
-| Switch | A toggle. The label is a real label, not a placeholder for one. | `switch` `switch-root` `switch-label` `switch-thumb` |
-| Select | A listbox trigger with typeahead. | `select` `select-trigger` `select-value` `select-listbox` `select-option-label` `select-option-description` `select-option-check` |
-| SegmentedControl | One tab stop, arrow keys move and select. | `segmented` `segmented-item` `segmented-icon` |
+| Primitive | What it is for | Motion | Page |
+| --- | --- | --- | --- |
+| Button | A button. Variant, size and loading, with the glyphs as icon slots. | fast: hover, press | [button](components/button.md) |
+| Transcript | The conversation: a scroller, the rows, and jump-to-latest. One live region for the thread. | moderate: entrance | [transcript](components/transcript.md) |
+| Composer | The field, the submit action, the toolbar slots and the above-band. | fast: hover | [composer](components/composer.md) |
+| PartRenderer | Dispatches one part to its renderer. The default renderers follow. | fast: fade | [part-renderer](components/part-renderer.md) |
+| MessageActions | The per-message action row. Hidden until the row is hovered or focused. | fast: hover | [message-actions](components/message-actions.md) |
+| PlanChecklist | An ordered plan with a derived rollup. Render only. | still | [plan-checklist](components/plan-checklist.md) |
+| ComposerSurface | The composer surface: trigger menus, suggestion chips, attachments. | fast: indeterminate | [composer-surface](components/composer-surface.md) |
+| SessionList | A host-agnostic session listbox, grouped by recency. | fast: shimmer | [session-list](components/session-list.md) |
+| SessionSearch | One incremental combobox for sessions. | fast: fade | [session-search](components/session-search.md) |
+| SidebarNav | A vertical nav host with a controlled collapse. | moderate: fade | [sidebar-nav](components/sidebar-nav.md) |
+| Dialog | A modal on the top layer, with a focus trap and a focus return. | slow: entrance, exit | [dialog](components/dialog.md) |
+| AlertDialog | A modal that asks before it acts. The scrim does not dismiss it. | slow: entrance | [alert-dialog](components/alert-dialog.md) |
+| Drawer | A sheet that slides in from an edge. Swipe to dismiss. | moderate: entrance | [drawer](components/drawer.md) |
+| ToastRegion | Transient status in a corner region. One live region, polite by default. | moderate: entrance | [toast-region](components/toast-region.md) |
+| Toast | One transient status message, with an optional action. | moderate: entrance, exit | [toast](components/toast.md) |
+| Field | A label, a control, a description, an error and a save acknowledgement. | fast: fade | [field](components/field.md) |
+| Switch | A toggle. The label is a real label, not a placeholder for one. | fast: thumb | [switch](components/switch.md) |
+| Select | A listbox trigger with typeahead. | moderate: entrance | [select](components/select.md) |
+| SegmentedControl | One tab stop, arrow keys move and select. | moderate: travelling-indicator | [segmented-control](components/segmented-control.md) |
+| Badge | A small label that sits next to a word. | fast: hover | [badge](components/badge.md) |
+| Separator | A rule between two regions. Decorative by default, announced when it is not. | still | [separator](components/separator.md) |
+| Kbd | A keyboard key, drawn as a keycap. | fast: press | [kbd](components/kbd.md) |
+| Progress | A progress bar. Determinate when it has a value, travelling when it does not. | moderate: fill, indeterminate | [progress](components/progress.md) |
+| Skeleton | A shimmering placeholder while content is on its way. | moderate: shimmer | [skeleton](components/skeleton.md) |
+| Spinner | A spinning status glyph. The glyph is the spinner icon slot. | fast: spin | [spinner](components/spinner.md) |
+| Alert | A status message that arrives and stays. Title and description are subparts. | slow: entrance | [alert](components/alert.md) |
+| Card | A sheet with a header, a body and a footer. | still | [card](components/card.md) |
+| Empty | What a region says when it has nothing in it yet. | moderate: fade | [empty](components/empty.md) |
+| Tooltip | A tip that shows on hover and on keyboard focus. | fast: fade | [tooltip](components/tooltip.md) |
+| Tabs | A tablist and its panels. The selection is a pill that travels. | moderate: travelling-indicator | [tabs](components/tabs.md) |
+| Collapsible | One panel that folds. The height animates, and the chevron turns. | moderate: height, chevron | [collapsible](components/collapsible.md) |
+| Accordion | A list of disclosures. One open at a time, or several. | moderate: height, chevron | [accordion](components/accordion.md) |
 
 ## Shared slots
 
@@ -202,6 +220,55 @@ The names are public API. Changing one is a breaking change.
 | `data-state` | `selected` `unselected` |
 | `data-size` | `sm` `md` |
 
+### Badge
+
+| Attribute | Values |
+| --- | --- |
+| `data-variant` | `default` `secondary` `outline` `destructive` `success` |
+
+### Separator
+
+| Attribute | Values |
+| --- | --- |
+| `data-orientation` | `horizontal` `vertical` |
+
+### Progress
+
+| Attribute | Values |
+| --- | --- |
+| `data-state` | `determinate` `indeterminate` |
+
+### Alert
+
+| Attribute | Values |
+| --- | --- |
+| `data-variant` | `info` `success` `warning` `destructive` |
+
+### Tooltip
+
+| Attribute | Values |
+| --- | --- |
+| `data-state` | `open` `closed` |
+
+### Tabs
+
+| Attribute | Values |
+| --- | --- |
+| `data-state` | `active` `inactive` |
+
+### Collapsible
+
+| Attribute | Values |
+| --- | --- |
+| `data-state` | `open` `closed` |
+
+### Accordion
+
+| Attribute | Values |
+| --- | --- |
+| `data-state` | `open` `closed` |
+| `data-type` | `single` `multiple` |
+
 ## Icon roles
 
 A primitive never imports an icon. It asks for the role it plays, and the
@@ -246,12 +313,23 @@ that wants another set wraps its tree once and every primitive follows.
 
 ## Every slot
 
+- `accordion`
+- `accordion-body`
+- `accordion-item`
+- `accordion-label`
+- `accordion-panel`
+- `accordion-trigger`
+- `alert`
+- `alert-body`
+- `alert-description`
 - `alert-dialog`
 - `alert-dialog-actions`
 - `alert-dialog-cancel`
 - `alert-dialog-confirm`
 - `alert-dialog-confirmation`
 - `alert-dialog-layer`
+- `alert-icon`
+- `alert-title`
 - `artifact-card`
 - `artifact-icon`
 - `artifact-kind`
@@ -270,11 +348,23 @@ that wants another set wraps its tree once and every primitive follows.
 - `attachment-retry`
 - `attachment-row`
 - `attachment-size`
+- `badge`
 - `branch-switcher`
 - `button`
 - `button-icon`
 - `button-label`
+- `card`
+- `card-body`
+- `card-description`
+- `card-footer`
+- `card-header`
+- `card-title`
 - `code-block`
+- `collapsible`
+- `collapsible-body`
+- `collapsible-label`
+- `collapsible-panel`
+- `collapsible-trigger`
 - `composer`
 - `composer-attach`
 - `composer-body`
@@ -290,6 +380,10 @@ that wants another set wraps its tree once and every primitive follows.
 - `dialog-title`
 - `drawer`
 - `drawer-layer`
+- `empty`
+- `empty-actions`
+- `empty-description`
+- `empty-title`
 - `field`
 - `field-description`
 - `field-error`
@@ -297,6 +391,7 @@ that wants another set wraps its tree once and every primitive follows.
 - `field-save-state`
 - `icon`
 - `inline-code`
+- `kbd`
 - `message`
 - `message-actions`
 - `message-row`
@@ -305,12 +400,15 @@ that wants another set wraps its tree once and every primitive follows.
 - `plan-count`
 - `plan-rollup`
 - `plan-title`
+- `progress`
+- `progress-bar`
 - `reasoning`
 - `reasoning-body`
 - `scrim`
 - `scroll-to-bottom`
 - `segmented`
 - `segmented-icon`
+- `segmented-indicator`
 - `segmented-item`
 - `select`
 - `select-listbox`
@@ -319,6 +417,7 @@ that wants another set wraps its tree once and every primitive follows.
 - `select-option-label`
 - `select-trigger`
 - `select-value`
+- `separator`
 - `session-actions`
 - `session-group`
 - `session-group-label`
@@ -347,6 +446,8 @@ that wants another set wraps its tree once and every primitive follows.
 - `sidebar-nav-label`
 - `sidebar-nav-list`
 - `sidebar-nav-toggle`
+- `skeleton`
+- `spinner`
 - `status-line`
 - `suggestion-chip`
 - `suggestion-chips`
@@ -354,6 +455,11 @@ that wants another set wraps its tree once and every primitive follows.
 - `switch-label`
 - `switch-root`
 - `switch-thumb`
+- `tabs`
+- `tabs-indicator`
+- `tabs-list`
+- `tabs-panel`
+- `tabs-tab`
 - `terminal-output`
 - `toast`
 - `toast-action`
@@ -364,6 +470,8 @@ that wants another set wraps its tree once and every primitive follows.
 - `toast-title`
 - `tool-call`
 - `tool-call-body`
+- `tooltip`
+- `tooltip-anchor`
 - `transcript`
 - `transcript-root`
 - `trigger-menu`

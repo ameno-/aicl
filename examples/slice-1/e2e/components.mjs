@@ -231,6 +231,38 @@ await check('dropzone: picker accepts image, rejects wrong type', async () => {
   eq(await page.locator('#dropzone [data-aicl=attachment-chip]').count(), 0, 'removed');
 });
 
+// ── Content and motion ──────────────────────────────────────────────────
+await check('tabs: the pill follows the arrow, and the panel swaps', async () => {
+  const list = page.locator('#motion [data-aicl=tabs-list]');
+  await list.scrollIntoViewIfNeeded();
+  await list.getByRole('tab', { name: 'Plan' }).focus();
+  await page.keyboard.press('ArrowRight');
+  eq(await list.getByRole('tab', { name: 'Files' }).getAttribute('aria-selected'), 'true', 'selected');
+  eq(await page.locator('#motion [data-aicl=tabs-indicator]').getAttribute('data-index'), '1', 'pill');
+  eq(await page.locator('#motion [data-aicl=tabs-panel]').nth(1).isVisible(), true, 'panel');
+});
+await check('collapsible: the trigger opens the panel', async () => {
+  const trigger = page.locator('#motion [data-aicl=collapsible-trigger]');
+  eq(await trigger.getAttribute('aria-expanded'), 'false', 'closed');
+  await trigger.click();
+  eq(await trigger.getAttribute('aria-expanded'), 'true', 'open');
+  eq(await page.locator('#motion [data-aicl=collapsible]').getAttribute('data-state'), 'open', 'state');
+});
+await check('accordion: opening the second row closes the first', async () => {
+  const rows = page.locator('#motion [data-aicl=accordion-item]');
+  eq(await rows.nth(0).getAttribute('data-state'), 'open', 'first open');
+  await rows.nth(1).getByRole('button').click();
+  eq(await rows.nth(0).getAttribute('data-state'), 'closed', 'first closed');
+  eq(await rows.nth(1).getAttribute('data-state'), 'open', 'second open');
+});
+await check('tooltip: focus reveals it, blur hides it', async () => {
+  const anchor = page.locator('#content [data-aicl=tooltip-anchor]');
+  await anchor.getByRole('button', { name: 'Copy' }).focus();
+  eq(await anchor.getAttribute('data-state'), 'open', 'open');
+  await page.keyboard.press('Tab');
+  eq(await anchor.getAttribute('data-state'), 'closed', 'closed');
+});
+
 await check('no page errors', async () => {
   eq(errors, [], 'errors');
 });

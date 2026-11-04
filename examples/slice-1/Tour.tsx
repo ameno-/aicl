@@ -2,13 +2,19 @@ import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import type { Message, SessionMeta } from '@aicl/core';
 import { FluidHoverHighlight, WeightText, useFluidHover } from '@aicl/motion/react';
 import {
+  Accordion,
   Button,
+  Collapsible,
   Composer,
   Dialog,
+  Progress,
   SegmentedControl,
   Select,
   SessionList,
+  Skeleton,
+  Spinner,
   Switch,
+  Tabs,
   Transcript,
 } from '@aicl/react';
 
@@ -28,6 +34,7 @@ const STOPS = [
   { id: 'composer', title: 'Composer', line: 'Type, then send. The field is the product.' },
   { id: 'transcript', title: 'Transcript', line: 'One live region. Messages arrive; they do not pop.' },
   { id: 'choice', title: 'Choice', line: 'A switch, a segment, a select. Keyboard first.' },
+  { id: 'motion', title: 'Motion', line: 'A pill that travels, a panel that folds, a placeholder that shimmers.' },
   { id: 'dialog', title: 'Dialog', line: 'A sheet that lands, then gets out of the way.' },
   { id: 'sessions', title: 'Sessions', line: 'The list beside the thread. Arrows move, Enter opens.' },
   { id: 'yours', title: 'Make them yours', line: 'Same components. A different object.' },
@@ -154,6 +161,45 @@ function ChoiceStop() {
   );
 }
 
+function MotionStop() {
+  const [tab, setTab] = useState('plan');
+  return (
+    <div className="tour-stack">
+      <div className="tour-row">
+        <Spinner label="Thinking" />
+        <Skeleton width={140} />
+        <div style={{ width: 160 }}>
+          <Progress value={64} label="Tokens" />
+        </div>
+      </div>
+      <Tabs value={tab} onValueChange={setTab}>
+        <Tabs.List aria-label="Work">
+          <Tabs.Tab value="plan">Plan</Tabs.Tab>
+          <Tabs.Tab value="files">Files</Tabs.Tab>
+          <Tabs.Tab value="terminal">Terminal</Tabs.Tab>
+        </Tabs.List>
+        <Tabs.Panel value="plan">Write the failing test first.</Tabs.Panel>
+        <Tabs.Panel value="files">Two files changed.</Tabs.Panel>
+        <Tabs.Panel value="terminal">Checks passed.</Tabs.Panel>
+      </Tabs>
+      <Collapsible defaultOpen>
+        <Collapsible.Trigger>Worked for 11s</Collapsible.Trigger>
+        <Collapsible.Panel>Edited two files. Close it and the row folds.</Collapsible.Panel>
+      </Collapsible>
+      <Accordion defaultValue="read">
+        <Accordion.Item value="read">
+          <Accordion.Trigger>Read the diff</Accordion.Trigger>
+          <Accordion.Panel>Opening the next row closes this one.</Accordion.Panel>
+        </Accordion.Item>
+        <Accordion.Item value="run">
+          <Accordion.Trigger>Run the checks</Accordion.Trigger>
+          <Accordion.Panel>The chevron turns as the panel opens.</Accordion.Panel>
+        </Accordion.Item>
+      </Accordion>
+    </div>
+  );
+}
+
 function DialogStop() {
   const [open, setOpen] = useState(false);
   return (
@@ -217,6 +263,7 @@ const STAGES: Record<StopId, (skin: string) => ReactNode> = {
   composer: () => <ComposerStop />,
   transcript: (skin) => <TranscriptStop skin={skin} />,
   choice: () => <ChoiceStop />,
+  motion: () => <MotionStop />,
   dialog: () => <DialogStop />,
   sessions: () => <SessionsStop />,
   yours: () => <YoursStop />,

@@ -1,0 +1,37 @@
+# Select
+
+A listbox trigger with typeahead.
+
+## Incorporation
+
+A listbox trigger with typeahead. The shared popup chrome both libraries factor out is still a candidate; this select carries its own list.
+
+| | |
+| --- | --- |
+| Shapes | **S1** flat primitive, **S7** slot DOM contract, **S9** icon slots |
+| Motion | **moderate** — `entrance` |
+| LooseLeaf | [select](https://github.com/kevintngo/looseleaf/blob/4bdb647940e2fefb3cebb394f3bad25c766a27d2/registry.json) |
+| Fluid Functionalism | [select](https://github.com/mickadesign/fluid-functionalism/blob/168d8d4982654f72da8f76df169eafb20e825409/registry.json) |
+| Gallery | `examples/slice-1` section `forms` |
+| Tour | stop `choice` |
+| See it | The components gallery, section Field, and the tour's Choice stop. |
+| Source | `packages/react/src/platform.tsx` |
+
+## Slots
+
+- `select`
+- `select-trigger`
+- `select-value`
+- `select-listbox`
+- `select-option-label`
+- `select-option-description`
+- `select-option-check`
+
+## States
+
+| Attribute | Values |
+| --- | --- |
+| `data-state` | `open` `closed` |
+| `data-size` | `sm` `md` |
+| `data-selected` | `true` |
+| `data-disabled` | `true` |

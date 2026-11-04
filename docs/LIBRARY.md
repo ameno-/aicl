@@ -80,6 +80,12 @@ These are AICL's own, and they stay. What changes is that they are now
 *described* — the contract names their slots and states, and a test fails
 when the description and the implementation drift apart.
 
+Each primitive also has an incorporation record: the shapes it uses, the
+motion it takes, and which LooseLeaf and Fluid components it was built
+against. The procedure for the next one is
+[`catalog/README.md`](catalog/README.md). The live decision for every item
+in those two registries is [`catalog/index.md`](catalog/index.md).
+
 ### The skins
 
 One skin ships: [`looseleaf.css`](../packages/styles/src/themes/looseleaf.css).

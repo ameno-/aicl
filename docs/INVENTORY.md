@@ -237,16 +237,16 @@ across adapters.
 
 ## 5. AICL today
 
+The numbers in §1 are the snapshot this inventory was written from. The
+live list — every sample component, and the decision about it — is
+[`catalog/index.md`](catalog/index.md). One page per primitive AICL ships
+is in [`components/`](components/).
+
 ### 5.1 The library primitives
 
-18, 118 slots — the full list with states is in
-[`components.md`](components.md).
-
-`Transcript`, `MessageItem`, `MessageActions`, `PlanChecklist`,
-`PartRenderer` and its default renderers, `Composer`, `ComposerSurface`,
-`SessionList`, `SessionSearch`, `SidebarNav`, `Dialog`, `AlertDialog`,
-`Drawer`, `ToastRegion`, `Toast`, `Field`, `Switch`, `Select`,
-`SegmentedControl`.
+The full list, with slots, states and motion, is in
+[`components.md`](components.md). That page is generated from the contract,
+so a name kept here would only drift.
 
 ### 5.2 What exists but is not in the library
 
@@ -273,16 +273,14 @@ distinctive thing AICL has:
 per-kit token sets applied as `--aicl-*` variables. It is the same idea as
 `@aicl/styles/themes/`, arrived at separately.
 
-### 5.3 The gap, in one table
+### 5.3 The gap
 
-| | AICL has | AICL needs |
-|---|---|---|
-| **Buttons** | *nothing* — every button is a raw `<button>` | `Button` with variants, sizes, loading, icon slots |
-| **Overlays** | `Dialog`, `AlertDialog`, `Drawer` | `Tooltip`, `Popover`, `DropdownMenu`, `HoverCard`, `CommandMenu` |
-| **Form** | `Switch`, `Select`, `SegmentedControl`, `Field` | `Input`, `Textarea`, `InputGroup`, `Checkbox`, `RadioGroup`, `Slider`, `Combobox` |
-| **Content** | `PlanChecklist`, `Toast` | `Badge`, `Card`, `Separator`, `Progress`, `Kbd`, `Empty`, `Skeleton`, `Alert`, `Tabs`, `Accordion`, `Collapsible` |
-| **Chat** | `Composer`, `Transcript`, `MessageItem`, part renderers | compound shapes; the thinking family; the question flow; the queued stack |
-| **Surfaces** | `TerminalOutput` (a stub) | the seven workspace surfaces, as a contract |
+The gap is no longer a table maintained by hand. A sample component AICL
+has incorporated is in the catalog as `incorporated`, with a link to the
+primitive. One AICL has not built, and that a chat app needs, is a
+`candidate` with a roadmap wave. Marketing pages, paper toys and drawn art
+are `out-of-scope`, on purpose, so they are not rediscovered as missing
+buttons.
 
 ---
 

@@ -11,7 +11,7 @@
   no dependencies.
 - [@aicl/react](./packages/react/README.md): the React adapter. Accessible,
   unstyled primitives that publish their state as `data-aicl` attributes,
-  plus the component contract.
+  plus the component contract and the incorporation records.
 - [@aicl/server](./packages/server/README.md): `createChatHandler`. Turns an
   async iterable of StreamEvents into SSE frames.
 - [@aicl/styles](./packages/styles/README.md): the token contract and the
@@ -25,11 +25,16 @@
   contract, the motion system, the skin model, the shipping model.
 - [Library](./docs/LIBRARY.md): how the library is organised, and what is
   planned.
+- [How a component is incorporated](./docs/catalog/README.md): discover,
+  decide, document, incorporate. Read this before adding a component.
+- [Catalog](./docs/catalog/index.md): every LooseLeaf and Fluid Functionalism
+  registry item, and the decision AICL made about it.
 - [Inventory](./docs/INVENTORY.md): the deep inventory of LooseLeaf and
   Fluid Functionalism, and the shape vocabulary the plan is written in.
 - [Roadmap](./docs/ROADMAP.md): what to create, expose and refactor, and
   in what order.
-- [Component contract](./docs/components.md): every slot and every state.
+- [Component contract](./docs/components.md): every primitive, with its
+  motion. One page per primitive lives in `docs/components/`.
 - [Decisions](./docs/DECISIONS.md): the binding decisions, D1–D18.
 - [Adoption](./docs/ADOPTION.md): wiring AICL into an app, with every known
   sharp edge.
@@ -43,5 +48,6 @@ A primitive publishes slots (`data-aicl="composer"`) and states
 (`data-state="streaming"`). Those names are public API. A skin is a
 stylesheet that overrides the `--aicl-*` token contract and nothing else, so
 it cannot change behaviour. The motion system replaces the contract's
-easings with real springs. The component contract above is generated from
-the implementation and a test fails when the two drift apart.
+easings with real springs. Every primitive has an incorporation record —
+shapes, motion, and the sample components it aligns with — and a test fails
+when a discovered sample component has no decision.

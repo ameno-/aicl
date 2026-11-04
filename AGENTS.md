@@ -66,7 +66,8 @@ Start with the library. Move to the app only when the change is about that speci
 |---|---|
 | Message/part model, stream reduction, branching | `packages/core/src/types.ts`, `packages/core/src/chat.ts` |
 | A React primitive's markup, ARIA, keyboard | `packages/react/src/*.tsx`, then `examples/slice-1` to see it |
-| A primitive's slots and states | `packages/react/src/contract.ts` — the contract is the source of truth; `docs/components.md` is generated from it |
+| A primitive's slots and states | `packages/react/src/contract.ts` — the contract is the source of truth; `docs/components.md` and `docs/components/*.md` are generated from it |
+| Incorporating a component | `docs/catalog/README.md`, then `packages/react/src/incorporation.ts` and `packages/react/src/catalog.ts` |
 | Icons | `packages/react/src/icons.tsx` — the slot names and the Lucide defaults |
 | Default theme / tokens / a skin | `packages/styles/src/contract.css`, `packages/styles/src/themes/*.css`, `components.css` |
 | Springs, easings, hover, weight | `packages/motion/src/springs.ts` (the source of truth), `scripts/generate-motion-css.mjs` |
@@ -84,8 +85,10 @@ Start with the library. Move to the app only when the change is about that speci
 - `docs/DESIGN-SYSTEM.md`: the four layers — protocol, behaviour, system, skin — the token
   contract, the motion system, and the shipping model.
 - `docs/LIBRARY.md`: how the library is organised — systems, components, blocks — and what is
-  planned. `docs/components.md`: the component contract, generated. `docs/llms.txt`: the
-  library, indexed for an agent.
+  planned. `docs/components.md`: the component contract, generated, with one page per primitive
+  in `docs/components/`. `docs/llms.txt`: the library, indexed for an agent.
+- `docs/catalog/README.md`: how a component is discovered, decided, documented and incorporated.
+  `docs/catalog/index.md` is the decision for every LooseLeaf and Fluid Functionalism registry item.
 - `docs/ARCHITECTURE.md`: the layer split and why. `docs/DECISIONS.md`: D1–D18 (binding).
 - `docs/api/README.md`: the wire contract and handler conventions.
 - `docs/BLUEPRINT.md`: target-state component inventory and token contract (design, partly

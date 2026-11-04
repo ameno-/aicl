@@ -401,10 +401,120 @@ export const primitives: readonly PrimitiveContract[] = [
     name: 'SegmentedControl',
     summary: 'One tab stop, arrow keys move and select.',
     source: ['platform.tsx'],
-    slots: ['segmented', 'segmented-item', 'segmented-icon'],
+    slots: ['segmented', 'segmented-indicator', 'segmented-item', 'segmented-icon'],
     states: {
       'data-state': ['selected', 'unselected'],
       'data-size': ['sm', 'md'],
+    },
+  },
+  {
+    name: 'Badge',
+    summary: 'A small label that sits next to a word.',
+    source: ['content.tsx'],
+    slots: ['badge'],
+    states: {
+      'data-variant': ['default', 'secondary', 'outline', 'destructive', 'success'],
+    },
+  },
+  {
+    name: 'Separator',
+    summary: 'A rule between two regions. Decorative by default, announced when it is not.',
+    source: ['content.tsx'],
+    slots: ['separator'],
+    states: {
+      'data-orientation': ['horizontal', 'vertical'],
+    },
+  },
+  {
+    name: 'Kbd',
+    summary: 'A keyboard key, drawn as a keycap.',
+    source: ['content.tsx'],
+    slots: ['kbd'],
+  },
+  {
+    name: 'Progress',
+    summary: 'A progress bar. Determinate when it has a value, travelling when it does not.',
+    source: ['content.tsx'],
+    slots: ['progress', 'progress-bar'],
+    states: {
+      'data-state': ['determinate', 'indeterminate'],
+    },
+  },
+  {
+    name: 'Skeleton',
+    summary: 'A shimmering placeholder while content is on its way.',
+    source: ['content.tsx'],
+    slots: ['skeleton'],
+  },
+  {
+    name: 'Spinner',
+    summary: 'A spinning status glyph. The glyph is the spinner icon slot.',
+    source: ['content.tsx'],
+    slots: ['spinner'],
+  },
+  {
+    name: 'Alert',
+    summary: 'A status message that arrives and stays. Title and description are subparts.',
+    source: ['content.tsx'],
+    slots: ['alert', 'alert-icon', 'alert-body', 'alert-title', 'alert-description'],
+    states: {
+      'data-variant': ['info', 'success', 'warning', 'destructive'],
+    },
+  },
+  {
+    name: 'Card',
+    summary: 'A sheet with a header, a body and a footer.',
+    source: ['content.tsx'],
+    slots: ['card', 'card-header', 'card-title', 'card-description', 'card-body', 'card-footer'],
+  },
+  {
+    name: 'Empty',
+    summary: 'What a region says when it has nothing in it yet.',
+    source: ['content.tsx'],
+    slots: ['empty', 'empty-title', 'empty-description', 'empty-actions'],
+  },
+  {
+    name: 'Tooltip',
+    summary: 'A tip that shows on hover and on keyboard focus.',
+    source: ['content.tsx'],
+    slots: ['tooltip-anchor', 'tooltip'],
+    states: {
+      'data-state': ['open', 'closed'],
+    },
+  },
+  {
+    name: 'Tabs',
+    summary: 'A tablist and its panels. The selection is a pill that travels.',
+    source: ['tabs.tsx'],
+    slots: ['tabs', 'tabs-list', 'tabs-indicator', 'tabs-tab', 'tabs-panel'],
+    states: {
+      'data-state': ['active', 'inactive'],
+    },
+  },
+  {
+    name: 'Collapsible',
+    summary: 'One panel that folds. The height animates, and the chevron turns.',
+    source: ['disclosure.tsx'],
+    slots: ['collapsible', 'collapsible-trigger', 'collapsible-label', 'collapsible-panel', 'collapsible-body'],
+    states: {
+      'data-state': ['open', 'closed'],
+    },
+  },
+  {
+    name: 'Accordion',
+    summary: 'A list of disclosures. One open at a time, or several.',
+    source: ['disclosure.tsx'],
+    slots: [
+      'accordion',
+      'accordion-item',
+      'accordion-trigger',
+      'accordion-label',
+      'accordion-panel',
+      'accordion-body',
+    ],
+    states: {
+      'data-state': ['open', 'closed'],
+      'data-type': ['single', 'multiple'],
     },
   },
 ];

@@ -1,0 +1,2916 @@
+{
+  "pins": {
+    "looseleaf": "4bdb647940e2fefb3cebb394f3bad25c766a27d2",
+    "fluid": "168d8d4982654f72da8f76df169eafb20e825409"
+  },
+  "items": [
+    {
+      "source": "looseleaf",
+      "name": "looseleaf",
+      "type": "registry:style",
+      "title": "Looseleaf",
+      "description": "Everything: the paper theme, fonts, the ink engine and every Looseleaf component. Overwrites your global CSS tokens.",
+      "categories": [
+        "umbrella"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "looseleaf-blocks",
+      "type": "registry:block",
+      "title": "Looseleaf blocks",
+      "description": "Every composed page block (login, dashboard, …). Pulls in the components they need.",
+      "categories": [
+        "umbrella"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "looseleaf-theme",
+      "type": "registry:theme",
+      "title": "Looseleaf theme",
+      "description": "Paper tokens, @theme mappings, keyframes and utilities for Looseleaf, merged into your global CSS. Fonts are pulled in as registry dependencies.",
+      "categories": [
+        "theme"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "font-kevin-sans",
+      "type": "registry:theme",
+      "title": "Kevin Sans",
+      "description": "Kevin Sans, the hand of every Looseleaf label, title and stamp: one family tuned for three roles (font-hand, font-script, font-type). The ink engine loads it from the Looseleaf site the first time a component draws, unless the page already has it.",
+      "categories": [
+        "fonts"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "font-ibm-plex-mono",
+      "type": "registry:font",
+      "title": "IBM Plex Mono",
+      "description": "IBM Plex Mono for code, kbd and numbers (font-mono).",
+      "categories": [
+        "fonts"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "utils",
+      "type": "registry:lib",
+      "title": "Utils",
+      "description": "The cn() class-name helper (clsx + tailwind-merge). `shadcn init` already creates this; you only need it if you skipped init.",
+      "categories": []
+    },
+    {
+      "source": "looseleaf",
+      "name": "chat-align",
+      "type": "registry:lib",
+      "title": "Chat Align",
+      "description": "Shared Looseleaf helpers: chat-align.",
+      "categories": []
+    },
+    {
+      "source": "looseleaf",
+      "name": "code-highlight",
+      "type": "registry:lib",
+      "title": "Code Highlight",
+      "description": "Shared Looseleaf helpers: code-highlight.",
+      "categories": []
+    },
+    {
+      "source": "looseleaf",
+      "name": "field-class",
+      "type": "registry:lib",
+      "title": "Field Class",
+      "description": "Shared Looseleaf helpers: field-class.",
+      "categories": []
+    },
+    {
+      "source": "looseleaf",
+      "name": "ink",
+      "type": "registry:lib",
+      "title": "Ink engine",
+      "description": "Looseleaf's hand-drawing engine: seeded randomness, pens, shapes, fills, the <Ink> layer, the provider and the grain and paper textures shared by every drawn component.",
+      "categories": []
+    },
+    {
+      "source": "looseleaf",
+      "name": "ink-art",
+      "type": "registry:lib",
+      "title": "Ink art renderer",
+      "description": "What draws the art kits: the art DSL and types, drawSkeleton, the hand-lettering glyph font, rubber stamps and badges. Icon, Doodle, Sticker, Stamp and Mascot import it, and every ink-* art kit builds on it.",
+      "categories": []
+    },
+    {
+      "source": "looseleaf",
+      "name": "ink-doodles",
+      "type": "registry:lib",
+      "title": "Ink doodles",
+      "description": "Margin doodles: the hand-drawn flourishes, arrows and small pictures used by <Doodle> and decorative components.",
+      "categories": []
+    },
+    {
+      "source": "looseleaf",
+      "name": "ink-grain-textures",
+      "type": "registry:lib",
+      "title": "Ink grain textures",
+      "description": "Baked pen-grain masks (felt, marker, graphite, waxy, stamp) as base64 PNG inside a .ts file, mounted once per page by <InkDefs>.",
+      "categories": []
+    },
+    {
+      "source": "looseleaf",
+      "name": "ink-icons",
+      "type": "registry:lib",
+      "title": "Ink icons",
+      "description": "The hand-drawn icon set (lucide-compatible names, 16 and 24 px drawings) behind <Icon>.",
+      "categories": []
+    },
+    {
+      "source": "looseleaf",
+      "name": "ink-mascots",
+      "type": "registry:lib",
+      "title": "Ink mascots",
+      "description": "Stubby the pencil stub, in every pose, for empty states, 404 pages and spinners.",
+      "categories": []
+    },
+    {
+      "source": "looseleaf",
+      "name": "ink-paper",
+      "type": "registry:lib",
+      "title": "Ink paper",
+      "description": "Paper for the ink engine: stocks, hand-cut edges, shadows, tape and desk props, and the layers a drawn sheet is built from. Paper, Card, Tape and the paper set import it.",
+      "categories": []
+    },
+    {
+      "source": "looseleaf",
+      "name": "ink-paper-textures",
+      "type": "registry:lib",
+      "title": "Ink paper textures",
+      "description": "Baked paper, fiber, linen and kraft tiles (base64 PNG inside a .ts file). The ink engine imports them; a bundler drops the tiles an app never draws.",
+      "categories": []
+    },
+    {
+      "source": "looseleaf",
+      "name": "ink-props",
+      "type": "registry:lib",
+      "title": "Ink props",
+      "description": "Paper stocks, tape, clips, pins and other desk props for Paper, Card and friends.",
+      "categories": []
+    },
+    {
+      "source": "looseleaf",
+      "name": "ink-recipes",
+      "type": "registry:lib",
+      "title": "Ink recipes",
+      "description": "Drawing recipes shared by several components: field and select frames, draw-on and reveal helpers, pencil tiles, margin brackets and text marks. Components that use one depend on it.",
+      "categories": []
+    },
+    {
+      "source": "looseleaf",
+      "name": "ink-scenes",
+      "type": "registry:lib",
+      "title": "Ink scenes",
+      "description": "Composed empty-state and hero illustrations built from the doodles, stickers and mascot.",
+      "categories": []
+    },
+    {
+      "source": "looseleaf",
+      "name": "ink-stickers",
+      "type": "registry:lib",
+      "title": "Ink stickers",
+      "description": "Die-cut stickers, badges and rubber stamps behind <Sticker>, <Badge> and <Stamp>.",
+      "categories": []
+    },
+    {
+      "source": "looseleaf",
+      "name": "menu-styles",
+      "type": "registry:lib",
+      "title": "Menu Styles",
+      "description": "Shared Looseleaf helpers: menu-styles.",
+      "categories": []
+    },
+    {
+      "source": "looseleaf",
+      "name": "message-scroller-primitive",
+      "type": "registry:lib",
+      "title": "Message Scroller Primitive",
+      "description": "Shared Looseleaf helpers: message-scroller-primitive.",
+      "categories": []
+    },
+    {
+      "source": "looseleaf",
+      "name": "sketch-export",
+      "type": "registry:lib",
+      "title": "Sketch Export",
+      "description": "Shared Looseleaf helpers: sketch-export.",
+      "categories": []
+    },
+    {
+      "source": "looseleaf",
+      "name": "use-form-reset",
+      "type": "registry:hook",
+      "title": "use-form-reset",
+      "description": "The use-form-reset React hook from Looseleaf.",
+      "categories": []
+    },
+    {
+      "source": "looseleaf",
+      "name": "use-live-motion",
+      "type": "registry:hook",
+      "title": "use-live-motion",
+      "description": "The use-live-motion React hook from Looseleaf.",
+      "categories": []
+    },
+    {
+      "source": "looseleaf",
+      "name": "use-mark-ink",
+      "type": "registry:hook",
+      "title": "use-mark-ink",
+      "description": "The use-mark-ink React hook from Looseleaf.",
+      "categories": []
+    },
+    {
+      "source": "looseleaf",
+      "name": "use-mobile",
+      "type": "registry:hook",
+      "title": "use-mobile",
+      "description": "The use-mobile React hook from Looseleaf.",
+      "categories": []
+    },
+    {
+      "source": "looseleaf",
+      "name": "use-paper-object",
+      "type": "registry:hook",
+      "title": "use-paper-object",
+      "description": "The use-paper-object React hook from Looseleaf.",
+      "categories": []
+    },
+    {
+      "source": "looseleaf",
+      "name": "accordion",
+      "type": "registry:ui",
+      "title": "Accordion",
+      "description": "Ruled rows that open. Each row sits on a hand-pulled pencil rule; a hovered row gets a highlighter swipe, and an opened row turns its chevron over, writes a margin brace beside its text and lets the words soak in. Radix behavior and keyboard support are untouched.",
+      "categories": [
+        "Layout"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "alert-dialog",
+      "type": "registry:ui",
+      "title": "Alert Dialog",
+      "description": "A dialog that asks one question and will not go away until it is answered: no close button, no dismissing by clicking outside, focus starts on the safe answer. For risky questions it can be taped with hazard strips and given a red patch behind its icon.",
+      "categories": [
+        "Overlays"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "alert",
+      "type": "registry:ui",
+      "title": "Alert",
+      "description": "A message on a slip of paper, drawn in felt tip. Default and destructive as upstream, plus info, success, warning and a sticky-note variant. Each tone has its own pattern in the margin as well as its own color, and a 16 px icon put first is circled in the tone's marker.",
+      "categories": [
+        "Feedback"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "annotate",
+      "type": "registry:ui",
+      "title": "Annotate",
+      "description": "One component for every mark, in the spirit of RoughNotation: put a highlight, an underline, a circle, a box, brackets, a strike, a cross-out or a scribble on real words, and draw it on when it scrolls into view.",
+      "categories": [
+        "Marks"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "arrow",
+      "type": "registry:ui",
+      "title": "Arrow",
+      "description": "A hand-drawn arrow that points where you tell it: one of eight directions inside its own box, or straight at another element on the page. Straight, curved, or with a loop-the-loop, five heads, and an optional label.",
+      "categories": [
+        "Marks"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "aspect-ratio",
+      "type": "registry:ui",
+      "title": "Aspect Ratio",
+      "description": "A box that keeps its width-to-height ratio while its width changes. Exactly shadcn's; the hand-made part is what surrounds it: a photograph on a Polaroid, a print taped at its corners, a map pinned to the desk.",
+      "categories": [
+        "Layout"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "asterisk",
+      "type": "registry:ui",
+      "title": "Asterisk",
+      "description": "Hand-drawn footnote marks: an asterisk, a star, a dagger or a double dagger, in red pencil, sized like a superscript after the word they belong to. Give it a label and an href and it links to the footnote.",
+      "categories": [
+        "Marks"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "attachment",
+      "type": "registry:ui",
+      "title": "Attachment",
+      "description": "A file handed over in a conversation: a slip clipped to the message, or a print taped up. Five states (idle, uploading, processing, error, done), a pencil progress bar and a remove button. The pencil traces the slip, dashes it while it is only a promise and goes red when it fails.",
+      "categories": [
+        "Chat"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "avatar",
+      "type": "registry:ui",
+      "title": "Avatar",
+      "description": "A face, circled in felt tip. The picture is circled by a hand-drawn loop; without one the initials sit on a disc of marker in a stationery color chosen from the name. A status dot goes on the corner, and a group overlaps its faces and ends in a sketched \"+3\".",
+      "categories": [
+        "Data display"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "badge",
+      "type": "registry:ui",
+      "title": "Badge",
+      "description": "A small mark that sits next to a word: a marker stamp, a highlighter swipe, a red-hatched warning, a circled word, and a count that can be written as tally marks. Same variants and asChild as shadcn.",
+      "categories": [
+        "Data display"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "boil",
+      "type": "registry:ui",
+      "title": "Boil",
+      "description": "Makes drawn things shiver the way hand-animated line drawings do. About six times a second it moves to the next of a few frames: doodles are redrawn by a new hand, and buttons, cards and fields inside wobble a little differently. It stands still when motion is reduced, off screen and in a hidden tab.",
+      "categories": [
+        "Interactive"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "bookmark",
+      "type": "registry:ui",
+      "title": "Bookmark",
+      "description": "A ribbon bookmark you can press. Unpressed, a dashed pencil ghost of a ribbon marks the place; pressed, the woven, edge-stitched cloth ribbon hangs there in its color and casts a short shadow. It is a Toggle underneath, so `aria-pressed`, Space and Enter come for free. `BookmarkRibbon` is the same ribbon as a page marker with no behavior.",
+      "categories": [
+        "Paper"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "bracket",
+      "type": "registry:ui",
+      "title": "Bracket",
+      "description": "A hand bracket down one side of a block: these paragraphs, this list, these three rows belong together. Square, curly or round, on either side, and it flips with the page direction.",
+      "categories": [
+        "Marks"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "breadcrumb",
+      "type": "registry:ui",
+      "title": "Breadcrumb",
+      "description": "The path to the page you are on, written in a notebook: names between pencil slashes, links that wear the highlighter when pointed at, and the current page underlined twice in blue felt. Swap the slash for a chevron or any node, and fold the middle of a long path into a dropdown.",
+      "categories": [
+        "Navigation"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "bubble",
+      "type": "registry:ui",
+      "title": "Bubble",
+      "description": "A chat bubble drawn like a person draws one: a single felt-tip stroke round a pillowy box, a solid fill (blue for what you send, gray or highlighter for the rest) and a tail on the sender's side. Also a folded note or a sticky note.",
+      "categories": [
+        "Chat"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "button-group",
+      "type": "registry:ui",
+      "title": "Button Group",
+      "description": "Buttons, fields and printed cells joined into one row (or column) that share their seams: the edge two neighbors have in common is drawn once, by the one before, or by a pencil separator you put between them.",
+      "categories": [
+        "Actions"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "button",
+      "type": "registry:ui",
+      "title": "Button",
+      "description": "The thing you press. A marker-filled primary, a highlighter secondary, an inked outline, a whisper-box ghost, a solid red destructive and a hand-underlined link, in every shadcn size.",
+      "categories": [
+        "Actions"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "calendar",
+      "type": "registry:ui",
+      "title": "Calendar",
+      "description": "A month on planner paper. The grid is ruled by hand, the day you chose is circled in marker, today is underlined in felt, a range is one highlighter swipe per week, and a day you may not pick is hatched out in pencil. react-day-picker v10 underneath: single, multiple and range selection, locales, right-to-left, week numbers, dropdown captions, several months.",
+      "categories": [
+        "Forms"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "callout",
+      "type": "registry:ui",
+      "title": "Callout",
+      "description": "A note in the margin: a few handwritten words and a hand arrow pointing at the thing they are about. It is an ordinary box, so put it where it belongs with a class: float it into the margin, absolutely position it, or drop it in a grid cell.",
+      "categories": [
+        "Marks"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "card",
+      "type": "registry:ui",
+      "title": "Card",
+      "description": "A card is a sheet of paper: header, title, description, action, content and footer with shadcn's spacing, on any stock and edge. Dividers are drawn pencil rules, and a card can be taped, pinned or clipped to the desk.",
+      "categories": [
+        "Layout"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "carousel",
+      "type": "registry:ui",
+      "title": "Carousel",
+      "description": "Embla's smooth, swipeable scroller with paper furniture: hand-drawn arrows outside the slides (dashed when there is nowhere to go) and, if you want it, a tally under them: one stroke per slide, groups of five with the fifth struck across the other four, the current slide in blue felt. Horizontal or vertical, any number of slides per view, autoplay only if you plug it in.",
+      "categories": [
+        "Data display"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "chart",
+      "type": "registry:ui",
+      "title": "Chart",
+      "description": "Charts drawn by hand: bars colored in with a marker, felt lines, pencil-shaded areas, pies, radars, dials, sparklines, tally marks and calendar heat maps. Real text on a real DOM, a keyboard cursor, a tooltip on a slip of paper, a legend that switches series off, a table for screen readers, and a pencil pattern on every series so color is never the only channel.",
+      "categories": [
+        "Charts"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "checkbox",
+      "type": "registry:ui",
+      "title": "Checkbox",
+      "description": "A hand-drawn box you tick. Checking fills it with solid marker and writes a heavy felt tick over it, stroke by stroke; a dash means partly checked. Radix behavior, keyboard and form support are untouched.",
+      "categories": [
+        "Forms"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "circled",
+      "type": "registry:ui",
+      "title": "Circled",
+      "description": "A hand loop around a word or phrase: a circle that overshoots where it started, a box, or a pair of square brackets. It can be written on as it scrolls into view.",
+      "categories": [
+        "Marks"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "clipboard",
+      "type": "registry:ui",
+      "title": "Clipboard",
+      "description": "A board with a spring clip holding a sheet of paper. The board is one drawn sheet (hardboard with the grain of its fiber, or colored plastic; a bevel lit from the upper left) that turns and casts its own shadow; the chrome clip is drawn over the paper it holds. The sheet is real DOM: put a form, a checklist or notes on it.",
+      "categories": [
+        "Paper"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "code-block",
+      "type": "registry:ui",
+      "title": "Code block",
+      "description": "A typed slip taped to the page: the file name in a typewriter face, the code on a two-color ribbon (red keywords and numbers, black for the rest), line numbers in the margin and a diff mode where removed lines are struck through in red pencil and added ones ticked in green. Ships its own small lexer for tsx, ts, jsx, js, css, json and bash.",
+      "categories": [
+        "Chat"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "collapsible",
+      "type": "registry:ui",
+      "title": "Collapsible",
+      "description": "One panel that folds away behind a trigger. Minimal by design: the panel slides, and if you ask for it, writes a margin brace beside its text. The chevron indicator turns over the same way the accordion's does.",
+      "categories": [
+        "Layout"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "combobox",
+      "type": "registry:ui",
+      "title": "Combobox",
+      "description": "A field you can search. Press it and a command list opens on a slip; type to narrow it, arrow keys and Enter to choose. It can be the single-select of the shadcn docs, an editable field, or a multi-select whose choices are hand-drawn hang-tags you can take back; it can offer to create what you typed and wait for results from a server.",
+      "categories": [
+        "Forms"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "command",
+      "type": "registry:ui",
+      "title": "Command",
+      "description": "A command palette on a slip of paper. Type and the list is sorted and cut down (cmdk's fuzzy match); the row you are on wears the highlighter, keys show as pencil keycaps, an empty search gets Stubby with his magnifier. Put it in a dialog and it is set on a napkin.",
+      "categories": [
+        "Overlays"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "confetti",
+      "type": "registry:ui",
+      "title": "Confetti",
+      "description": "Paper confetti for the small victories. Strips, punched dots, stars, triangles, streamers and torn scraps, each a tiny drawing from the ink engine, thrown from a click, a state change or a function call. Nothing moves with reduced motion.",
+      "categories": [
+        "Interactive"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "context-menu",
+      "type": "registry:ui",
+      "title": "Context Menu",
+      "description": "The right-click menu, written on the same slip of paper as the dropdown and set down where the pointer was. Highlighter rows, drawn keycaps, pencil boxes and felt ticks, a red pencil hatch for what deletes. It opens on a right click, a long press on touch, or the menu key, and pops in where the pointer was.",
+      "categories": [
+        "Overlays"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "corkboard",
+      "type": "registry:ui",
+      "title": "Corkboard",
+      "description": "A wooden-framed corkboard with notes you can pick up. Drag them with a pointer, or focus one and use the arrow keys to move it and R to turn it. Positions are plain JSON you can store and restore.",
+      "categories": [
+        "Interactive"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "date-picker",
+      "type": "registry:ui",
+      "title": "Date Picker",
+      "description": "A date field with a calendar on a slip. Type a date (Sep 17, 2026, 9/17/26, 2026-09-17, tomorrow) or open the calendar and circle one; presets sit in a column beside it; the range version takes two months and closes when you have chosen both ends. Popover + Calendar + Button + Input, composed.",
+      "categories": [
+        "Forms"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "desk",
+      "type": "registry:ui",
+      "title": "Desk",
+      "description": "The surface everything else lies on: sage bookcloth under a lamp (linen weave, mottling, a warm vignette), with an optional layer of objects behind your content: a coffee ring, a pencil, paper clips, a ruler, push-pins. Paper is only paper against something darker than itself.",
+      "categories": [
+        "Paper"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "dialog",
+      "type": "registry:ui",
+      "title": "Dialog",
+      "description": "A modal window that is a sheet of paper dropped on the desk: it lands with a small tilt that settles, the page behind goes dim under a lamp, and the close button is a doodled x. Tape it, pin it, tear its edge; on a phone it becomes a sheet at the bottom of the screen.",
+      "categories": [
+        "Overlays"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "direction",
+      "type": "registry:ui",
+      "title": "Direction",
+      "description": "Tells every Radix part, every drawing and every logical property which way the page reads. One provider at the root of a right-to-left page (or on an island inside a left-to-right one) turns arrow keys, sub-menus, slider edges, tab shoulders and hand-drawn strokes round together.",
+      "categories": [
+        "Layout"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "doodle",
+      "type": "registry:ui",
+      "title": "Doodle",
+      "description": "Margin doodles: a star, a sun, a flower, a mushroom. Line-led, with one flat fill in register. Use them in the decoration layer, on empty states and in corners of cards.",
+      "categories": [
+        "Stickers & doodles"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "drawer",
+      "type": "registry:ui",
+      "title": "Drawer",
+      "description": "A slip of paper you pull up from the bottom of the screen (or in from any edge), built on vaul. From the bottom it is torn off a pad along its top edge with a strip of tape as the grab tab; drag it, flick it away, or give it snap points.",
+      "categories": [
+        "Overlays"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "dropdown-menu",
+      "type": "registry:ui",
+      "title": "Dropdown Menu",
+      "description": "A menu written on a slip of paper that drops from a button. The row under the pointer or the keyboard wears the highlighter, a ticked row is a pencil box with a felt-tip tick over it, shortcuts are drawn keycaps, and a destructive row hatches in red pencil instead. Sub-menus, typeahead and focus handling are Radix's.",
+      "categories": [
+        "Overlays"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "dropzone",
+      "type": "registry:ui",
+      "title": "Dropzone",
+      "description": "A patch of paper, stitched round its edge, that files can be dropped on or picked into. It checks type, size and count and tells you why a file was refused; it hands you File objects and shows them in a ruled list with thumbnails and progress lines. It uploads nothing: that part is yours.",
+      "categories": [
+        "Forms"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "empty",
+      "type": "registry:ui",
+      "title": "Empty",
+      "description": "What a page says when there is nothing on it yet: media, a title in the script font, a line of explanation and an action. The media can be an icon on a slip of paper, Stubby the pencil stub in one of his poses, or a doodle; a `border` draws the sketched, dashed placeholder frame.",
+      "categories": [
+        "Feedback"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "envelope",
+      "type": "registry:ui",
+      "title": "Envelope",
+      "description": "An envelope on the desk with a stamp, a postmark and address lines. It opens: the flap, which belongs to the back panel, stands up behind, and a letter slides out from between the panels, the front panel hiding its foot. Built on Collapsible, so it has a real trigger, `aria-expanded`, and content that is not in the page until it is out.",
+      "categories": [
+        "Paper"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "field",
+      "type": "registry:ui",
+      "title": "Field",
+      "description": "The words around a control: a label, help text and an error, stacked or in a row, grouped in sets with a legend. It is layout, so the only drawings are the wavy red pencil underline of an error and the hand-drawn card around a choice (a label that wraps a radio or checkbox with its own title and help).",
+      "categories": [
+        "Forms"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "flip-card",
+      "type": "registry:ui",
+      "title": "Flip card",
+      "description": "An index card with two sides. It turns over in 3D when you click it or press Space, lifting off the desk on the way; the side you cannot see is inert and hidden from assistive technology. For flashcards, reveals, and anything with a back.",
+      "categories": [
+        "Interactive"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "folder",
+      "type": "registry:ui",
+      "title": "Folder",
+      "description": "A manila file folder that is also a set of tabs: a row of paper tabs standing on a sheet of the same paper. The active tab is the folder's own color and runs down into the body, so tab and folder are one piece; the others stand a little lower and darker. It is Radix Tabs underneath.",
+      "categories": [
+        "Paper"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "form",
+      "type": "registry:ui",
+      "title": "Form",
+      "description": "react-hook-form wired to the drawn controls, exactly like shadcn's Form. FormControl gives the control its id, aria-describedby and aria-invalid, so an Input, Select, Checkbox or Switch turns red pencil when the field has an error, its label follows, and FormMessage writes the message under it with a wavy red underline.",
+      "categories": [
+        "Forms"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "handwritten",
+      "type": "registry:ui",
+      "title": "Handwritten",
+      "description": "Text that looks written, not typeset: every word sits a hair off the baseline and a touch lighter, by a seeded amount. The words stay real inline text; code, links and forms inside are left exactly as typed.",
+      "categories": [
+        "Typography"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "highlight",
+      "type": "registry:ui",
+      "title": "Highlight",
+      "description": "A highlighter swipe behind real words. The phrase stays text you can select and copy; the swipe follows it line by line when it wraps, in yellow or any stationery color, and can draw itself on as it scrolls into view.",
+      "categories": [
+        "Marks"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "hover-card",
+      "type": "registry:ui",
+      "title": "Hover Card",
+      "description": "A small polaroid that appears when you rest the pointer on a link or move keyboard focus to it: photo stock with a thick lower margin for handwriting, a degree or two of tilt, and tape if you like. A preview for sighted pointer users, never the only home of anything.",
+      "categories": [
+        "Overlays"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "icon",
+      "type": "registry:ui",
+      "title": "Icon",
+      "description": "Every glyph in Looseleaf is a hand-drawn felt-tip icon, redrawn at each size so a 16 px chevron is a chevron and not a shrunken 24 px one. It takes lucide names, so a shadcn snippet keeps working.",
+      "categories": [
+        "Icons"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "index-card",
+      "type": "registry:ui",
+      "title": "Index card",
+      "description": "A 3 x 5 card of cream stock with a red header rule and blue lines every 30 px. Header, body and footer parts lay out on the printed rules; the card can have its rod hole punched at the foot, a colored flag stuck over its edge, and a pile of cards behind it.",
+      "categories": [
+        "Paper"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "input-group",
+      "type": "registry:ui",
+      "title": "Input Group",
+      "description": "One hand-drawn field around an icon, some text, a button and the control, so a search box or a URL field is a single box instead of three. The box takes the control's focus, invalid and disabled states, and grows with a textarea. The same parts as shadcn's Input Group.",
+      "categories": [
+        "Forms"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "input-otp",
+      "type": "registry:ui",
+      "title": "Input OTP",
+      "description": "A one-time code as a row of separate hand-drawn boxes. The box that takes the next character wears the blue ring and a blinking pencil stroke; typed characters are written in script; a wrong code turns the boxes red. Underneath is one real input (the input-otp package), so paste, SMS autofill, password managers and the mobile keyboard just work.",
+      "categories": [
+        "Forms"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "input",
+      "type": "registry:ui",
+      "title": "Input",
+      "description": "A one-line text field: a pencil box on paper around a real <input>, with blue felt for what you type. It draws its own hover, focus ring, invalid (red pencil and a !), disabled (dashes) and read-only (printed) states.",
+      "categories": [
+        "Forms"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "item",
+      "type": "registry:ui",
+      "title": "Item",
+      "description": "A row for lists of things: an icon or photo, a title with a line of description, some actions. Rows sit on ruled paper, a link row lights up under a highlighter swipe, and none of it carries ink of its own, so a list of hundreds costs nothing.",
+      "categories": [
+        "Data display"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "kbd",
+      "type": "registry:ui",
+      "title": "Kbd",
+      "description": "A keyboard key, drawn in pencil as a little keycap with a shaded thickness that presses flat under your finger. Used inline, in groups, in tooltips and in menus.",
+      "categories": [
+        "Typography"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "label-tag",
+      "type": "registry:ui",
+      "title": "Label tag",
+      "description": "A hang tag: cut card with clipped corners (or an arched top, or a luggage tag's clipped end), a hole with a reinforcing patch and a brass eyelet, and a loop of twine. The whole silhouette is one drawn sheet, so the string and the eyelet turn and cast their shadow with the card. As a link or a button it swings on its eyelet.",
+      "categories": [
+        "Paper"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "label",
+      "type": "registry:ui",
+      "title": "Label",
+      "description": "The words that go with a field, in the bold hand font, with an optional red pencil star for required fields. It fades with a disabled control and hands its click to it.",
+      "categories": [
+        "Forms"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "lettering",
+      "type": "registry:ui",
+      "title": "Lettering",
+      "description": "Display titles in the script font with a riso print look: ink with a second color printed a hair off register. Pure CSS text-shadow, so the words are real text at any size. No gradients, no filters.",
+      "categories": [
+        "Typography"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "marker",
+      "type": "registry:ui",
+      "title": "Marker",
+      "description": "The pencil line between two days of a conversation, the red one where you stopped reading, and the quiet note that someone joined. A separator, a border or a plain line of small print.",
+      "categories": [
+        "Chat"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "marquee",
+      "type": "registry:ui",
+      "title": "Marquee",
+      "description": "A ticker written on a strip of washi tape. The text runs along it, fades at the ends, stops while you point at it or focus inside it, and has a pause button. With reduced motion it is a still strip with the text centered.",
+      "categories": [
+        "Interactive"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "mascot",
+      "type": "registry:ui",
+      "title": "Mascot",
+      "description": "Stubby, the pencil stub who does the drawing. He waves in welcomes, thinks in empty search results, sleeps when nothing is happening. An original character drawn as a die-cut sticker: a chubby pencil stub with a face and nothing else (no arms, no legs, no clothes). His mood is his face, a small lean of the body and one doodle floating beside him.",
+      "categories": [
+        "Stickers & doodles"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "menubar",
+      "type": "registry:ui",
+      "title": "Menubar",
+      "description": "A desktop-style menu bar: a strip of paper with a pencil ruler along its foot and the menu titles written on it. Hovered, focused or open, a title wears the highlighter; each menu opens the same slip as the dropdown. Roving focus, hover-to-switch and typeahead are Radix's.",
+      "categories": [
+        "Navigation"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "message-scroller",
+      "type": "registry:ui",
+      "title": "Message scroller",
+      "description": "The scrolling transcript of a chat: it opens on the newest message, sticks to the bottom while a reply streams and lets go the moment you scroll up, pins your new message to the top so the reply grows beneath it, holds your place when older messages are added above, and wakes a \"jump to latest\" button when there is more below. Same parts and hooks as shadcn's message scroller, with the behavior written in, so no extra package.",
+      "categories": [
+        "Chat"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "message",
+      "type": "registry:ui",
+      "title": "Message",
+      "description": "The row of a chat message: an avatar, a column with a header, the bubbles and a footer, aligned to the start or the end. Also MessageText, which sets a reply word by word so streaming text soaks in like wet ink.",
+      "categories": [
+        "Chat"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "napkin",
+      "type": "registry:ui",
+      "title": "Napkin",
+      "description": "A paper napkin to write on: tissue with a pinked edge and a pressed border, folded so it has creases (a valley with a shade on one side and a pale line on the other), optionally ringed by a coffee cup. Notes on it are set in the script font, as if in marker.",
+      "categories": [
+        "Paper"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "native-select",
+      "type": "registry:ui",
+      "title": "Native Select",
+      "description": "The browser's own <select> in a hand-drawn frame with a pencil chevron. You keep the platform's popup, mobile picker, typeahead and autofill, and a list of hundreds of options costs nothing. Reach for Select when you want the paper slip.",
+      "categories": [
+        "Forms"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "navigation-menu",
+      "type": "registry:ui",
+      "title": "Navigation Menu",
+      "description": "A site's top navigation as a strip of index dividers: pencil-sketched tabs standing on a pencil line, the open one lifted and washed with highlighter, the current page filled. Its panel drops from under the strip as a slip of paper that follows the size of what is inside, and a felt-tip underline slides along to the open tab. Hover intent, arrow keys and the motion between panels are Radix's.",
+      "categories": [
+        "Navigation"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "notebook",
+      "type": "registry:ui",
+      "title": "Notebook",
+      "description": "An open notebook on the desk: ruled paper with a red margin, bound with a wire spiral, binder rings or a stab-stitched spine, its holes punched, more pages peeking out underneath. Text sits on the lines, and with a dog-ear it turns pages. Its closed sibling, `NotebookCover`, is a cloth-bound cover with a stitched spine and an elastic band.",
+      "categories": [
+        "Paper"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "page",
+      "type": "registry:ui",
+      "title": "Page",
+      "description": "The app's main paper column: a sheet on the desk with a header, content and a footer. It can be three-hole punched (the desk shows through the holes), torn from a pad, ringed with a coffee stain, and its title is underlined by the same hand that wrote it.",
+      "categories": [
+        "Paper"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "pagination",
+      "type": "registry:ui",
+      "title": "Pagination",
+      "description": "Page links as drawn buttons: each number is a Button around your own link, the page you are on is a block of highlighter, the arrows and the ellipsis are hand-drawn. It is just links, so it works with any router, or with plain hrefs and no JavaScript at all.",
+      "categories": [
+        "Navigation"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "paper",
+      "type": "registry:ui",
+      "title": "Paper",
+      "description": "A sheet of paper on the desk: a stock (paper, slip, index card, graph, kraft, sticky notes ...), an edge (cut, torn, deckle, pinked ...), printed rules, a shadow and a small seeded tilt. The sheet turns; your content never does.",
+      "categories": [
+        "Paper"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "peel-corner",
+      "type": "registry:ui",
+      "title": "Peel corner",
+      "description": "A page whose corner curls back to show the sheet underneath. Hover the corner to lift it, drag it to peel along a diagonal crease, click or press Enter to open it. For a discount code, a hint, a secret, a P.S.",
+      "categories": [
+        "Interactive"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "polaroid",
+      "type": "registry:ui",
+      "title": "Polaroid",
+      "description": "An instant photograph: a white frame with the thick foot, a recessed square window and a caption in script. Put a real image in the window, or let it draw a little scene in marker and felt tip. Tape it, pin it, clip it, pile it up.",
+      "categories": [
+        "Paper"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "popover",
+      "type": "registry:ui",
+      "title": "Popover",
+      "description": "A slip of paper set down next to its trigger. It can be held with a push-pin or a strip of tape, given a hand-drawn arrow to point at what it is about, and cut from any stock. Focus moves into it, Escape puts it away.",
+      "categories": [
+        "Overlays"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "progress",
+      "type": "registry:ui",
+      "title": "Progress",
+      "description": "A bar somebody hatched in pencil and is coloring in with a marker. The marker is one full-length pass revealed by a CSS clip up to the value, so changing the value is a transition, not a redraw. Without a value it becomes a scribble sliding across. Radix Progress underneath.",
+      "categories": [
+        "Feedback"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "prompt-input",
+      "type": "registry:ui",
+      "title": "Prompt input",
+      "description": "The composer of a chat: a napkin strip with a writing line, an auto-growing textarea, room for attachments and a paper-plane send button that flies off when the message goes. Enter sends, Shift+Enter breaks the line, IME composition is left alone, and while a reply streams the button becomes a stop button. Slots for slash commands and @mentions, with no data of their own.",
+      "categories": [
+        "Chat"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "quote",
+      "type": "registry:ui",
+      "title": "Quote",
+      "description": "A pull quote with big hand-drawn quotation marks and an attribution. A real figure, blockquote and figcaption, with marker or felt marks drawn in the gutters: an opening pair at the top, a closing pair at the bottom.",
+      "categories": [
+        "Marks"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "radio-group",
+      "type": "registry:ui",
+      "title": "Radio Group",
+      "description": "Pick exactly one. Each choice is a hand-circled ring; picking it colors the dot in with a terracotta blot and writes a felt spiral into it. Radix Radio Group underneath: roving focus, arrow keys, form value, orientation and direction.",
+      "categories": [
+        "Forms"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "rating",
+      "type": "registry:ui",
+      "title": "Rating",
+      "description": "Stars, hearts or suns somebody drew, where you pick how many are filled. Hover previews, half steps are optional, and it is a real radio group (arrow keys, form value), or a plain read-only display with a text alternative. New in Looseleaf: shadcn has no rating.",
+      "categories": [
+        "Forms"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "receipt",
+      "type": "registry:ui",
+      "title": "Receipt",
+      "description": "Thermal till paper: pinked (or perforated, or torn) at both ends, printed in the typewriter font, its lines a description list, its total circled in red felt tip by whoever checked it, ending in a barcode made from the number under it.",
+      "categories": [
+        "Paper"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "resizable",
+      "type": "registry:ui",
+      "title": "Resizable",
+      "description": "Panels you can drag apart. The seam between two panels is stitched by hand, gets a paper tab with a grip if you ask, darkens under the pointer and is pulled tight into one blue line while you drag. Built on react-resizable-panels 4: keyboard resizing, collapsible panels and persisted layouts included.",
+      "categories": [
+        "Layout"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "reveal",
+      "type": "registry:ui",
+      "title": "Reveal",
+      "description": "Holds its children back until they scroll into view, then draws them on: a wipe along the line, wet ink drying, a sheet dropped on the desk, a stamp, a toss. Direct children can arrive one after another. Without script, and with reduced motion, everything is simply there.",
+      "categories": [
+        "Interactive"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "ribbon",
+      "type": "registry:ui",
+      "title": "Ribbon",
+      "description": "A ribbon label: a band of colored paper with words on it, folded ends and all. For a section heading, a New flag on a card, a price label or a call to action.",
+      "categories": [
+        "Marks"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "scribble",
+      "type": "registry:ui",
+      "title": "Scribble",
+      "description": "Words scribbled out with tight back-and-forth strokes, like a note someone changed their mind about. A look, not a redaction: the text underneath stays in the DOM.",
+      "categories": [
+        "Marks"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "scroll-area",
+      "type": "registry:ui",
+      "title": "Scroll Area",
+      "description": "A scroll container whose bar is a pencil \"scroll mark\": a graphite pull sliding down a faint gutter, gone over once more when a hand is on it. It fades in on hover or scroll, works in both directions, and is Radix underneath.",
+      "categories": [
+        "Layout"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "seal",
+      "type": "registry:ui",
+      "title": "Seal",
+      "description": "Rosettes, scalloped seals, medals, ringed seals with rim lettering and wax seals, drawn like the stickers without the white edge. Use one as a verified mark beside a name, an award on a card, or the stamp of approval on a certificate.",
+      "categories": [
+        "Stickers & doodles"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "select",
+      "type": "registry:ui",
+      "title": "Select",
+      "description": "A drop-down field. The trigger is a pencil box with a tick before its chevron; the list is a slip of paper set down over or under it, where the row you are on gets the highlighter and the chosen row is bold with a blue tick. Radix Select underneath: typeahead, keyboard, form value, item-aligned or popper placement.",
+      "categories": [
+        "Forms"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "separator",
+      "type": "registry:ui",
+      "title": "Separator",
+      "description": "A rule that visually or semantically separates content, drawn by hand: pencil, ledger dashes, a squiggle, dots, a strip of tape, a running stitch or a torn edge of paper. Horizontal or vertical, with an optional centered label.",
+      "categories": [
+        "Layout"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "sheet",
+      "type": "registry:ui",
+      "title": "Sheet",
+      "description": "A notebook page that slides in from the edge of the screen. It is bound along the edge that faces the middle: spiral wire through punched holes, three binder holes, a perforated tear line, or torn out of a pad. Good for settings, filters, carts and mobile navigation.",
+      "categories": [
+        "Overlays"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "sidebar",
+      "type": "registry:ui",
+      "title": "Sidebar",
+      "description": "An order pad hung from the top of the screen: cream paper with a torn top edge and a binder clip. Rows carry their own line of the pad's ruling, hover is the highlighter, and the current page is marked with a highlighter swipe and a bracket in the margin. It collapses to icons or slides away, becomes a sheet on phones, and stays cheap for a long menu: only the one active row draws anything.",
+      "categories": [
+        "Navigation"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "signature-pad",
+      "type": "registry:ui",
+      "title": "Signature pad",
+      "description": "Sign on the screen. One brush pen with real pressure, a pencil baseline with its x, a clear button, and a typed-name fallback that is set in hand lettering. It carries the image in a hidden field, so it works in a plain form and can be required.",
+      "categories": [
+        "Forms"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "signature",
+      "type": "registry:ui",
+      "title": "Signature",
+      "description": "A name signed in the script font with the pen's flourish under it: a swoosh with a loop that flicks up past the last letter. The name is ordinary text; the flourish is a drawing that can write itself on.",
+      "categories": [
+        "Marks"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "skeleton",
+      "type": "registry:ui",
+      "title": "Skeleton",
+      "description": "A placeholder someone sketched in pencil: a pale hatch inside a rough ruled outline that boils gently between three redrawn frames. It costs no ink per instance, so a page of hundreds is as cheap as one.",
+      "categories": [
+        "Feedback"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "sketchpad",
+      "type": "registry:ui",
+      "title": "Sketchpad",
+      "description": "A real drawing surface. Pointer, touch, pen pressure or the keyboard put strokes on paper, and every stroke is rendered by the interface's own pen (variable-width ribbons, pooled ends, felt / graphite / marker grain), so what people draw looks like the rest of the page. Undo, redo, export as svg, replay.",
+      "categories": [
+        "Interactive"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "slider",
+      "type": "registry:ui",
+      "title": "Slider",
+      "description": "Pick a number, or two, by dragging a paper knob along a hand-ruled groove. The range is one marker pass drawn full length and revealed by a CSS clip, so nothing is redrawn while you drag. Ticks, a highlighter or blue-felt range, vertical, and range sliders. Radix Slider underneath.",
+      "categories": [
+        "Forms"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "sonner",
+      "type": "registry:ui",
+      "title": "Sonner",
+      "description": "Toasts as slips of paper tossed onto the desk. A guest check for success, a pink sticky for errors, yellow for warnings, blue for news; stacked, swipeable, with drawn icons, action buttons, promise toasts and tape or a pin to hold them down. Built on the sonner package: you keep its `toast()` API.",
+      "categories": [
+        "Feedback"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "spinner",
+      "type": "registry:ui",
+      "title": "Spinner",
+      "description": "A pencil that will not stop scribbling: a hand-wound spiral whose line is drawn and undrawn round and round, in the color of the text around it. Still, and whole, when motion is reduced. Stubby can write instead, in three frames like a flip book.",
+      "categories": [
+        "Feedback"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "squiggle",
+      "type": "registry:ui",
+      "title": "Squiggle",
+      "description": "A hand-drawn divider: a wave, a zig-zag, a row of loops, scallops, dashes or dots, drawn to fit whatever width or height you give it. Same semantics as a separator.",
+      "categories": [
+        "Marks"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "stamp-button",
+      "type": "registry:ui",
+      "title": "Stamp button",
+      "description": "A button that is a rubber stamp: a wooden knob on an inked die, in the color of the impression it will leave. Press it and APPROVED, PAID or VOID lands on the page with a thump. The stamps on a page are JSON, so they can be state.",
+      "categories": [
+        "Actions"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "stamp",
+      "type": "registry:ui",
+      "title": "Stamp",
+      "description": "A rubber stamp: solid ink pressed through a worn pad, double-rule border, typewriter capitals, a slight tilt and sometimes the ghost of a first impression. For APPROVED, PAID, DRAFT and friends.",
+      "categories": [
+        "Stickers & doodles"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "stepper",
+      "type": "registry:ui",
+      "title": "Stepper",
+      "description": "A number you can nudge: minus, the value, plus. One hand-drawn box with a tick before each button, the number in script, buttons that repeat while you hold them, arrow keys and PageUp / PageDown for the keyboard, and a rattle of the box when there is nowhere left to go. The value is a real text input, so it types, pastes and submits with a form.",
+      "categories": [
+        "Forms"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "sticker-board",
+      "type": "registry:ui",
+      "title": "Sticker board",
+      "description": "A page you can stick stickers on: drag them anywhere, turn them, size them, stack them, with the pointer or the keyboard. The value is plain JSON ({ id, name, x, y, rot, scale, z }) and it exports to one standalone SVG.",
+      "categories": [
+        "Interactive"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "sticker-picker",
+      "type": "registry:ui",
+      "title": "Sticker picker",
+      "description": "A popover of stickers to choose from: a search field, category chips and a grid you walk with the arrow keys. Reach for it in a comment box, a reaction bar or a profile editor. The highlighted sticker peels its corner.",
+      "categories": [
+        "Forms"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "sticker-sheet",
+      "type": "registry:ui",
+      "title": "Sticker sheet",
+      "description": "A sheet of die-cut stickers on backing paper, each in its own kiss-cut outline. Press one and it peels away, drag one and it comes off under the mouse; the outline stays behind and can take it back. For reward charts, sticker packs and anything you collect.",
+      "categories": [
+        "Stickers & doodles"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "sticker",
+      "type": "registry:ui",
+      "title": "Sticker",
+      "description": "Die-cut vinyl stickers: the art with a white border, a cut line, a soft shadow and, if you like, a peeled corner. Status badges (done, sale) are generated; the rest are drawn by hand.",
+      "categories": [
+        "Stickers & doodles"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "sticky-note",
+      "type": "registry:ui",
+      "title": "Sticky note",
+      "description": "A square of colored paper with a gum band, turned a little more than a page. Five pads, any size, written in marker. It can curl a corner, hang from a pin or a strip of tape, and grow a tick box that is ticked with a felt pen.",
+      "categories": [
+        "Paper"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "strike",
+      "type": "registry:ui",
+      "title": "Strike",
+      "description": "A red pencil through real words: one line, two lines, or a cross-out. The text stays readable and real underneath, so a price that was 49 can still be copied and read by a screen reader.",
+      "categories": [
+        "Marks"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "switch",
+      "type": "registry:ui",
+      "title": "Switch",
+      "description": "An on/off switch drawn as one clean felt pill: the terracotta marker fills the track when it is on, and a paper coin for a thumb slides across. Radix Switch underneath.",
+      "categories": [
+        "Forms"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "table",
+      "type": "registry:ui",
+      "title": "Table",
+      "description": "Rows and columns on a ruled page. Every rule is a pencil pull drawn once by the pen and printed by CSS (so a hundred rows cost no drawings), the header has an accountant's double rule, and a hovered or selected row is a highlighter swipe.",
+      "categories": [
+        "Data display"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "tabs",
+      "type": "registry:ui",
+      "title": "Tabs",
+      "description": "Index-divider tabs: the active one is lifted and filled with highlighter, and the pencil baseline breaks under it. Also a hairline `line` style with a blue felt underline, and vertical binder tabs. Radix behavior and roving focus are untouched.",
+      "categories": [
+        "Navigation"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "tally",
+      "type": "registry:ui",
+      "title": "Tally",
+      "description": "A count as tally marks, 1 to 99: bundles of four struck through by a fifth. The number is the accessible name, the box is exactly as big as the marks, and it is drawn on the server.",
+      "categories": [
+        "Marks"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "tape",
+      "type": "registry:ui",
+      "title": "Tape",
+      "description": "A strip of masking, washi, kraft or cellophane tape, drawn: translucent, with slit lines along its edges, crinkles and torn or pinked ends. Stick it across a corner, use it as a label, or let Paper place it for you.",
+      "categories": [
+        "Paper"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "tear-off",
+      "type": "registry:ui",
+      "title": "Tear-off",
+      "description": "A coupon, ticket or raffle strip with a stub you tear off along a perforated line. Pull the stub and it swings off its far corner, tap it or press Enter and it comes away; the ticket keeps a torn edge. Calls onTear once.",
+      "categories": [
+        "Interactive"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "textarea",
+      "type": "registry:ui",
+      "title": "Textarea",
+      "description": "A multi-line text field on paper: a pencil box around a real <textarea> that grows with its text, with optional hand-ruled lines on the baselines, a drawn resize handle and a character counter.",
+      "categories": [
+        "Forms"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "ticket",
+      "type": "registry:ui",
+      "title": "Ticket",
+      "description": "A ticket with concave corners, a bite out of both edges where the stub tears off, and a row of holes along the tear. The holes are cut out of the paper, so the desk (and the shadow) show through. A body, a stub, spaced capitals in the typewriter font and a serial number in red.",
+      "categories": [
+        "Paper"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "toggle-group",
+      "type": "registry:ui",
+      "title": "Toggle Group",
+      "description": "A row of toggles that belong together: pick one (alignment) or several (bold, italic, underline). Joined outline items share one hand-drawn box with a pencil seam between them; the highlighter body marks what is on.",
+      "categories": [
+        "Actions"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "toggle",
+      "type": "registry:ui",
+      "title": "Toggle",
+      "description": "A two-state button that stays down: a whisper of pencil box at rest, and a highlighter body that snaps into register when it is on. Same Radix behavior and variants as shadcn.",
+      "categories": [
+        "Actions"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "tooltip",
+      "type": "registry:ui",
+      "title": "Tooltip",
+      "description": "A sticky note stuck next to a control, with a felt-tip arrow pointing at it. It names an icon button or adds a hint, opens on hover and keyboard focus with a shared delay, and never hides anything a person needs to be able to read.",
+      "categories": [
+        "Overlays"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "typewriter",
+      "type": "registry:ui",
+      "title": "Typewriter",
+      "description": "Text that types itself in the typewriter face, with an inked caret. Keys land at uneven speeds and hold at commas and periods; several phrases can go one under the other or be typed, held and backspaced in turn.",
+      "categories": [
+        "Typography"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "typing-indicator",
+      "type": "registry:ui",
+      "title": "Typing indicator",
+      "description": "\"Somebody is writing\": a small pencil that draws three dots one after another, or scrawls a line of cursive. A polite live region with a screen-reader label, at home inside a bubble.",
+      "categories": [
+        "Chat"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "typography",
+      "type": "registry:ui",
+      "title": "Typography",
+      "description": "The type scale and a Prose wrapper for the notebook: script headings with a hand-drawn rule, body text in the hand at 17 px on a 1.7 line, blue felt links, marker bullets, mono code chips. Prose styles markup you did not write (markdown, CMS html, MDX).",
+      "categories": [
+        "Typography"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "underline",
+      "type": "registry:ui",
+      "title": "Underline",
+      "description": "A pen line under real words: single, double, wavy or scribbled, in felt, pencil or marker. It follows the phrase line by line when it wraps, and can draw itself on as it scrolls into view.",
+      "categories": [
+        "Marks"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "announcement-bar",
+      "type": "registry:block",
+      "title": "Announcement bar",
+      "description": "A strip of kraft paper taped across the top of the page: a New ribbon, one sentence, a link and a dismiss button. Looks right on paper or on the desk.",
+      "categories": [
+        "marketing"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "calendar-planner",
+      "type": "registry:block",
+      "title": "Calendar planner",
+      "description": "A month planner: the hand-ruled Calendar with dots on the days that have something on, the chosen day written one event to a line on an index card, what comes next, and a dialog to add, change or cross out an event. Days say how many events they hold to a screen reader. Made for the desk; the sheets bring their own paper.",
+      "categories": [
+        "app"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "chat-app",
+      "type": "registry:block",
+      "title": "Chat app",
+      "description": "A two-pane chat for a pen-pal look: a pad of conversations with search and an unread filter, and a thread with a transcript that pins your message and follows the reply as it is written word by word, attachments, tool notes, a code slip with a diff, and the composer on its napkin. One pane at a time on a phone. Both panes are sheets of paper, so it looks right on paper or on the desk.",
+      "categories": [
+        "app"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "checkout-01",
+      "type": "registry:block",
+      "title": "Checkout 01",
+      "description": "Checkout on one taped page: contact, delivery (choice cards that show what each costs right now, with no address asked for a pick-up) and a card checked as you type (Luhn, expiry, grouped digits), beside a basket with quantity steppers, a promo code and a till receipt that rewrites itself with the delivery, discount and VAT. A failed try lists what needs a look with buttons to the fields; placing the order swaps the page for a thank-you with the receipt stamped PAID. The text and forms sit on sheets of their own, so it looks right on paper or on the desk.",
+      "categories": [
+        "commerce"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "cta-01",
+      "type": "registry:block",
+      "title": "Call to action, ticket",
+      "description": "One big admit-one ticket: riso lettering, two buttons, and a stub with Stubby celebrating and a serial number. Looks right on paper or on the desk.",
+      "categories": [
+        "marketing"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "dashboard-01",
+      "type": "registry:block",
+      "title": "Dashboard 01",
+      "description": "The classic admin page: a sidebar hung from a binder clip, four numbers, an area chart you can re-cut by date and a table you can select, hide columns from, page through and edit. Mirrors shadcn's dashboard-01. Looks right on the desk (the page is a sheet set on it) and on plain paper.",
+      "categories": [
+        "dashboard"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "dashboard-analytics",
+      "type": "registry:block",
+      "title": "Analytics dashboard",
+      "description": "Traffic on one sheet of paper: four sparkline numbers, visitors day by day against the days before, where they came from, the top pages and a checkout funnel with its biggest drop circled. The date range re-works every figure. The sheet brings its own paper, so it reads the same on the desk and on a plain page.",
+      "categories": [
+        "dashboard"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "dashboard-finance",
+      "type": "registry:block",
+      "title": "Finance dashboard",
+      "description": "A household ledger on a three-hole-punched sheet: balances written up as a till receipt with the total circled, money in and out, budgets as pencil bars that turn to a red word when a pot is overspent, a donut, and a transactions table with status chips you can filter, sort and add to. Brings its own paper, so it reads the same on the desk and on a plain page.",
+      "categories": [
+        "dashboard"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "empty-inbox",
+      "type": "registry:block",
+      "title": "Empty inbox",
+      "description": "A taped inbox card with three filters and an empty state under each: inbox zero with Stubby celebrating beside a hand-circled 0, all quiet, and nothing starred. Looks right on paper or on the desk.",
+      "categories": [
+        "feedback"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "empty-search",
+      "type": "registry:block",
+      "title": "Empty search",
+      "description": "A contacts list with a live search. When nothing matches, Stubby comes out with his magnifying glass, quotes the words back, and offers to clear the box or try a search that works. Looks right on paper or on the desk.",
+      "categories": [
+        "feedback"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "error-404",
+      "type": "registry:block",
+      "title": "404, page not found",
+      "description": "A torn scrap with 404 in riso lettering and Stubby shrugging beside it, a sentence, a search box (press / to reach it) and two ways out, all on one taped sheet. Looks right on paper or on the desk.",
+      "categories": [
+        "feedback"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "error-500",
+      "type": "registry:block",
+      "title": "500, server error",
+      "description": "Stubby says oops and a pink sticky note says sorry, over an incident slip with the request, the time and a circled reference with a barcode and a copy button; try again, go home, check the status. Looks right on paper or on the desk.",
+      "categories": [
+        "feedback"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "faq-01",
+      "type": "registry:block",
+      "title": "FAQ on ruled paper",
+      "description": "An accordion written on ruled notebook paper, every line on the printed rules, with a flagged \"still stuck?\" index card and Stubby beside it. Looks right on paper or on the desk.",
+      "categories": [
+        "marketing"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "features-01",
+      "type": "registry:block",
+      "title": "Features, cards and bento",
+      "description": "A feature section in two looks: three index cards with doodle icons, or a bento of a ruled page, a sticky note, a polaroid, a receipt and a ticket pinned to a corkboard (variant=\"bento\"). Looks right on paper or on the desk.",
+      "categories": [
+        "marketing"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "file-explorer",
+      "type": "registry:block",
+      "title": "File explorer",
+      "description": "A filing cabinet: the places are the tabs of a manila folder, and inside one you open folders with a trail back, switch between a list and a grid, sort, search, pick several files and delete them (with an Undo). Files are named to a screen reader with their kind, size and date. Made for the desk, where the folder's kraft looks right.",
+      "categories": [
+        "app"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "footer-01",
+      "type": "registry:block",
+      "title": "Footer, stitched kraft",
+      "description": "A sheet of kraft torn along its top edge and sewn with a running stitch: wordmark and Stubby, three link lists, social buttons, a status badge and a round rubber stamp. Looks right on paper or on the desk.",
+      "categories": [
+        "marketing"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "forgot-password-01",
+      "type": "registry:block",
+      "title": "Forgot password 01",
+      "description": "One field asks for a reset link, and the answer never says whether the address has an account. The card then turns into a note that the link is on its way, with a way to send it again. Taped card, Stubby searching. Made for the desk.",
+      "categories": [
+        "authentication"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "inbox",
+      "type": "registry:block",
+      "title": "Inbox",
+      "description": "Letters on one side, the open one on a sheet of its own on the other. Closed envelopes are unread, opened ones are read; the list is a single tab stop moved with the arrow keys. Folders, a search, unread only, archive, delete, star, mark unread and a reply box, with a status line for every move. On a phone it shows one pane at a time with a way back. Made for the desk.",
+      "categories": [
+        "app"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "kanban-board",
+      "type": "registry:block",
+      "title": "Kanban board",
+      "description": "Three columns of sticky notes on graph paper. Every note has arrow buttons that name the note and the column it goes to, so moving one works from the keyboard and a screen reader; you can also pick a note up and drop it on another column. Add a note at the foot of a column. Made for the desk, fine on a plain page.",
+      "categories": [
+        "app"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "landing-hero-01",
+      "type": "registry:block",
+      "title": "Landing hero, split",
+      "description": "A headline in riso lettering with a highlighted phrase, two buttons, social proof and a collage of a polaroid, a sticky note, an index card, a sticker and Stubby, on one taped sheet. Looks right on paper or on the desk.",
+      "categories": [
+        "marketing"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "landing-hero-02",
+      "type": "registry:block",
+      "title": "Landing hero, centered",
+      "description": "A centered riso headline, two buttons, and the product on a taped page: a checklist you can tick (the bar, the tally and a stamp follow), margin notes and Stubby peeking over the edge. Looks right on paper or on the desk.",
+      "categories": [
+        "marketing"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "login-01",
+      "type": "registry:block",
+      "title": "Login 01",
+      "description": "A taped sheet on the desk with a hand-written welcome back and Stubby looking over its top edge. Email, password with a show toggle, remember me and a Google button, checked with react-hook-form and zod. Sits on the desk (it brings its own) and reads the same on paper.",
+      "categories": [
+        "authentication"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "login-02",
+      "type": "registry:block",
+      "title": "Login 02",
+      "description": "Two columns: the form on a sheet of paper, and where the photograph would be a hand-made cover on the desk (graph paper, a greeting, Stubby waving, a pinned note, stickers). The cover shows from 48rem of width. Paper on one side, desk on the other, so it works on either.",
+      "categories": [
+        "authentication"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "login-03",
+      "type": "registry:block",
+      "title": "Login 03",
+      "description": "A card on a quiet desk with a pencil lying about. Apple and Google buttons, an or-continue-with rule, then email and password. The desk is the muted background of the official block and travels with the block.",
+      "categories": [
+        "authentication"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "login-04",
+      "type": "registry:block",
+      "title": "Login 04",
+      "description": "A card that opens into two columns: the form, and a kraft panel with three drawn polaroids taped and pinned to it. Three provider buttons in a row. The pictures stay home below 42rem. Made for the desk.",
+      "categories": [
+        "authentication"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "login-05",
+      "type": "registry:block",
+      "title": "Login 05",
+      "description": "Email first, on a plain sheet of paper that is the whole page: Stubby waves, one field emails a sign-in link, Apple and Google below. After the link is sent the form says so and lets you fix the address. Brings its own paper, so it reads the same on the desk or on paper.",
+      "categories": [
+        "authentication"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "logos-01",
+      "type": "registry:block",
+      "title": "Logo tickers on washi tape",
+      "description": "Two strips of washi tape with customer names in their own type, running in opposite directions, one pause button for both; a plain wrapped list replaces them for reduced motion. Looks right on paper or on the desk.",
+      "categories": [
+        "marketing"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "newsletter-01",
+      "type": "registry:block",
+      "title": "Newsletter sign-up",
+      "description": "A taped card with a labeled email field and a button, beside a kraft envelope that holds a sample letter. A bad address is flagged under the field; a good one opens the envelope and stamps it SUBSCRIBED. Looks right on paper or on the desk.",
+      "categories": [
+        "marketing"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "notes-app",
+      "type": "registry:block",
+      "title": "Notes app",
+      "description": "A notebook editor shell: notebooks as binder tabs down a spine, the pages of the open notebook as index cards, and the page itself on ruled spiral paper with a marks toolbar (highlight, underline, circle, cross out). Write mode is plain text in blue felt, Page mode draws the marks; a tally counts how often you have read it. One pane at a time on a phone. Both panes are sheets, so it looks right on paper or on the desk.",
+      "categories": [
+        "app"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "onboarding-01",
+      "type": "registry:block",
+      "title": "Onboarding checklist",
+      "description": "A taped card with a progress bar and a pencil tally that follow five ticks, a button per step, a stamp and confetti when the last one is done, and a skip link. Looks right on paper or on the desk.",
+      "categories": [
+        "marketing"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "otp-01",
+      "type": "registry:block",
+      "title": "OTP 01",
+      "description": "Verify a code: six hand-drawn boxes on a taped card. The last digit checks it by itself, paste works, a wrong code turns the boxes red and clears them, resend comes back after a wait and the success card wears a rosette. A sticky note gives away the demo code. Made for the desk.",
+      "categories": [
+        "authentication"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "pricing-01",
+      "type": "registry:block",
+      "title": "Pricing 01",
+      "description": "Three price cards taped to the wall with a monthly / yearly switch. The middle plan is the popular one: taller, a medal sticker on its corner and its name highlighted. Prices follow the switch (yearly is two months free, said out loud to screen readers too), feature lists have hand-ticked lines, and a short accordion answers the questions people ask. The text sits on the page itself, so it reads the same on paper or on the desk.",
+      "categories": [
+        "marketing"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "profile-page",
+      "type": "registry:block",
+      "title": "Profile page",
+      "description": "A person's page: a taped polaroid holding their photo (or initials) with the name, words, follow and message beside it, four numbers on slips, and three tabs. Activity is pages written week by week in tally marks (this week in marker) and a feed under the day it happened; Notebooks is a shelf of closed covers; Stickers shows the ones earned and, faint, what it takes to earn the rest. The text sits on the page itself, so it reads the same on paper or on the desk.",
+      "categories": [
+        "app"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "reset-password-01",
+      "type": "registry:block",
+      "title": "Reset password 01",
+      "description": "Choose a new password twice, with the rules as a checklist that ticks itself off while you type, then a card that says it is done. Stubby writes it down. Taped card on the desk with a pencil and push-pins.",
+      "categories": [
+        "authentication"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "settings-appearance",
+      "type": "registry:block",
+      "title": "Settings: appearance",
+      "description": "Appearance settings for the InkProvider on a page punched at the top: theme, density (comfortable, compact, calm), motion, fine ink, reading direction and the paper to write on, as choice cards. A preview inside its own provider wears every choice at once, and the props to paste into your root provider are written out beneath it. It is a sheet of paper, so it looks right on paper or on the desk.",
+      "categories": [
+        "settings"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "settings-billing",
+      "type": "registry:block",
+      "title": "Settings: billing",
+      "description": "Billing settings on a taped, coffee-ringed page: your plan as a ticket with choice cards and an honest price for changing it (upgrades are prorated, downgrades wait for the renewal and warn about what no longer fits), usage as pencil bars, the card on file with a real card form (Luhn check, expiry, auto-formatting), invoice details, and every invoice as a till receipt. It is a sheet of paper, so it looks right on paper or on the desk.",
+      "categories": [
+        "settings"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "settings-notifications",
+      "type": "registry:block",
+      "title": "Settings: notifications",
+      "description": "Notification settings on a page torn from a pad: a how-much dial as choice cards, a ruled table with a hand-ticked box per event and channel, quiet hours with times and days, and a weekly summary. Choices that cannot work together (nothing reaches you, the same time twice, no days) are written under the box that causes them. It is a sheet of paper, so it looks right on paper or on the desk.",
+      "categories": [
+        "settings"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "settings-profile",
+      "type": "registry:block",
+      "title": "Settings: profile",
+      "description": "Profile settings on a three-hole-punched page: photo upload with size and type checks, name, username (with a taken-name rule), email, bio with a live counter, pronouns, time zone, website and a search switch. react-hook-form and zod, every message written under its field, and an index card that shows how others see you as you type. It is a sheet of paper, so it looks right on paper or on the desk.",
+      "categories": [
+        "settings"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "sidebar-01",
+      "type": "registry:block",
+      "title": "Sidebar 01",
+      "description": "A simple sidebar with the navigation grouped by section: an order pad hung from a binder clip, an edition switcher and a search box on top, the current page in highlighter with a bracket in the margin. Mirrors shadcn's sidebar-01. Looks right on the desk and on plain paper.",
+      "categories": [
+        "sidebar"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "sidebar-02",
+      "type": "registry:block",
+      "title": "Sidebar 02",
+      "description": "A sidebar with collapsible sections: each group label is a button that folds its pages away (the chevron turns over), and the page header is a strip of paper that stays at the top while the page scrolls. Mirrors shadcn's sidebar-02. Looks right on the desk and on plain paper.",
+      "categories": [
+        "sidebar"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "sidebar-03",
+      "type": "registry:block",
+      "title": "Sidebar 03",
+      "description": "A sidebar with submenus: every section is a bold row with its pages listed underneath, hung on a pencil line down the margin. Mirrors shadcn's sidebar-03. Looks right on the desk and on plain paper.",
+      "categories": [
+        "sidebar"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "sidebar-04",
+      "type": "registry:block",
+      "title": "Sidebar 04",
+      "description": "A floating sidebar with submenus: the pad is set down on the desk with a margin all round and turned a little, 19rem wide, and the page beside it is a second sheet. Mirrors shadcn's sidebar-04. At its best on the desk; on plain paper it still reads as two sheets.",
+      "categories": [
+        "sidebar"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "sidebar-05",
+      "type": "registry:block",
+      "title": "Sidebar 05",
+      "description": "A sidebar with collapsible submenus: each section is a row with a plus that turns into a minus while its pages are showing. Mirrors shadcn's sidebar-05. Looks right on the desk and on plain paper.",
+      "categories": [
+        "sidebar"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "sidebar-06",
+      "type": "registry:block",
+      "title": "Sidebar 06",
+      "description": "A sidebar with submenus as dropdowns: each section opens its pages in a menu beside the pad, and a little sign-up card is tucked into the foot. Mirrors shadcn's sidebar-06. Looks right on the desk and on plain paper.",
+      "categories": [
+        "sidebar"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "sidebar-07",
+      "type": "registry:block",
+      "title": "Sidebar 07",
+      "description": "A sidebar that collapses to icons: the header button, Ctrl/Cmd+B or the strip on the pad's edge shrinks it to a 3rem column, the clip comes off and each icon names itself in a tooltip. Team switcher, folding rows, projects and an account menu. Mirrors shadcn's sidebar-07. Looks right on the desk and on plain paper.",
+      "categories": [
+        "sidebar"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "sidebar-08",
+      "type": "registry:block",
+      "title": "Sidebar 08",
+      "description": "An inset sidebar with secondary navigation: the pad has a margin round it and the page becomes a sheet of paper set on the desk beside it. Rows fold open from a chevron, projects keep their menus, support and feedback sit at the foot. Mirrors shadcn's sidebar-08. At its best on the desk.",
+      "categories": [
+        "sidebar"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "sidebar-09",
+      "type": "registry:block",
+      "title": "Sidebar 09",
+      "description": "Nested sidebars for a mail app: a strip of folder icons and, on the same pad, a second sheet listing the messages of the folder you picked, with search and an Unreads switch. Pick a message and it opens on the page. Mirrors shadcn's sidebar-09. Looks right on the desk and on plain paper.",
+      "categories": [
+        "sidebar"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "sidebar-10",
+      "type": "registry:block",
+      "title": "Sidebar 10",
+      "description": "A sidebar with a popover: a notes app with favorites and workspaces on the pad and, in the page header, a star and a \"...\" that opens a slip of actions built from the same menu parts as the pad. Mirrors shadcn's sidebar-10. Looks right on the desk and on plain paper.",
+      "categories": [
+        "sidebar"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "sidebar-11",
+      "type": "registry:block",
+      "title": "Sidebar 11",
+      "description": "A sidebar with a collapsible file tree: the changed files with their letters in the margin, then the folders, each folding open to any depth. Pick a file and the trail in the header follows it. Mirrors shadcn's sidebar-11. Looks right on the desk and on plain paper.",
+      "categories": [
+        "sidebar"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "sidebar-12",
+      "type": "registry:block",
+      "title": "Sidebar 12",
+      "description": "A sidebar with a calendar: a month to pick a day from, calendars as ticked boxes in folding groups, and your account on top. The picked day becomes the page. Mirrors shadcn's sidebar-12. Looks right on the desk and on plain paper.",
+      "categories": [
+        "sidebar"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "sidebar-13",
+      "type": "registry:block",
+      "title": "Sidebar 13",
+      "description": "A sidebar in a dialog: the app's settings open in a sheet of their own that is a small app too, with a pad of sections, breadcrumbs and a page of switches. Opens from the Settings row or the header button. Mirrors shadcn's sidebar-13. Looks right on the desk and on plain paper.",
+      "categories": [
+        "sidebar"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "sidebar-14",
+      "type": "registry:block",
+      "title": "Sidebar 14",
+      "description": "A sidebar on the right: the page comes first and the pad hangs from the other edge as a table of contents, folding away with a button at the far end of the header. Mirrors shadcn's sidebar-14. Looks right on the desk and on plain paper.",
+      "categories": [
+        "sidebar"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "sidebar-15",
+      "type": "registry:block",
+      "title": "Sidebar 15",
+      "description": "A left and a right sidebar: the notes pad hangs from the left and folds away, the calendar pad is taped in on the right and stays (from the lg breakpoint up), the page is a sheet between them. Mirrors shadcn's sidebar-15. Looks right on the desk and on plain paper.",
+      "categories": [
+        "sidebar"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "sidebar-16",
+      "type": "registry:block",
+      "title": "Sidebar 16",
+      "description": "A sidebar under a sticky site header: a strip of paper runs across the whole window with the toggle button, the trail and a search box, and the pad and the page live below it. Mirrors shadcn's sidebar-16. Looks right on the desk and on plain paper.",
+      "categories": [
+        "sidebar"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "sidebar-shared",
+      "type": "registry:block",
+      "title": "Sidebar parts",
+      "description": "The pieces the sixteen sidebar blocks share: brand header, search box, team switcher, account menu, project and secondary lists, folding calendars, a page header with breadcrumbs, and the small hand-written note that stands where content goes. It installs by itself with any sidebar block; copy the parts you like into your app.",
+      "categories": [
+        "sidebar"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "signup-01",
+      "type": "registry:block",
+      "title": "Signup 01",
+      "description": "A guest check on the desk: a paper clip, dashed tear lines top and bottom, and a member number in the corner. Name, email, password twice and a Google button, with live messages in the fields. Made for the desk.",
+      "categories": [
+        "authentication"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "signup-02",
+      "type": "registry:block",
+      "title": "Signup 02",
+      "description": "Two columns: the form on paper, and on the desk beside it the ticket you are signing up for (admit one, stub still on), a club stamp across the corner and Stubby celebrating. The ticket shows from 48rem of width.",
+      "categories": [
+        "authentication"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "signup-03",
+      "type": "registry:block",
+      "title": "Signup 03",
+      "description": "A card on a quiet desk with paper clips and push-pins lying about. Password and confirmation side by side, and a tally under them that counts how strong the password is. Terms line under the card.",
+      "categories": [
+        "authentication"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "signup-04",
+      "type": "registry:block",
+      "title": "Signup 04",
+      "description": "A card that opens into two columns: the form, and a kraft panel holding a welcome kit of nine stickers that really peel off. Three provider buttons. The sticker sheet stays home below 42rem. Made for the desk.",
+      "categories": [
+        "authentication"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "signup-05",
+      "type": "registry:block",
+      "title": "Signup 05",
+      "description": "Email first, on a page torn from a pad and laid on the desk: Stubby thinks about it, one field emails a link to start, Apple and Google below. After the link is sent the form says so. Brings its own desk and paper.",
+      "categories": [
+        "authentication"
+      ]
+    },
+    {
+      "source": "looseleaf",
+      "name": "testimonials-01",
+      "type": "registry:block",
+      "title": "Testimonials wall",
+      "description": "Six quotations on six kinds of paper: sticky notes, a torn page, a polaroid, a napkin and an index card, pinned, taped and clipped, under a star rating. Looks right on paper or on the desk.",
+      "categories": [
+        "marketing"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "surfaces",
+      "type": "registry:theme",
+      "title": "Surfaces",
+      "description": "Eight-level surface and shadow ladder for elevation. Light: two color steps then flat white, differentiated by shadow. Dark: additive white-opacity ladder with layered inset highlights and drops.",
+      "categories": [
+        "theme"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "tokens",
+      "type": "registry:theme",
+      "title": "Interaction Tokens",
+      "description": "Shared interaction-state tokens: surface-relative hover/active overlays (bg-hover, bg-active), the selected fill, the see-through secondary-button tint (--tint, --tint-hover), the destructive-light ground, the --overlay RGB triplet, the --fluid-accent color (switch track, drop and swatch rings, copy highlight) with --focus-ring derived from it, the accent text selection, and the base-layer :focus-visible fallback ring.",
+      "categories": [
+        "theme"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "type-scale",
+      "type": "registry:item",
+      "title": "Type Scale",
+      "description": "Six type roles (display, title, subtitle, body, caption, micro), each a font size and a line height, at the default and compact steps of the size ladder. Adds text-<role> utilities and the --fs-* / --lh-* variables components read.",
+      "categories": [
+        "theme"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "typography",
+      "type": "registry:item",
+      "title": "Typography",
+      "description": "The type scale and prose styles in one install. size-context brings the 6 roles, typeClass(), and the --fs-* / --lh-* tokens; the prose styles set rendered markdown and rich-text editors (Tiptap works as is) in those roles: wrap content in .typeset, and h1 is display in bold, h2 title, h3 to h6 subtitle, paragraphs body in the muted color, figcaption and code caption. Zero specificity inside @layer components, so any utility wins; .not-typeset opts a subtree out; spacing only above elements, so streamed content never reflows. Add .typeset-compact for the compact step.",
+      "categories": [
+        "theme"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "utils",
+      "type": "registry:lib",
+      "title": "Utilities",
+      "description": "Utility function for merging Tailwind CSS classes with clsx and tailwind-merge.",
+      "categories": [
+        "lib"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "springs",
+      "type": "registry:lib",
+      "title": "Spring Animations",
+      "description": "Spring animation token presets for Motion (fast, moderate, slow).",
+      "categories": [
+        "lib"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "font-weight",
+      "type": "registry:lib",
+      "title": "Font Weight Tokens",
+      "description": "Variable font weight tokens for Inter (normal, medium, semibold, bold) using font-variation-settings.",
+      "categories": [
+        "lib"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "surface-context",
+      "type": "registry:lib",
+      "title": "Surface Context",
+      "description": "React context that tracks the current substrate elevation level. Elevated components (Dropdown, Select, etc.) read it via useSurface() and render at substrate + offset, then re-provide a new substrate so further nesting elevates further.",
+      "categories": [
+        "lib"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "surface-classes",
+      "type": "registry:lib",
+      "title": "Surface Class Lookup",
+      "description": "Static lookup tables for bg-surface-N and shadow-surface-N utilities. Required because Tailwind v4 cannot detect template-literal class names.",
+      "categories": [
+        "lib"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "elevated",
+      "type": "registry:lib",
+      "title": "Elevated",
+      "description": "Elevation primitive. Wraps the read-substrate / compute-level / apply-classes / re-provide-context pattern into one component. Pulls in the surface theme tokens, substrate context, and class lookup so a single install drops in the whole elevation system.",
+      "categories": [
+        "lib"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "popup",
+      "type": "registry:lib",
+      "title": "Popup chrome",
+      "description": "Shared popup chrome for the dropdown, select, and combobox popups: side-aware enter/exit motion classes driven by the positioner's resolved data-side, the ScrollArea sizing the list scrolls inside, and the navigation-key list.",
+      "categories": [
+        "lib"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "omit",
+      "type": "registry:lib",
+      "title": "Omit",
+      "description": "Copies an object without the given keys. Components use it to drop props before spreading the rest onto an element, without leaving unused bindings behind.",
+      "categories": [
+        "lib"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "shape-context",
+      "type": "registry:lib",
+      "title": "Shape Context",
+      "description": "React context provider for runtime shape variant switching (pill or rounded). Controls border-radius across all Fluid Functionalism components.",
+      "categories": [
+        "lib"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "size-context",
+      "type": "registry:lib",
+      "title": "Size Context",
+      "description": "React context provider for the two-step size ladder (36px default, 28px compact). Controls control heights, text, icon, and padding scale across all Fluid Functionalism components, and ships the six-role type scale (size + leading per role) with its class map.",
+      "categories": [
+        "lib"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "icon-context",
+      "type": "registry:lib",
+      "title": "Icon Context",
+      "description": "Named icon slots with a Lucide default set; swap any icon via IconProvider.",
+      "categories": [
+        "lib"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "icons-tabler",
+      "type": "registry:lib",
+      "title": "Tabler Icon Set",
+      "description": "Tabler glyphs for every icon slot the components look up. Pass the map to IconProvider (or FluidProvider's icons prop) and every component draws Tabler.",
+      "categories": [
+        "lib"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "icons-phosphor",
+      "type": "registry:lib",
+      "title": "Phosphor Icon Set",
+      "description": "Phosphor glyphs for every icon slot the components look up. Pass the map to IconProvider (or FluidProvider's icons prop) and every component draws Phosphor.",
+      "categories": [
+        "lib"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "icons-hugeicons",
+      "type": "registry:lib",
+      "title": "HugeIcons Icon Set",
+      "description": "HugeIcons glyphs for every icon slot the components look up. Pass the map to IconProvider (or FluidProvider's icons prop) and every component draws HugeIcons.",
+      "categories": [
+        "lib"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "icons-untitledui",
+      "type": "registry:lib",
+      "title": "Untitled UI Icon Set",
+      "description": "Untitled UI glyphs for every icon slot the components look up. Pass the map to IconProvider (or FluidProvider's icons prop) and every component draws Untitled UI.",
+      "categories": [
+        "lib"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "fluid-provider",
+      "type": "registry:lib",
+      "title": "Fluid Provider",
+      "description": "One wrapper for the whole system: reduced motion that follows the OS, the radius (rounded or pill), the size step (default or compact), and the icon set.",
+      "categories": [
+        "lib"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "use-fluid-hover",
+      "type": "registry:hook",
+      "title": "useFluidHover + FluidHoverHighlight",
+      "description": "Fluid hover: the hook that tracks the item nearest the cursor within a container, and the one highlight component that springs between the rects it measures.",
+      "categories": [
+        "hook"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "use-fluid-hover-standard",
+      "type": "registry:hook",
+      "title": "useFluidHover + FluidHoverHighlight (standard hover)",
+      "description": "Standard hover: the same API as fluid hover, without the glide. The item under the pointer lights with a plain fill; nothing travels between items. Served as r/standard/use-fluid-hover.json.",
+      "categories": [
+        "hook"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "use-touch-primary",
+      "type": "registry:hook",
+      "title": "useTouchPrimary",
+      "description": "Detects touch-primary devices (coarse pointer + touch points), updating live on pointer-mode and media-query changes. Adapted from Lina (https://lina.sameer.sh).",
+      "categories": [
+        "hook"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "use-keyboard-nav-gate",
+      "type": "registry:hook",
+      "title": "useKeyboardNavGate",
+      "description": "Gates a popup's keyboard focus ring on keyboard use: seeded at open from the focused element's :focus-visible state, then earned by navigation keys inside the popup.",
+      "categories": [
+        "hook"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "use-merge-split",
+      "type": "registry:hook",
+      "title": "useMergeSplitBlocks",
+      "description": "React hook + renderer for the selected-background merge/split animation. When one row bridges or splits two contiguous selected runs, their inner edges glide together (or apart) and swap to a single block, instead of one block spring-growing over the union.",
+      "categories": [
+        "hook"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "accordion",
+      "type": "registry:ui",
+      "title": "Accordion",
+      "description": "Collapsible accordion with animated height transitions, spring-animated chevron, and fluid hover in grouped mode. Built on Radix UI Accordion.",
+      "categories": [
+        "components"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "accordion-base",
+      "type": "registry:ui",
+      "title": "Accordion (Base UI)",
+      "description": "Collapsible accordion with animated height transitions, spring-animated chevron, and fluid hover in grouped mode. Base UI flavor.",
+      "categories": [
+        "components"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "ask-user-questions",
+      "type": "registry:ui",
+      "title": "Ask User Questions",
+      "description": "Stepped question flow with numbered options, keyboard shortcuts (1–9), single or multi-select, inline 'other' text input, optional skip, fluid hover, and multi-question navigation. Auto-advances on selection in single-select.",
+      "categories": [
+        "components"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "badge",
+      "type": "registry:ui",
+      "title": "Badge",
+      "description": "Compact label with solid and dot variants, Tailwind color palette, and three sizes.",
+      "categories": [
+        "components"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "banner",
+      "type": "registry:ui",
+      "title": "Banner",
+      "description": "Status message built from parts (Banner, BannerTitle, BannerDescription, BannerActions, BannerAction): 5 statuses (filled glyphs for info, success, warning and error; the icon set's outline info icon for default), low or high contrast, primary, secondary and ghost actions (the library Button) that trail a one-line banner (primary at the edge) and drop under a description (primary first), a dismiss that collapses its height, and a fixed variant that sticks full-bleed to the top of the page.",
+      "categories": [
+        "components"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "button",
+      "type": "registry:ui",
+      "title": "Button",
+      "description": "Animated button with variants (primary, secondary, tertiary, ghost), icon support, loading spinner, and fluid font-weight transitions on hover.",
+      "categories": [
+        "components"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "button-base",
+      "type": "registry:ui",
+      "title": "Button (Base UI)",
+      "description": "Animated button with variants (primary, secondary, tertiary, ghost), icon support, loading spinner, and fluid font-weight transitions on hover. Base UI flavor.",
+      "categories": [
+        "components"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "dropdown",
+      "type": "registry:ui",
+      "title": "Dropdown",
+      "description": "Dropdown menu with fluid hover, animated selection indicator, inline panel or triggered popup with collision-aware positioning, typeahead, and close-on-select. Includes MenuItem, DropdownSearch (a search field inside the popup), submenus (DropdownSub) whose trigger row stays lit across the safe area, and multiple selection with merged backgrounds. Radix flavor.",
+      "categories": [
+        "components"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "dropdown-base",
+      "type": "registry:ui",
+      "title": "Dropdown",
+      "description": "Dropdown menu with fluid hover, animated selection indicator, inline panel or triggered popup with collision-aware positioning, typeahead, and close-on-select. Includes MenuItem, DropdownSearch (a search field inside the popup), submenus (DropdownSub) whose trigger row stays lit across the safe area, and multiple selection with merged backgrounds. Base UI flavor.",
+      "categories": [
+        "components"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "checkbox-group",
+      "type": "registry:ui",
+      "title": "Checkbox Group",
+      "description": "Animated checkbox group with fluid hover, contiguous selection merging, and spring-animated check marks. Built on Radix UI Checkbox.",
+      "categories": [
+        "components"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "checkbox-group-base",
+      "type": "registry:ui",
+      "title": "Checkbox Group (Base UI)",
+      "description": "Animated checkbox group with fluid hover, contiguous selection merging, and spring-animated check marks. Base UI flavor.",
+      "categories": [
+        "components"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "radio-group",
+      "type": "registry:ui",
+      "title": "Radio Group",
+      "description": "Animated radio group with fluid hover, spring-animated selection dot, and optional Radix UI integration. Supports both controlled index and value-based APIs.",
+      "categories": [
+        "components"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "radio-group-base",
+      "type": "registry:ui",
+      "title": "Radio Group (Base UI)",
+      "description": "Animated radio group with fluid hover, spring-animated selection dot. Base UI flavor.",
+      "categories": [
+        "components"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "dialog",
+      "type": "registry:ui",
+      "title": "Dialog",
+      "description": "Animated modal dialog with spring-based scale and opacity transitions in three widths (sm, lg, and an xl canvas for composed layouts such as a sidebar), plus a container prop to scope it to a region. Built on Radix UI Dialog with overlay, header, footer, title, and description sub-components.",
+      "categories": [
+        "components"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "dialog-base",
+      "type": "registry:ui",
+      "title": "Dialog (Base UI)",
+      "description": "Animated modal dialog with spring-based scale and opacity transitions in three widths (sm, lg, and an xl canvas for composed layouts such as a sidebar), plus a container prop to scope it to a region. Base UI flavor.",
+      "categories": [
+        "components"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "mobile-drawer",
+      "type": "registry:ui",
+      "title": "Mobile Drawer",
+      "description": "Slide-in navigation drawer with scrim, focus trap, and scroll lock. Radix flavor.",
+      "categories": [
+        "components"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "mobile-drawer-base",
+      "type": "registry:ui",
+      "title": "Mobile Drawer",
+      "description": "Slide-in navigation drawer with scrim, focus trap, and scroll lock. Base UI flavor.",
+      "categories": [
+        "components"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "input-copy",
+      "type": "registry:ui",
+      "title": "Input Copy",
+      "description": "Read-only input with a copy-to-clipboard button and animated check feedback. Supports optional label and shape context.",
+      "categories": [
+        "components"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "input-group",
+      "type": "registry:ui",
+      "title": "Input Group",
+      "description": "Grouped input fields with fluid hover highlighting, animated label transitions, optional icons, and error states.",
+      "categories": [
+        "components"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "input-message",
+      "type": "registry:ui",
+      "title": "Input Message",
+      "description": "Chat-style message composer with auto-resizing textarea, drag-and-drop file attachments (PNG / JPEG / PDF), flexible left/right action slots, and a built-in send button on a Surface-2 substrate.",
+      "categories": [
+        "components"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "file-thumbnail",
+      "type": "registry:ui",
+      "title": "File Thumbnail",
+      "description": "Read-only square preview of a File. Images render via object-cover; PDFs render their first page via pdfjs; a spinner shows while either resolves. Adapts its corner radius to the global shape setting.",
+      "categories": [
+        "components"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "queued-stack",
+      "type": "registry:block",
+      "title": "Queued message stack",
+      "description": "Sonner-style stack of queued composer messages: collapsed cards fan out on hover (tap on touch), drag to reorder, a gutter arrow counts the overflow, edit/remove per card, and a shared-layout morph into the sent message.",
+      "categories": [
+        "blocks"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "chat-message",
+      "type": "registry:ui",
+      "title": "Chat Message",
+      "description": "A single chat transcript entry with baked-in entrance and layout motion. Right-aligned accent bubble for the user, left-aligned muted bubble for the assistant, with optional file attachments. Adapts to the global shape setting.",
+      "categories": [
+        "components"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "tabs",
+      "type": "registry:ui",
+      "title": "Tabs",
+      "description": "Horizontal tab navigation with fluid hover, animated pill selection indicator, and fluid font-weight transitions. Radix flavor.",
+      "categories": [
+        "components"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "tabs-base",
+      "type": "registry:ui",
+      "title": "Tabs",
+      "description": "Horizontal tab navigation with fluid hover, animated pill selection indicator, and fluid font-weight transitions. Base UI flavor.",
+      "categories": [
+        "components"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "switch",
+      "type": "registry:ui",
+      "title": "Switch",
+      "description": "Animated toggle switch with spring-based thumb animation and fluid font-weight label transitions. Built on Radix UI Switch.",
+      "categories": [
+        "components"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "switch-base",
+      "type": "registry:ui",
+      "title": "Switch (Base UI)",
+      "description": "Animated toggle switch with spring-based thumb animation and fluid font-weight label transitions. Base UI flavor.",
+      "categories": [
+        "components"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "carousel-dots",
+      "type": "registry:ui",
+      "title": "Carousel Dots",
+      "description": "Carousel dots, static or on autoplay: fluid-hover click areas, and a current pill that fills over each slide's duration.",
+      "categories": [
+        "components"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "table",
+      "type": "registry:ui",
+      "title": "Table",
+      "description": "Animated table with fluid hover row highlighting and fluid border transitions. Includes TableHeader, TableBody, TableRow, TableHead, and TableCell sub-components.",
+      "categories": [
+        "components"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "card",
+      "type": "registry:ui",
+      "title": "Card",
+      "description": "shadcn's compositional card (Card, CardHeader, CardTitle, CardDescription, CardAction, CardContent, CardFooter) with the Fluid Functionalism layer: transparent substrate, weight-animated title, media/logo/feature/image slots, and a CardGroup that owns stacked, inline, and grid layouts plus 2-D fluid-hover highlighting.",
+      "categories": [
+        "components"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "sidebar",
+      "type": "registry:ui",
+      "title": "Sidebar",
+      "description": "Refined, composable app sidebar with offcanvas collapse, floating and inset variants, a mobile drawer, cookie-persisted state, keyboard shortcut, and fluid-hover menus with traveling selection, hover, and focus indicators. Radix flavor.",
+      "categories": [
+        "components"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "sidebar-base",
+      "type": "registry:ui",
+      "title": "Sidebar",
+      "description": "Refined, composable app sidebar with offcanvas collapse, floating and inset variants, a mobile drawer, cookie-persisted state, keyboard shortcut, and fluid-hover menus with traveling selection, hover, and focus indicators. Base UI flavor.",
+      "categories": [
+        "components"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "sidebar-menu-grid",
+      "type": "registry:lib",
+      "title": "Sidebar Menu Grid",
+      "description": "Shared popup geometry for sidebar-anchored dropdown menus: trigger width +10px shifted -4px, items on the rows' leading and text axes, trailing glyphs on the trigger chevron's axis.",
+      "categories": [
+        "lib"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "sidebar-workspace-header",
+      "type": "registry:block",
+      "title": "Sidebar Workspace Header",
+      "description": "Workspace brand row for a sidebar header: 20px tile on the rows' leading axis, name pinned to the 32px text axis, trigger cross-fading into the tile's slot while the collapsed rail peeks, and a trigger-width switcher menu on the shared sidebar grid.",
+      "categories": [
+        "blocks"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "sidebar-user-footer",
+      "type": "registry:block",
+      "title": "Sidebar User Footer",
+      "description": "Footer identity row: a 20px avatar centred on the rows' leading icon axis, chevron on the trailing action axis, and an upward user menu on the shared sidebar grid so its rows align with the trigger exactly.",
+      "categories": [
+        "blocks"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "sidebar-search-field",
+      "type": "registry:block",
+      "title": "Sidebar Search Field",
+      "description": "Header search on the menu rows' rhythm: leading icon on the rows' 16px axis, text on the 32px axis, and a hover-revealed keystroke chip at the trailing edge.",
+      "categories": []
+    },
+    {
+      "source": "fluid",
+      "name": "sidebar-inset-topbar",
+      "type": "registry:block",
+      "title": "Sidebar Inset Topbar",
+      "description": "The main region's topbar: h-12 with the trigger that hides while the rail peeks and fades back in at its settled spot after a pin.",
+      "categories": []
+    },
+    {
+      "source": "fluid",
+      "name": "sidebar-app",
+      "type": "registry:block",
+      "title": "App Sidebar",
+      "description": "A complete app shell: workspace header with the peek cross-fade, search on the menu rows' rhythm with a hover-revealed shortcut chip, collapsible sections with label actions and badges, a user footer, and an inset topbar whose trigger fades back in at its settled position after a pin.",
+      "categories": [
+        "blocks"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "dialog-sidebar",
+      "type": "registry:block",
+      "title": "Settings Dialog (Sidebar in a Dialog)",
+      "description": "A settings dialog: the xl Dialog as a canvas, a non-collapsing Sidebar of sections down its left edge, and a scrolling panel of controls — switches, selects, and an input group. Below the sm breakpoint a Select takes over navigation.",
+      "categories": [
+        "blocks"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "slider",
+      "type": "registry:ui",
+      "title": "Slider",
+      "description": "Animated slider with spring-snapped thumb, step dots, range mode, and click-to-edit value display. Built on Radix UI Slider.",
+      "categories": [
+        "components"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "slider-base",
+      "type": "registry:ui",
+      "title": "Slider (Base UI)",
+      "description": "Animated slider with spring-snapped thumb, step dots, range mode, and click-to-edit value display. Base UI flavor.",
+      "categories": [
+        "components"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "thinking-indicator",
+      "type": "registry:ui",
+      "title": "Thinking Indicator",
+      "description": "Animated loading indicator with morphing SVG path (circle to infinity loop) and shimmer text rotation. Cycles through customizable status words.",
+      "categories": [
+        "components"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "reveal",
+      "type": "registry:item",
+      "title": "Reveal",
+      "description": "Page reveals in 1 class, on the existing spring tiers: slow for landing, moderate for product. .reveal-landing for a page read once: the hero rises and scales in on load, later sections do on scroll, and every section leaves the same way at the top; .reveal-scroll makes a deeper element, like a grid card, a section of its own. .reveal-product for the app: blocks fade in on load, nothing on scroll. Each has a -subtle step. For slow data, .reveal-swap crossfades shadcn's Skeleton into the real block and .reveal-items brings rows in one by one. Pure CSS; reduced motion keeps the fades and drops the rest.",
+      "categories": [
+        "theme"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "scroll-area",
+      "type": "registry:ui",
+      "title": "Scroll Area",
+      "description": "Scroll container with a restyled overlay scrollbar that stays discoverable on hover and follows the shape system. Falls back to native overflow scrolling on touch-primary devices. Built on Radix UI Scroll Area; adapted from Lina (https://lina.sameer.sh).",
+      "categories": [
+        "components"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "scroll-area-base",
+      "type": "registry:ui",
+      "title": "Scroll Area (Base UI)",
+      "description": "Scroll container with a restyled overlay scrollbar that stays discoverable on hover and follows the shape system. Falls back to native overflow scrolling on touch-primary devices. Base UI flavor; adapted from Lina (https://lina.sameer.sh).",
+      "categories": [
+        "components"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "select",
+      "type": "registry:ui",
+      "title": "Select",
+      "description": "Animated select menu with collision-aware positioning, typeahead, fluid hover, spring-animated popover, and animated checkmark. Radix flavor.",
+      "categories": [
+        "components"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "select-base",
+      "type": "registry:ui",
+      "title": "Select",
+      "description": "Animated select menu with collision-aware positioning, typeahead, fluid hover, spring-animated popover, and animated checkmark. Base UI flavor.",
+      "categories": [
+        "components"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "combobox",
+      "type": "registry:ui",
+      "title": "Combobox",
+      "description": "Type-to-filter combobox with single or multiple (chips, merged selection backgrounds) selection: a text field that filters a list as you type, with keyboard highlight, fluid hover, spring-animated popover, animated checkmark, and clear/chevron controls. Optional create-from-query row (onCreate) and hideSelected for chips fields. Radix flavor (Popover + hand-rolled listbox).",
+      "categories": [
+        "components"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "combobox-base",
+      "type": "registry:ui",
+      "title": "Combobox",
+      "description": "Type-to-filter combobox with single or multiple (chips, merged selection backgrounds) selection: a text field that filters a list as you type, with keyboard highlight, fluid hover, spring-animated popover, animated checkmark, and clear/chevron controls. Optional create-from-query row (onCreate) and hideSelected for chips fields. Base UI flavor.",
+      "categories": [
+        "components"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "command-menu",
+      "type": "registry:ui",
+      "title": "Command Menu",
+      "description": "Search field over a list of actions: type to filter, arrows to move the fluid hover highlight, Enter to run. Grouped rows with icons, descriptions, and shortcut caps; suggestions listed first while nothing is typed; tabs or a borderless filter bar under the field; and a dialog shell opened by a global shortcut (default ⌘K / Ctrl+K). The list needs no primitive; the dialog is the library's Dialog in either flavor.",
+      "categories": [
+        "components"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "calendar",
+      "type": "registry:ui",
+      "title": "Calendar",
+      "description": "Month grid on DayPicker v10 for a single day or a range: one fluid hover highlight across one or two months that follows keyboard focus, a range band that previews the end under the pointer, booked (struck through) and unavailable days, ISO week numbers, a cellSize prop and fill mode, and a direction-aware month slide.",
+      "categories": [
+        "components"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "date-picker",
+      "type": "registry:ui",
+      "title": "Date Picker",
+      "description": "Field or ghost trigger for a date, a range, or a date and a time: a calendar popover that opens on the selected day, optional range presets, and editable time fields with slot lists that show each duration. Radix flavor.",
+      "categories": [
+        "components"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "date-picker-base",
+      "type": "registry:ui",
+      "title": "Date Picker",
+      "description": "Field or ghost trigger for a date, a range, or a date and a time: a calendar popover that opens on the selected day, optional range presets, and editable time fields with slot lists that show each duration. Base UI flavor.",
+      "categories": [
+        "components"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "tooltip",
+      "type": "registry:ui",
+      "title": "Tooltip",
+      "description": "Floating tooltip with spring-based animations, configurable placement, and rich content support.",
+      "categories": [
+        "components"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "tooltip-base",
+      "type": "registry:ui",
+      "title": "Tooltip (Base UI)",
+      "description": "Floating tooltip with spring-based animations, configurable placement, and rich content support. Base UI flavor.",
+      "categories": [
+        "components"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "thinking-steps",
+      "type": "registry:ui",
+      "title": "Thinking Steps",
+      "description": "Collapsible AI reasoning steps with animated expand/collapse, per-step icons, sources, and nested details. Radix flavor.",
+      "categories": [
+        "components"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "thinking-steps-base",
+      "type": "registry:ui",
+      "title": "Thinking Steps",
+      "description": "Collapsible AI reasoning steps with animated expand/collapse, per-step icons, sources, and nested details. Base UI flavor.",
+      "categories": [
+        "components"
+      ]
+    },
+    {
+      "source": "fluid",
+      "name": "color-picker",
+      "type": "registry:ui",
+      "title": "Color Picker",
+      "description": "Color picker with HEX, RGB, HSL, and OKLCH formats, alpha channel, optional swatches, and a popover trigger. Built on Base UI's Popover, Menu, and NumberField primitives with native EyeDropper support.",
+      "categories": [
+        "components"
+      ]
+    }
+  ]
+}

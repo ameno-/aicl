@@ -1,24 +1,37 @@
 import { useMemo, useRef, useState, type ReactNode } from 'react';
 import { bucketByRecency, createSessionStore, createToastQueue, type Attachment, type SessionMeta } from '@aicl/core';
 import {
+  Accordion,
+  Alert,
   AlertDialog,
   AttachmentChip,
   AttachmentDropzone,
+  Badge,
   Button,
+  Card,
+  Collapsible,
   Composer,
   Dialog,
   Drawer,
+  Empty,
   Field,
+  Kbd,
   MentionMenu,
+  Progress,
   SegmentedControl,
   Select,
+  Separator,
   SessionList,
   SessionSearch,
   SidebarNav,
+  Skeleton,
   SlashMenu,
+  Spinner,
   SuggestionChips,
   Switch,
+  Tabs,
   ToastRegion,
+  Tooltip,
   useAttachmentPicker,
   useReadable,
 } from '@aicl/react';
@@ -398,6 +411,97 @@ export function Components() {
       <Section id="forms" title="Field, switch, select, segmented control">
         <FormsDemo />
       </Section>
+      <Section id="content" title="Content">
+        <ContentDemo />
+      </Section>
+      <Section id="motion" title="Motion">
+        <MotionDemo />
+      </Section>
     </main>
+  );
+}
+
+function ContentDemo() {
+  return (
+    <div className="stack">
+      <div className="row">
+        <Badge>Default</Badge>
+        <Badge variant="secondary">Secondary</Badge>
+        <Badge variant="outline">Outline</Badge>
+        <Badge variant="success">Live</Badge>
+        <Badge variant="destructive">Failed</Badge>
+      </div>
+      <div className="row">
+        <span>Open the palette <Kbd>⌘K</Kbd></span>
+        <Tooltip content="Copies the message">
+          <Button variant="outline" size="sm" icon="copy">Copy</Button>
+        </Tooltip>
+      </div>
+      <Separator />
+      <Alert variant="warning">
+        <Alert.Title>Needs you</Alert.Title>
+        <Alert.Description>Approve the command before the agent continues.</Alert.Description>
+      </Alert>
+      <Card>
+        <Card.Header>
+          <Card.Title>Plan</Card.Title>
+          <Card.Description>Three steps, one of them done.</Card.Description>
+        </Card.Header>
+        <Card.Body>Write the failing test, then the primitive, then the gallery.</Card.Body>
+        <Card.Footer>
+          <Badge variant="secondary">1 / 3</Badge>
+        </Card.Footer>
+      </Card>
+      <Empty>
+        <Empty.Title>No sessions yet</Empty.Title>
+        <Empty.Description>Start one from the composer.</Empty.Description>
+        <Empty.Actions>
+          <Button size="sm">New session</Button>
+        </Empty.Actions>
+      </Empty>
+    </div>
+  );
+}
+
+function MotionDemo() {
+  const [tab, setTab] = useState('plan');
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="stack">
+      <div className="row">
+        <Spinner label="Thinking" />
+        <Skeleton width={160} />
+        <div style={{ width: 180 }}>
+          <Progress value={40} label="Tokens" />
+        </div>
+        <div style={{ width: 180 }}>
+          <Progress label="Working" />
+        </div>
+      </div>
+      <Tabs value={tab} onValueChange={setTab}>
+        <Tabs.List aria-label="Work">
+          <Tabs.Tab value="plan">Plan</Tabs.Tab>
+          <Tabs.Tab value="files">Files</Tabs.Tab>
+          <Tabs.Tab value="terminal">Terminal</Tabs.Tab>
+        </Tabs.List>
+        <Tabs.Panel value="plan">The plan lives here.</Tabs.Panel>
+        <Tabs.Panel value="files">Two files changed.</Tabs.Panel>
+        <Tabs.Panel value="terminal">Checks passed.</Tabs.Panel>
+      </Tabs>
+      <Collapsible open={open} onOpenChange={setOpen}>
+        <Collapsible.Trigger>Worked for 11s</Collapsible.Trigger>
+        <Collapsible.Panel>Edited two files. The panel height animates open.</Collapsible.Panel>
+      </Collapsible>
+      <Accordion defaultValue="read">
+        <Accordion.Item value="read">
+          <Accordion.Trigger>Read the diff</Accordion.Trigger>
+          <Accordion.Panel>The selection moved, and the other row closed.</Accordion.Panel>
+        </Accordion.Item>
+        <Accordion.Item value="run">
+          <Accordion.Trigger>Run the checks</Accordion.Trigger>
+          <Accordion.Panel>Typecheck, then the component tests.</Accordion.Panel>
+        </Accordion.Item>
+      </Accordion>
+    </div>
   );
 }

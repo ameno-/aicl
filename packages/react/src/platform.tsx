@@ -886,6 +886,8 @@ export function SegmentedControl<T>({ value, options, onValueChange, ariaLabel, 
     select(target[event.key]!);
   };
 
+  const selected = current >= 0;
+
   return (
     <div
       role="radiogroup"
@@ -894,7 +896,12 @@ export function SegmentedControl<T>({ value, options, onValueChange, ariaLabel, 
       data-value={String(value)}
       data-save-state={saveState}
       onKeyDown={onKeyDown}
+      style={{
+        ['--aicl-index' as string]: String(Math.max(0, current)),
+        ['--aicl-count' as string]: String(options.length || 1),
+      }}
     >
+      {selected ? <span data-aicl="segmented-indicator" data-index={current} aria-hidden="true" /> : null}
       {options.map((o, i) => (
         <button
           key={String(o.value)}
